@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { AlertTriangle, ArrowLeft, Home, Copy, Check } from "lucide-react";
 
 type ErrorPageProps = {
   error: Error & { digest?: string };
@@ -83,45 +84,8 @@ export default function Error({ error, reset }: ErrorPageProps) {
                 </p>
               </div>
 
-              <div className="hidden sm:block">
-                {/* Simple monochrome illustration */}
-                <svg
-                  width="120"
-                  height="120"
-                  viewBox="0 0 120 120"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="text-zinc-300 dark:text-zinc-700"
-                >
-                  <rect
-                    x="10"
-                    y="20"
-                    width="100"
-                    height="70"
-                    rx="8"
-                    fill="currentColor"
-                    opacity="0.35"
-                  />
-                  <rect
-                    x="18"
-                    y="28"
-                    width="84"
-                    height="46"
-                    rx="4"
-                    fill="currentColor"
-                    opacity="0.2"
-                  />
-                  <circle cx="30" cy="86" r="4" fill="currentColor" />
-                  <circle cx="60" cy="86" r="4" fill="currentColor" />
-                  <circle cx="90" cy="86" r="4" fill="currentColor" />
-                  <path
-                    d="M45 48 l10 10 l20 -20"
-                    stroke="currentColor"
-                    strokeWidth="6"
-                    strokeLinecap="round"
-                    fill="none"
-                    opacity="0.45"
-                  />
-                </svg>
+              <div className="hidden sm:block text-zinc-300 dark:text-zinc-700">
+                <AlertTriangle size={120} strokeWidth={1.75} aria-hidden />
               </div>
             </div>
 
@@ -129,27 +93,38 @@ export default function Error({ error, reset }: ErrorPageProps) {
             <div className="mt-6 flex flex-wrap gap-3">
               <button
                 onClick={reset}
-                className="inline-flex items-center justify-center rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white shadow hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+                className="inline-flex items-center gap-2 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white shadow hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
               >
+                <AlertTriangle className="size-4" aria-hidden />
                 Try again
               </button>
               <button
                 onClick={() => window.history.back()}
-                className="inline-flex items-center justify-center rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+                className="inline-flex items-center gap-2 rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
               >
+                <ArrowLeft className="size-4" aria-hidden />
                 Go back
               </button>
               <Link
                 href="/"
-                className="inline-flex items-center justify-center rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+                className="inline-flex items-center gap-2 rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
               >
+                <Home className="size-4" aria-hidden />
                 Go home
               </Link>
               <button
                 onClick={handleCopy}
-                className="inline-flex items-center justify-center rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+                className="inline-flex items-center gap-2 rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
               >
-                {copied ? "Copied!" : "Copy error"}
+                {copied ? (
+                  <>
+                    <Check className="size-4" aria-hidden /> Copied!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="size-4" aria-hidden /> Copy error
+                  </>
+                )}
               </button>
               <a
                 href="mailto:support@primerental.com?subject=App%20Error&body=Please%20paste%20the%20error%20details%20below:%0D%0A%0D%0A"
