@@ -13,6 +13,7 @@ import Loading from "@/components/loading";
 import { addToast } from "@heroui/toast";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { ArrowRight } from "lucide-react";
 
 function Page() {
   const router = useRouter();
@@ -24,6 +25,7 @@ function Page() {
     resolver: zodResolver(loginSchema),
   });
 
+  // This block is kept exactly as you requested.
   const [, action, loading] = useAction(authenticate, [
     ,
     (response) => {
@@ -37,109 +39,101 @@ function Page() {
   ]);
 
   return (
-    <div className="relative min-h-dvh overflow-hidden bg-gradient-to-br from-violet-50 via-white to-sky-50">
+    <div className="relative flex min-h-dvh w-full items-center justify-center overflow-hidden bg-gradient-to-br from-violet-50 via-white to-sky-50 p-4">
       {/* Decorative blobs */}
-      <div className="pointer-events-none absolute -left-24 -top-24 h-96 w-96 rounded-full bg-violet-200/40 blur-3xl" />
-      <div className="pointer-events-none absolute -right-24 -bottom-24 h-[28rem] w-[28rem] rounded-full bg-sky-200/40 blur-3xl" />
+      <div className="pointer-events-none absolute -left-48 -top-48 h-[32rem] w-[32rem] rounded-full bg-violet-200/40 blur-3xl" />
+      <div className="pointer-events-none absolute -right-48 -bottom-48 h-[32rem] w-[32rem] rounded-full bg-sky-200/40 blur-3xl" />
 
-      {/* Top bar with About */}
-      <header className="relative z-10">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-2">
+      <div className="relative w-full max-w-4xl">
+        <div className="grid overflow-hidden rounded-2xl border border-white/60 bg-white/60 shadow-xl backdrop-blur-lg lg:grid-cols-2">
+          {/* Visual / Messaging Panel */}
+            <div className="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-violet-300 to-sky-300 p-8 lg:flex">
             <Image
-              src="/mindcare.png"
-              alt="MindCare"
-              width={36}
-              height={36}
-              className="rounded-md"
-              priority
-            />
-            <span className="text-sm font-semibold text-gray-800">
-              DARELKUBRA MINDCARE
-            </span>
-          </div>
-          <Link href="/en/about">
-            <Button variant="flat" color="secondary" className="backdrop-blur">
-              About
-            </Button>
-          </Link>
-        </div>
-      </header>
-
-      {/* Main card */}
-      <main className="relative z-10 mx-auto flex min-h-[70dvh] max-w-6xl items-center px-4">
-        <div className="grid w-full gap-6 rounded-3xl border border-white/60 bg-white/70 p-3 shadow-xl backdrop-blur-md sm:p-6 lg:grid-cols-2">
-          {/* Visual / messaging */}
-          <div className="relative hidden overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 to-sky-600 lg:block">
-            <Image
-              src="/mindcare.png"
-              alt="Welcome to MindCare"
+              src="/logo.png"
+              alt="Primerental Illustration"
               width={800}
               height={800}
-              className="absolute inset-0 h-full w-full object-cover opacity-20"
+              className="absolute inset-0 h-full w-full object-cover opacity-15"
               priority
             />
-            <div className="relative z-10 p-8 text-white">
-              <span className="inline-block rounded-full bg-white/15 px-3 py-1 text-xs">
-                Compassionate • Secure • Simple
+            <div className="relative z-10">
+              <div className="flex items-center gap-3">
+              <Image
+                src="/logo.png"
+                alt="Primerental Logo"
+                width={40}
+                height={40}
+                className="rounded-lg"
+              />
+              <span className="text-lg font-bold text-white">
+                PRIMERENTAL
               </span>
-              <h2 className="mt-5 text-3xl font-extrabold leading-tight">
-                Welcome back
+              </div>
+              <h2 className="mt-8 text-3xl font-extrabold leading-tight text-white">
+              Your trusted platform for student housing.
               </h2>
-              <p className="mt-3 text-white/90">
-                Sign in to manage general cases, appointments, and student
-                wellbeing with clarity and confidence.
+              <p className="mt-3 text-white/80">
+              Find, manage, and secure student rentals with ease. Primerental connects students and landlords for a seamless rental experience.
               </p>
-              <ul className="mt-6 space-y-2 text-sm text-white/90">
-                <li>• Streamlined case workflows</li>
-                <li>• Privacy-first by design</li>
-                <li>• Outcome-driven reporting</li>
-              </ul>
             </div>
-          </div>
+            <div className="relative z-10 mt-8 text-xs text-white/60">
+              © {new Date().getFullYear()} PRIMERENTAL
+            </div>
+            </div>
 
-          {/* Form */}
-          <div className="flex items-center">
-            <div className="w-full rounded-2xl bg-white/80 p-6 backdrop-blur">
-              <div className="mb-6">
+          {/* Form Panel */}
+          <div className="flex flex-col justify-center p-8 sm:p-12">
+            <div className="w-full">
+              <div className="mb-6 text-center lg:text-left">
                 <h1 className="text-2xl font-bold text-gray-900">
-                  Sign in to your account
+                  Welcome Back
                 </h1>
                 <p className="mt-1 text-sm text-gray-600">
-                  Enter your credentials to continue.
+                  Please sign in to continue.
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit(action)} className="space-y-5">
+              <form
+                onSubmit={handleSubmit(action)}
+                className="w-full space-y-5"
+              >
                 <div>
                   <label
-                    htmlFor="phone"
-                    className="mb-1 block text-sm font-medium text-gray-800"
+                    htmlFor="email"
+                    className="mb-1.5 block text-sm font-medium text-gray-700"
                   >
-                    Phone Number
+                    Email or Phone
                   </label>
                   <Input
-                    id="phone"
-                    type="tel"
+                    id="email"
+                    type="text"
                     variant="bordered"
-                    placeholder="e.g. 09xxxxxxx"
-                    {...register("phone")}
+                    placeholder="you@example.com or 09..."
+                    {...register("email")}
                     className="w-full"
                   />
-                  {errors.phone && (
+                  {errors.email && (
                     <p className="mt-1 text-xs text-red-500">
-                      {errors.phone.message}
+                      {errors.email.message}
                     </p>
                   )}
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="password"
-                    className="mb-1 block text-sm font-medium text-gray-800"
-                  >
-                    Password
-                  </label>
+                  <div className="mb-1.5 flex items-center justify-between">
+                    <label
+                      htmlFor="password"
+                      className="text-sm font-medium text-gray-700"
+                    >
+                      Password
+                    </label>
+                    <Link
+                      href="#"
+                      className="text-xs font-medium text-violet-600 hover:underline"
+                    >
+                      Forgot?
+                    </Link>
+                  </div>
                   <Input
                     id="password"
                     type="password"
@@ -160,27 +154,31 @@ function Page() {
                   color="primary"
                   variant="solid"
                   type="submit"
-                  className="w-full"
+                  className="w-full font-semibold"
                 >
-                  {loading ? <Loading /> : "Login"}
+                  {loading ? (
+                    <Loading />
+                  ) : (
+                    <>
+                      Sign In <ArrowRight className="ml-2 h-4 w-4" />
+                    </>
+                  )}
                 </Button>
 
-                <div className="text-center text-xs text-gray-500">
-                  By continuing you agree to our{" "}
-                  <span className="underline">Privacy Policy</span>.
+                <div className="text-center text-sm text-gray-500">
+                  No account?{" "}
+                  <Link
+                    href="/en/signup"
+                    className="font-medium text-violet-600 hover:underline"
+                  >
+                    Sign up
+                  </Link>
                 </div>
               </form>
             </div>
           </div>
         </div>
-      </main>
-
-      {/* Footer hint */}
-      <footer className="relative z-10 mx-auto max-w-6xl px-4 py-6">
-        <div className="text-center text-xs text-gray-500">
-          © {new Date().getFullYear()} DARELKUBRA MINDCARE
-        </div>
-      </footer>
+      </div>
     </div>
   );
 }

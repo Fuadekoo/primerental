@@ -1,16 +1,8 @@
 "use client";
-import React from "react";
-import { Button } from "@heroui/react";
-
+import { redirect } from "next/navigation";
 function Page() {
-  return (
-    <div>
-      <h1>Hello Fuad</h1>
-      <Button color="success" variant="shadow">
-        Hello Fuad
-      </Button>
-    </div>
-  );
+  redirect("/en/home");
+  // return null;
 }
 
 export default Page;
