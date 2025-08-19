@@ -9,14 +9,14 @@ import { loginSchema } from "./zodSchema";
 declare module "next-auth" {
   interface User {
     id?: string;
-    // role: string;
+    role: string;
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT extends DefaultJWT {
     id: string;
-    // role: string;
+    role: string;
   }
 }
 
@@ -30,29 +30,18 @@ export class CustomError extends CredentialsSignin {
 const authConfig = {
   trustHost: true,
   pages: {
-    signIn: "/en/signin",
-    signOut: "/en/signout",
+    signIn: "/en/login",
+    signOut: "/signout",
   },
   callbacks: {
     authorized: async ({ auth, request: { nextUrl } }) => {
-      const { pathname } = nextUrl;
-      // If logged-in user hits /en/signin, send to dashboard
-      if (auth && pathname.startsWith("/en/signin")) {
-        return Response.redirect(new URL("/en/dashboard", nextUrl));
-      }
-
-      // Public pages accessible without login
-      const publicPaths = ["/en/about", "/en/signin"];
-      if (publicPaths.some((p) => pathname.startsWith(p))) {
-        return true;
-      }
-
-      // Protect all other /en/* routes
-      if (!auth && pathname.startsWith("/en")) {
-        return false; // NextAuth will redirect to pages.signIn
-      }
-
-      return true;
+      if (auth) {
+        if (nextUrl.pathname.startsWith("/en/login")) {
+          return Response.redirect(new URL("/en/dashboard", nextUrl));
+        } else return true;
+      } else if (nextUrl.pathname.startsWith("/en/dashboard")) {
+        return false;
+      } else return true;
     },
 
     jwt: async ({ token, user }) => {
@@ -68,13 +57,13 @@ const authConfig = {
         const { email, password } = await loginSchema.parseAsync(credentials);
         const user = await prisma.user.findFirst({
           where: { email },
-          select: { id: true, password: true },
+          select: { id: true, role: true, password: true },
         });
-        if (!user) throw new CustomError("Invalid email Number");
+        if (!user) throw new CustomError("Invalid Phone Number");
         if (!user.password) throw new CustomError("Password Not Set");
         if (!(await bcryptjs.compare(password, user.password)))
           throw new CustomError("Invalid Password");
-        return { id: user.id };
+        return { id: user.id, role: user.role };
       },
     }),
   ],

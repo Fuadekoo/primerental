@@ -14,13 +14,128 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  ADMIN
+  GUEST
+}
+
+enum offerType {
+  RENT
+  SALE
+}
+
 model user {
   id        String   @id @default(uuid())
   name      String
+  phone     String   @unique
   email     String   @unique
   password  String
-  role      String
+  role      Role     @default(GUEST)
+  socket    String?
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  chat      chat[]
+}
+
+model guest {
+  id        String   @id @default(uuid())
+  guestId   String   @unique @default(uuid())
+  socket    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  chat      chat[]
+}
+
+model property {
+  id             String       @id @default(uuid())
+  title          String
+  description    String
+  offer_type     offerType
+  propertyType   propertyType @relation(fields: [propertyTypeId], references: [id])
+  propertyTypeId String
+  location       String
+  quantity       String
+  price          Float
+  discount       Float
+  currency       String
+  images         String[]
+  youtubeLink    String?
+  kitchen        Int
+  bedroom        Int
+  squareMeter    Int
+  parking        Int
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model propertyType {
+  id          String     @id @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  property    property[]
+}
+
+model feedback {
+  id         String   @id @default(uuid())
+  guestId    String
+  propertyId String
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model promotion {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  image       String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model propertyRequest {
+  id           String  @id @default(uuid())
+  firstName    String
+  lastName     String
+  email        String
+  phone        String
+  offerType    String
+  propertyType String
+  maxPrice     Float
+  bedrooms     Int
+  bathrooms    Int
+  minimumSize  Int
+  message      String?
+}
+
+model propertyRegistration {
+  id         String   @id @default(uuid())
+  propertyId String
+  userId     String
+  status     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model chat {
+  id         String @id @default(uuid())
+  message    String
+  senderRole Role // Can be USER or GUEST
+
+  // The user and guest who are part of this conversation
+  user    user   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  String
+  guest   guest  @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  guestId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // An index to quickly find all messages between a user and a guest
+  @@index([userId, guestId])
 }
