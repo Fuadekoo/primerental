@@ -20,3 +20,16 @@ export const propertyRequestSchema = z.object({
   message: z.string().min(2).max(500),
 });
 export type PropertyRequestType = z.infer<typeof propertyRequestSchema>;
+
+export const propertyRegisterSchema = z.object({
+  fullName: z.string().min(2).max(100),
+  email: z.string().email(),
+  phone: z.string().min(10).max(15),
+  registerType: z.enum(["rent", "buy"]),
+  propertyType: z.string().min(2).max(100),
+  price: z.number().min(0),
+  location: z.string().min(2).max(100),
+  realLocation: z.string().min(2).max(100),
+  description: z.string().min(2).max(500),
+});
+export type PropertyRegisterType = z.infer<typeof propertyRegisterSchema>;

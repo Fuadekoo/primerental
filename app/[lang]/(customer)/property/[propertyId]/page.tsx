@@ -1,10 +1,12 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import useAction from "@/hooks/useActions";
+import { useFavoriteStore } from "@/hooks/useFavoriteStore";
 import { getProperty } from "@/actions/customer/property";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { addToast } from "@heroui/toast";
 import wa from "@/public/wa.png";
 import insta from "@/public/insta.png";
 import tg from "@/public/tg.png";
@@ -171,11 +173,33 @@ function Page() {
   const { propertyId } = useParams<{ propertyId: string }>();
   const [isExpanded, setIsExpanded] = useState(false);
 
+  const { toggleFavorite, isFavorite } = useFavoriteStore();
+  const isFav = isFavorite(propertyId);
+
   const [propertyData, , isLoading] = useAction(
     getProperty,
     [true, () => {}],
     propertyId
   );
+
+  const handleToggleFavorite = () => {
+    toggleFavorite(propertyId);
+    if (!isFav) {
+      addToast({ description: "Added to favorites!" });
+    } else {
+      addToast({ description: "Removed from favorites." });
+    }
+  };
+
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      addToast({ description: "Link copied to clipboard!" });
+    } catch (err) {
+      console.error("Failed to copy link: ", err);
+      addToast({ description: "Could not copy link." });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -238,10 +262,21 @@ function Page() {
             <ArrowLeft className="h-5 w-5 text-gray-800" />
           </button>
           <div className="flex gap-2 pointer-events-auto">
-            <button className="bg-white/80 rounded-full p-2 shadow-md">
-              <Heart className="h-5 w-5 text-gray-800" />
+            <button
+              onClick={handleToggleFavorite}
+              className="bg-white/80 rounded-full p-2 shadow-md"
+            >
+              <Heart
+                className={`h-5 w-5 transition-colors ${
+                  isFav ? "text-red-500" : "text-gray-800"
+                }`}
+                fill={isFav ? "currentColor" : "none"}
+              />
             </button>
-            <button className="bg-white/80 rounded-full p-2 shadow-md">
+            <button
+              onClick={handleShare}
+              className="bg-white/80 rounded-full p-2 shadow-md"
+            >
               <Share2 className="h-5 w-5 text-gray-800" />
             </button>
             <button className="bg-white/80 rounded-full p-2 shadow-md">

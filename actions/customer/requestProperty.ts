@@ -3,9 +3,7 @@ import prisma from "@/lib/db";
 import { z } from "zod";
 import { propertyRequestSchema } from "@/lib/zodSchema";
 
-export async function propertyRequest(
-  data: z.infer<typeof propertyRequestSchema>
-) {
+export async function propertyRequest(data: z.infer<typeof propertyRequestSchema>) {
   try {
     await prisma.propertyRequest.create({
       data: {

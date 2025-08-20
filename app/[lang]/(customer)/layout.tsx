@@ -27,6 +27,11 @@ export default async function Layout({
       icon: <ShoppingBasket size={18} />,
     },
     {
+      label: "Property Register",
+      url: "propertyRegister",
+      icon: <ShoppingBasket size={18} />,
+    },
+    {
       label: "Favorite",
       url: "favorite",
       icon: <User size={18} />,
