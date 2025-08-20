@@ -1,3 +1,4 @@
+import { Bath } from "lucide-react";
 import { z } from "zod";
 
 export const loginSchema = z.object({
@@ -5,3 +6,17 @@ export const loginSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters long"),
 });
 export type LoginType = z.infer<typeof loginSchema>;
+
+export const propertyRequestSchema = z.object({
+  fullName: z.string().min(2).max(100),
+  email: z.string().email(),
+  phone: z.string().min(10).max(15),
+  requestType: z.enum(["rent", "buy"]),
+  propertyType: z.string().min(2).max(100),
+  bedroom: z.number().min(0),
+  bathroom: z.number().min(0),
+  maxPrice: z.number().min(0),
+  minimumSize: z.number().min(0),
+  message: z.string().min(2).max(500),
+});
+export type PropertyRequestType = z.infer<typeof propertyRequestSchema>;

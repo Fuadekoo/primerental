@@ -7,7 +7,7 @@ import { Home, User, ShoppingBasket } from "lucide-react";
 // import CustomerSocketHandler from "@/components/CustomerSocketHandler";
 import { SocketProvider } from "@/components/SocketProvider";
 import GuestSocketRegistrar from "@/components/GuestSocketRegistrar";
-import Footer from "@/components/Footer";
+import ChatPopup from "@/components/chat";
 
 export default async function Layout({
   children,
@@ -67,7 +67,7 @@ export default async function Layout({
         <GuestSocketRegistrar />
         {children}
       </SocketProvider>
-      {/* <Footer /> */}
+      <ChatPopup />
     </UserLayout>
   );
 }
