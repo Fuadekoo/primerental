@@ -1,20 +1,18 @@
 "use client";
 import Footer from "@/components/Footer";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "@heroui/react";
 import {
   SlidersHorizontal,
   ChevronLeft,
   ChevronRight,
-  Minus,
-  Plus,
-  PlusCircle,
   Search,
   MapPin,
   BedDouble,
   Ruler,
   Car,
   Building2,
+  X,
 } from "lucide-react";
 import useAction from "@/hooks/useActions";
 import {
@@ -27,7 +25,7 @@ import Link from "next/link";
 import ProductPerCategoryId from "@/components/productper-catagoryid";
 import Image from "next/image";
 
-// --- Reusable Components for Loading/Empty States ---
+// --- Reusable Components ---
 
 const SkeletonLoader = ({ className }: { className?: string }) => (
   <div className={`animate-pulse bg-gray-200 rounded-lg ${className}`} />
@@ -37,11 +35,210 @@ const EmptyState = ({ message }: { message: string }) => (
   <div className="text-center py-10 text-gray-500">{message}</div>
 );
 
+// --- Filter Dialog Component ---
+
+type FilterDialogProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  categories: Array<{ id: string; name: string }>;
+  onApply: (filters: {
+    propertyType: string;
+    offerType: string;
+    minPrice: string;
+    maxPrice: string;
+    bedrooms: string;
+  }) => void;
+};
+
+const FilterDialog = ({
+  isOpen,
+  onClose,
+  categories,
+  onApply,
+}: FilterDialogProps) => {
+  const [filters, setFilters] = useState({
+    propertyType: "",
+    offerType: "",
+    minPrice: "",
+    maxPrice: "",
+    bedrooms: "",
+  });
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  const handleApply = () => {
+    onApply(filters);
+    onClose();
+  };
+
+  const handleReset = () => {
+    setFilters({
+      propertyType: "",
+      offerType: "",
+      minPrice: "",
+      maxPrice: "",
+      bedrooms: "",
+    });
+  };
+
+  const FilterButton = ({ value, label, stateKey }) => (
+    <button
+      onClick={() =>
+        setFilters((prev) => ({
+          ...prev,
+          [stateKey]: prev[stateKey] === value ? "" : value,
+        }))
+      }
+      className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
+        filters[stateKey] === value
+          ? "bg-blue-600 text-white border-blue-600"
+          : "bg-gray-100 text-gray-700 border-gray-200"
+      }`}
+    >
+      {label}
+    </button>
+  );
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end">
+      <div className="bg-white w-full max-h-[90dvh] rounded-t-2xl p-4 flex flex-col">
+        <div className="flex items-center justify-between mb-4 pb-2 border-b">
+          <h2 className="text-xl font-bold">Filters</h2>
+          <button
+            onClick={onClose}
+            className="p-1 rounded-full hover:bg-gray-100"
+          >
+            <X className="h-6 w-6 text-gray-600" />
+          </button>
+        </div>
+
+        <div className="overflow-y-auto space-y-6 pb-20">
+          {/* Property Type */}
+          <div>
+            <h3 className="font-semibold mb-2">Property Type</h3>
+            <div className="flex flex-wrap gap-2">
+              {categories.map((cat) => (
+                <FilterButton
+                  key={cat.id}
+                  value={cat.id}
+                  label={cat.name}
+                  stateKey="propertyType"
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Offer Type */}
+          <div>
+            <h3 className="font-semibold mb-2">Offer Type</h3>
+            <div className="flex flex-wrap gap-2">
+              <FilterButton
+                value="SALE"
+                label="For Sale"
+                stateKey="offerType"
+              />
+              <FilterButton
+                value="RENT"
+                label="For Rent"
+                stateKey="offerType"
+              />
+            </div>
+          </div>
+
+          {/* Price Range */}
+          <div>
+            <h3 className="font-semibold mb-2">Price Range</h3>
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                placeholder="Min Price"
+                value={filters.minPrice}
+                onChange={(e) =>
+                  setFilters({ ...filters, minPrice: e.target.value })
+                }
+              />
+              <span className="text-gray-400">-</span>
+              <Input
+                type="number"
+                placeholder="Max Price"
+                value={filters.maxPrice}
+                onChange={(e) =>
+                  setFilters({ ...filters, maxPrice: e.target.value })
+                }
+              />
+            </div>
+          </div>
+
+          {/* Bedrooms */}
+          <div>
+            <h3 className="font-semibold mb-2">Bedrooms</h3>
+            <div className="flex flex-wrap gap-2">
+              {[1, 2, 3, 4, "5+"].map((num) => (
+                <FilterButton
+                  key={num}
+                  value={String(num)}
+                  label={String(num)}
+                  stateKey="bedrooms"
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* bathrooms */}
+          <div>
+            <h3 className="font-semibold mb-2">Bathrooms</h3>
+            <div className="flex flex-wrap gap-2">
+              {[1, 2, 3, 4, "5+"].map((num) => (
+                <FilterButton
+                  key={num}
+                  value={String(num)}
+                  label={String(num)}
+                  stateKey="bedrooms"
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="absolute bottom-0 left-0 w-full bg-white p-4 border-t flex gap-4">
+          <button
+            onClick={handleReset}
+            className="w-full py-3 rounded-lg border border-gray-300 font-semibold"
+          >
+            Reset
+          </button>
+          <button
+            onClick={handleApply}
+            className="w-full py-3 rounded-lg bg-blue-600 text-white font-semibold"
+          >
+            Apply Filters
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// --- Main Page Component ---
+
 function Page() {
   const [search, setSearch] = useState("");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
     null
   );
+  // ... (rest of your existing state and data fetching hooks)
   const [promotionData, , isLoadingPromotion] = useAction(getPromotion, [
     true,
     () => {},
@@ -87,17 +284,15 @@ function Page() {
     );
   };
 
-  // If a category is selected, render the product list for that category.
   if (selectedCategoryId) {
     return (
       <ProductPerCategoryId
         categoryId={selectedCategoryId}
-        onBack={() => setSelectedCategoryId(null)} // This function allows the user to go back
+        onBack={() => setSelectedCategoryId(null)}
       />
     );
   }
 
-  // Otherwise, render the main home page.
   return (
     <div className="w-dvw bg-gray-50 p-2">
       <div className="relative mb-4 w-full max-w-md mx-auto">
@@ -115,6 +310,7 @@ function Page() {
         </span>
         <button
           type="button"
+          onClick={() => setIsFilterOpen(true)}
           className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-primary-100 transition"
           tabIndex={-1}
         >
@@ -124,6 +320,7 @@ function Page() {
           />
         </button>
       </div>
+
       {/* --- Promotions Carousel --- */}
       <h1>Featured Property</h1>
       <div className="relative overflow-hidden rounded-2xl bg-yellow-50 shadow-lg mb-6 h-60">
@@ -136,15 +333,15 @@ function Page() {
               style={{ transform: `translateX(-${activeIndex * 100}%)` }}
             >
               {promotionData.map((item) => (
-                <div key={item.id} className="flex-shrink-0 h-full relative">
+                <div
+                  key={item.id}
+                  className="flex-shrink-0 h-full relative w-full"
+                >
                   <Image
                     src={`/api/filedata/${item.image}`}
                     alt={item.title ?? "Promotion"}
-                    width={600}
-                    height={240}
-                    className="object-cover h-full w-full rounded-t-xl"
-                    style={{ objectFit: "cover" }}
-                    loading="lazy"
+                    fill
+                    className="object-cover"
                     sizes="(max-width: 768px) 100vw, 600px"
                   />
                   <div className="absolute inset-0 bg-black/30" />
@@ -184,7 +381,6 @@ function Page() {
             View All
           </Link>
         </div>
-        {/* Masonry grid for a dynamic, modern look */}
         <div className="columns-2 gap-4 space-y-4">
           {isLoadingSpecialOffers
             ? Array.from({ length: 4 }).map((_, i) => (
@@ -228,7 +424,8 @@ function Page() {
           <EmptyState message="No special offers available right now." />
         )}
       </div>
-      {/* --- Categories Section 2 --- */}
+
+      {/* --- Categories Section --- */}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2 px-1">
           <h2 className="text-xl font-bold text-gray-800">Explore by Type</h2>
@@ -246,7 +443,7 @@ function Page() {
                   key={i}
                   className="flex-shrink-0 flex flex-col items-center w-24 gap-2"
                 >
-                  <SkeletonLoader className="w-20 h-20 rounded-xl" />
+                  <SkeletonLoader className="w-20 h-20 rounded-full" />
                   <SkeletonLoader className="w-16 h-4" />
                 </div>
               ))
@@ -264,8 +461,6 @@ function Page() {
                     width={80}
                     height={80}
                     className="w-20 h-20 object-cover rounded-full shadow-md"
-                    loading="lazy"
-                    // placeholder="blur"
                   />
                   <span className="text-sm font-medium text-gray-700">
                     {cat.name}
@@ -274,55 +469,7 @@ function Page() {
               ))}
         </div>
       </div>
-      {/* --- Special Offers Section --- */}
-      <div className="mb-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-2 px-1">
-          Special Offers
-        </h2>
-        <div className="flex gap-4 overflow-x-auto pb-2">
-          {isLoadingSpecialOffers
-            ? Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="flex-shrink-0 w-64">
-                  <SkeletonLoader className="h-48 rounded-xl" />
-                </div>
-              ))
-            : specialOfferData?.map((item) => (
-                <div
-                  key={item.id}
-                  className="relative flex-shrink-0 w-64 bg-white rounded-xl shadow-md overflow-hidden flex flex-col"
-                >
-                  <Image
-                    src={`/api/filedata/${item.images}`}
-                    alt={item.title}
-                    width={256}
-                    height={128}
-                    className=" h-32 object-cover"
-                    style={{ objectFit: "cover" }}
-                    loading="lazy"
-                  />
-                  <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                    {item.discount}% OFF
-                  </div>
-                  <div className="p-3 flex-grow flex flex-col justify-between">
-                    <div>
-                      <h3 className="font-semibold text-gray-800 truncate">
-                        {item.title}
-                      </h3>
-                      <div className="flex items-baseline gap-2 mt-1">
-                        <p className="text-lg font-bold text-primary-600">
-                          ${item.price.toFixed(2)}
-                        </p>
-                        <p className="text-sm text-gray-500 line-through">
-                          ${item.oldPrice.toFixed(2)}
-                        </p>
-                      </div>
-                    </div>
-                    {/* <AddToCartButton item={item} /> */}
-                  </div>
-                </div>
-              ))}
-        </div>
-      </div>
+
       {/* --- List of Properties Section --- */}
       <div>
         <div className="flex items-center justify-between px-1 mb-3">
@@ -359,7 +506,7 @@ function Page() {
           ) : allHouseData && allHouseData.length > 0 ? (
             allHouseData.map((item) => (
               <Link
-                href={`/en/property/${item.id}`} // Link to the detail page
+                href={`/en/property/${item.id}`}
                 key={item.id}
                 className="block rounded-lg bg-white p-3 shadow-sm transition-all hover:shadow-lg hover:-translate-y-0.5"
               >
@@ -414,10 +561,20 @@ function Page() {
           )}
         </div>
       </div>
-      {/* <MiniCart /> */}
+
       <div className="bottom-0 left-0 w-full z-50">
         <Footer />
       </div>
+
+      <FilterDialog
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        categories={categoryData || []}
+        onApply={(appliedFilters) => {
+          console.log("Applied Filters:", appliedFilters);
+          // Here you would typically trigger a new data fetch with these filters
+        }}
+      />
     </div>
   );
 }
