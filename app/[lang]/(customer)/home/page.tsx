@@ -3,7 +3,7 @@ import Footer from "@/components/Footer";
 import React, { useState } from "react";
 import { Input } from "@heroui/react";
 import {
-  Filter,
+  SlidersHorizontal,
   ChevronLeft,
   ChevronRight,
   Minus,
@@ -118,7 +118,10 @@ function Page() {
           className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-primary-100 transition"
           tabIndex={-1}
         >
-          <Filter className="h-5 w-5 text-primary-500" aria-hidden="true" />
+          <SlidersHorizontal
+            className="h-5 w-5 text-primary-500"
+            aria-hidden="true"
+          />
         </button>
       </div>
       {/* --- Promotions Carousel --- */}
