@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import React, { useState } from "react";
 import { Input } from "@heroui/react";
 import {
+  Filter,
   ChevronLeft,
   ChevronRight,
   Minus,
@@ -99,22 +100,25 @@ function Page() {
   // Otherwise, render the main home page.
   return (
     <div className="w-dvw bg-gray-50 p-2">
-      <div className="relative mb-4">
+      <div className="relative mb-4 w-full max-w-md mx-auto">
         <Input
           type="text"
           variant="faded"
           color="primary"
-          placeholder="Search for food..."
+          placeholder="Search for properties..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pr-12 pl-4 py-2 rounded-lg text-primary-800 shadow focus:ring-2 focus:ring-primary-300 transition"
+          className="w-full pl-10 pr-12 py-2 rounded-lg text-primary-800 shadow focus:ring-2 focus:ring-primary-300 transition"
         />
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+          <Search className="h-5 w-5 text-primary-500" aria-hidden="true" />
+        </span>
         <button
           type="button"
           className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-primary-100 transition"
           tabIndex={-1}
         >
-          <Search className="h-5 w-5 text-primary-500" aria-hidden="true" />
+          <Filter className="h-5 w-5 text-primary-500" aria-hidden="true" />
         </button>
       </div>
       {/* --- Promotions Carousel --- */}
