@@ -294,8 +294,8 @@ function Page() {
   }
 
   return (
-    <div className="w-dvw bg-gray-50 p-2">
-      <div className="relative mb-4 w-full max-w-md mx-auto">
+    <div className=" w-dvw bg-gray-50 p-2">
+      <div className="relative mb-4">
         <Input
           type="text"
           variant="faded"
