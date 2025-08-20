@@ -10,7 +10,7 @@ import { propertyRegister } from "@/actions/customer/registerProperty";
 import { propertyRegisterSchema } from "@/lib/zodSchema"; // Make sure this schema matches the new structure
 import { Input, Button, Textarea } from "@heroui/react";
 import { addToast } from "@heroui/toast";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import {
   User,
   Mail,
@@ -41,6 +41,8 @@ type RegisterFormValues = z.infer<typeof propertyRegisterSchema>;
 
 function PropertyRegisterPage() {
   const router = useRouter();
+  const params = useParams(); // Get the current URL params
+  const lang = params.lang;
 
   const {
     register,
@@ -66,7 +68,7 @@ function PropertyRegisterPage() {
         // type: "success",
         description: "Property request submitted successfully!",
       });
-      router.push("/en/home"); // Redirect after success
+      router.push(`/${lang}/home`); // Redirect after success
     },
   ]);
 

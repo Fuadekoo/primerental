@@ -59,8 +59,21 @@ const LanguageSelector = () => {
   const params = useParams();
   const currentLang = params.lang;
 
+  useEffect(() => {
+    // On component mount, check if the language cookie exists.
+    // If not, set the default language to 'en'.
+    if (
+      !document.cookie.split("; ").find((row) => row.startsWith("NEXT_LOCALE="))
+    ) {
+      document.cookie =
+        "NEXT_LOCALE=en; path=/; max-age=31536000; samesite=lax";
+    }
+  }, []);
+
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newLang = e.target.value;
+    // Set a cookie that expires in 1 year
+    document.cookie = `NEXT_LOCALE=${newLang}; path=/; max-age=31536000; samesite=lax`;
     router.push(`/${newLang}/settings`);
   };
 
@@ -78,8 +91,7 @@ const LanguageSelector = () => {
         className="w-full rounded-lg border-gray-300 bg-gray-50 py-2 pl-3 pr-8 text-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:w-auto"
       >
         <option value="en">English</option>
-        <option value="es">Spanish</option>
-        <option value="fr">French</option>
+        <option value="am">amharic</option>
       </select>
     </div>
   );
