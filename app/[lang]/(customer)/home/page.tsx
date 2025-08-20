@@ -9,6 +9,11 @@ import {
   Plus,
   PlusCircle,
   Search,
+  MapPin,
+  BedDouble,
+  Ruler,
+  Car,
+  Building2,
 } from "lucide-react";
 import useAction from "@/hooks/useActions";
 import {
@@ -18,8 +23,6 @@ import {
   specialOffers,
 } from "@/actions/customer/home";
 import Link from "next/link";
-// import MiniCart from "@/components/mini-cart";
-// import { useCart, CartItem } from "@/hooks/useCart";
 import ProductPerCategoryId from "@/components/productper-catagoryid";
 import Image from "next/image";
 
@@ -115,6 +118,7 @@ function Page() {
         </button>
       </div>
       {/* --- Promotions Carousel --- */}
+      <h1>Featured Property</h1>
       <div className="relative overflow-hidden rounded-2xl bg-yellow-50 shadow-lg mb-6 h-60">
         {isLoadingPromotion ? (
           <SkeletonLoader className=" h-full" />
@@ -161,10 +165,66 @@ function Page() {
           <EmptyState message="No promotions available right now." />
         )}
       </div>
-      {/* --- Categories Section --- */}
+
+      {/* --- Special Offers Section --- */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between px-1 mb-3">
+          <h2 className="text-xl font-bold text-gray-800">Special Offers</h2>
+          <Link
+            href="/offers"
+            className="text-sm font-semibold text-blue-600 hover:text-blue-800"
+          >
+            View All
+          </Link>
+        </div>
+        {/* Masonry grid for a dynamic, modern look */}
+        <div className="columns-2 gap-4 space-y-4">
+          {isLoadingSpecialOffers
+            ? Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`break-inside-avoid-column ${
+                    i % 2 === 0 ? "h-56" : "h-48"
+                  }`}
+                >
+                  <SkeletonLoader className="h-full w-full" />
+                </div>
+              ))
+            : specialOfferData?.map((item) => (
+                <Link
+                  href={`/en/property/${item.id}`}
+                  key={item.id}
+                  className="group relative block overflow-hidden rounded-xl shadow-md break-inside-avoid-column"
+                >
+                  <Image
+                    src={`/api/filedata/${item.images[0]}`}
+                    alt={item.title}
+                    width={200}
+                    height={250}
+                    className="h-auto w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                  <div className="absolute top-0 left-0 p-3">
+                    <div className="rounded-lg bg-white/90 p-2 backdrop-blur-sm">
+                      <h3 className="font-bold text-gray-800 text-sm">
+                        {item.title}
+                      </h3>
+                      <p className="text-xs text-red-600 font-semibold">
+                        {item.discount}% OFF
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+        </div>
+        {specialOfferData?.length === 0 && !isLoadingSpecialOffers && (
+          <EmptyState message="No special offers available right now." />
+        )}
+      </div>
+      {/* --- Categories Section 2 --- */}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2 px-1">
-          <h2 className="text-xl font-bold text-gray-800">Categories</h2>
+          <h2 className="text-xl font-bold text-gray-800">Explore by Type</h2>
           <Link
             href="/categories"
             className="text-sm font-semibold text-primary-600"
@@ -179,7 +239,7 @@ function Page() {
                   key={i}
                   className="flex-shrink-0 flex flex-col items-center w-24 gap-2"
                 >
-                  <SkeletonLoader className="w-20 h-20 rounded-full" />
+                  <SkeletonLoader className="w-20 h-20 rounded-xl" />
                   <SkeletonLoader className="w-16 h-4" />
                 </div>
               ))
@@ -198,6 +258,7 @@ function Page() {
                     height={80}
                     className="w-20 h-20 object-cover rounded-full shadow-md"
                     loading="lazy"
+                    // placeholder="blur"
                   />
                   <span className="text-sm font-medium text-gray-700">
                     {cat.name}
@@ -255,52 +316,97 @@ function Page() {
               ))}
         </div>
       </div>
-      {/* --- All Food Section --- */}
+      {/* --- List of Properties Section --- */}
       <div>
-        <h2 className="text-xl font-bold text-gray-800 mb-2 px-1">All Food</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="flex items-center justify-between px-1 mb-3">
+          <h2 className="text-xl font-bold text-gray-800">
+            List of Properties
+          </h2>
+          <Link
+            href="/properties"
+            className="text-sm font-semibold text-blue-600 hover:text-blue-800"
+          >
+            See All &gt;
+          </Link>
+        </div>
+        <div className="space-y-4">
           {isLoadingAllHouse ? (
-            Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-xl shadow-md p-2">
-                <SkeletonLoader className="h-32 rounded-lg mb-2" />
-                <SkeletonLoader className="w-3/4 h-5 mb-1" />
-                <SkeletonLoader className="w-1/2 h-4" />
+            Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="flex gap-4 rounded-lg bg-white p-3 shadow-sm"
+              >
+                <SkeletonLoader className="h-32 w-28 flex-shrink-0 rounded-md" />
+                <div className="flex-grow space-y-2">
+                  <SkeletonLoader className="h-5 w-3/4" />
+                  <SkeletonLoader className="h-4 w-1/2" />
+                  <SkeletonLoader className="h-4 w-full" />
+                  <SkeletonLoader className="h-4 w-2/3" />
+                  <div className="flex justify-between pt-2">
+                    <SkeletonLoader className="h-4 w-1/4" />
+                    <SkeletonLoader className="h-6 w-1/3" />
+                  </div>
+                </div>
               </div>
             ))
           ) : allHouseData && allHouseData.length > 0 ? (
             allHouseData.map((item) => (
-              <div
+              <Link
+                href={`/en/property/${item.id}`} // Link to the detail page
                 key={item.id}
-                className="bg-white rounded-xl shadow-md flex flex-col"
+                className="block rounded-lg bg-white p-3 shadow-sm transition-all hover:shadow-lg hover:-translate-y-0.5"
               >
-                <Image
-                  src={`/api/filedata/${item.images}`}
-                  alt={item.title}
-                  width={400}
-                  height={128}
-                  className="w-full h-32 object-cover rounded-t-xl"
-                  style={{ objectFit: "cover" }}
-                  loading="lazy"
-                />
-                <div className="p-3 flex-grow flex flex-col justify-between">
-                  <div>
-                    <h3 className="font-semibold text-gray-800 truncate">
+                <div className="flex gap-4">
+                  <Image
+                    src={`/api/filedata/${item.images[0]}`}
+                    alt={item.title}
+                    width={112}
+                    height={128}
+                    className="h-32 w-28 flex-shrink-0 rounded-md object-cover"
+                  />
+                  <div className="flex flex-col flex-grow">
+                    <h3 className="font-bold text-gray-800 truncate">
                       {item.title}
                     </h3>
-                    <p className="text-lg font-bold text-primary-600">
-                      ${item.price.toFixed(2)}
-                    </p>
+                    <div className="flex items-center gap-1.5 text-sm text-gray-500 mt-1">
+                      <MapPin size={14} className="flex-shrink-0" />
+                      <span>{item.location}</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm text-gray-600 mt-2">
+                      <span className="flex items-center gap-1.5">
+                        <BedDouble size={14} /> {item.bedroom} Beds
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <Ruler size={14} /> {item.squareMeter} m²
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <Car size={14} /> {item.parking} Parking
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <Building2 size={14} /> {item.propertyType.name}
+                      </span>
+                    </div>
+
+                    <div className="flex items-end justify-between mt-auto pt-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full capitalize">
+                          {item.offer_type.toLowerCase()}
+                        </span>
+                      </div>
+                      <p className="text-lg font-bold text-blue-600">
+                        ${item.price.toLocaleString()}
+                      </p>
+                    </div>
                   </div>
-                  {/* <AddToCartButton item={item} /> */}
                 </div>
-              </div>
+              </Link>
             ))
           ) : (
-            <EmptyState message="No food found." />
+            <EmptyState message="No properties found." />
           )}
         </div>
       </div>
-
       {/* <MiniCart /> */}
       <div className="bottom-0 left-0 w-full z-50">
         <Footer />
