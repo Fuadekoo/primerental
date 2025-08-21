@@ -25,6 +25,71 @@ import Link from "next/link";
 import ProductPerCategoryId from "@/components/productper-catagoryid";
 import FilteredComponent, { FilterInput } from "@/components/filteredComponent";
 import Image from "next/image";
+import { useParams } from "next/navigation";
+
+// i18n strings
+const translations = {
+  en: {
+    filtersTitle: "Filters",
+    propertyType: "Property Type",
+    offerType: "Offer Type",
+    forSale: "For Sale",
+    forRent: "For Rent",
+    priceRange: "Price Range",
+    minPrice: "Min Price",
+    maxPrice: "Max Price",
+    bedrooms: "Bedrooms",
+    bathrooms: "Bathrooms",
+    reset: "Reset",
+    applyFilters: "Apply Filters",
+    close: "Close",
+    filteredResults: "Filtered Results",
+    searchPlaceholder: "Search for properties...",
+    featuredProperty: "Featured Property",
+    specialOffers: "Special Offers",
+    viewAll: "View All",
+    exploreByType: "Explore by Type",
+    listOfProperties: "List of Properties",
+    seeAll: "See All >",
+    beds: "Beds",
+    m2: "m²",
+    parking: "Parking",
+    noPromotions: "No promotions available right now.",
+    noSpecial: "No special offers available right now.",
+    noProperties: "No properties found.",
+  },
+  am: {
+    filtersTitle: "ማጣሪያዎች",
+    propertyType: "የንብረት አይነት",
+    offerType: "የአቅርቦት አይነት",
+    forSale: "ሽያጭ",
+    forRent: "ኪራይ",
+    priceRange: "የዋጋ መጠን",
+    minPrice: "አነስተኛ ዋጋ",
+    maxPrice: "ከፍተኛ ዋጋ",
+    bedrooms: "መኝታ ቤቶች",
+    bathrooms: "መታጠቢያዎች",
+    reset: "እንደነበር መመለስ",
+    applyFilters: "ማጣሪያ መፈጸም",
+    close: "ዝጋ",
+    filteredResults: "የተጣሩ ውጤቶች",
+    searchPlaceholder: "ንብረቶችን ይፈልጉ...",
+    featuredProperty: "ተለይቶ የቀረበ ንብረት",
+    specialOffers: "ልዩ ቅናሾች",
+    viewAll: "ሁሉንም ተመልከት",
+    exploreByType: "በአይነት ይመለከቱ",
+    listOfProperties: "የንብረቶች ዝርዝር",
+    seeAll: "ሁሉንም እይ >",
+    beds: "መኝታ",
+    m2: "ሜ²",
+    parking: "ፓርኪንግ",
+    noPromotions: "በአሁኑ ጊዜ ማስታወቂያ የለም።",
+    noSpecial: "በአሁኑ ጊዜ ልዩ ቅናሽ የለም።",
+    noProperties: "ንብረት አልተገኘም።",
+  },
+} as const;
+
+type TDict = (typeof translations)[keyof typeof translations];
 
 // --- Reusable Components ---
 
@@ -50,6 +115,7 @@ type FilterDialogProps = {
     bedrooms: string;
     bathrooms: string;
   }) => void;
+  t: TDict;
 };
 
 const FilterDialog = ({
@@ -57,6 +123,7 @@ const FilterDialog = ({
   onClose,
   categories,
   onApply,
+  t,
 }: FilterDialogProps) => {
   const [filters, setFilters] = useState({
     propertyType: "",
@@ -136,7 +203,7 @@ const FilterDialog = ({
     <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end">
       <div className="bg-white w-full max-h-[90dvh] rounded-t-2xl p-4 flex flex-col">
         <div className="flex items-center justify-between mb-4 pb-2 border-b">
-          <h2 className="text-xl font-bold">Filters</h2>
+          <h2 className="text-xl font-bold">{t.filtersTitle}</h2>
           <button
             onClick={onClose}
             className="p-1 rounded-full hover:bg-gray-100"
@@ -148,7 +215,7 @@ const FilterDialog = ({
         <div className="overflow-y-auto space-y-6 pb-20">
           {/* Property Type */}
           <div>
-            <h3 className="font-semibold mb-2">Property Type</h3>
+            <h3 className="font-semibold mb-2">{t.propertyType}</h3>
             <div className="flex flex-wrap gap-2">
               {categories.map((cat: any) => (
                 <FilterButton
@@ -163,16 +230,16 @@ const FilterDialog = ({
 
           {/* Offer Type */}
           <div>
-            <h3 className="font-semibold mb-2">Offer Type</h3>
+            <h3 className="font-semibold mb-2">{t.offerType}</h3>
             <div className="flex flex-wrap gap-2">
               <FilterButton
                 value="SALE"
-                label="For Sale"
+                label={t.forSale}
                 stateKey="offerType"
               />
               <FilterButton
                 value="RENT"
-                label="For Rent"
+                label={t.forRent}
                 stateKey="offerType"
               />
             </div>
@@ -180,11 +247,11 @@ const FilterDialog = ({
 
           {/* Price Range */}
           <div>
-            <h3 className="font-semibold mb-2">Price Range</h3>
+            <h3 className="font-semibold mb-2">{t.priceRange}</h3>
             <div className="flex items-center gap-2">
               <Input
                 type="number"
-                placeholder="Min Price"
+                placeholder={t.minPrice}
                 value={filters.minPrice}
                 onChange={(e) =>
                   setFilters({ ...filters, minPrice: e.target.value })
@@ -193,7 +260,7 @@ const FilterDialog = ({
               <span className="text-gray-400">-</span>
               <Input
                 type="number"
-                placeholder="Max Price"
+                placeholder={t.maxPrice}
                 value={filters.maxPrice}
                 onChange={(e) =>
                   setFilters({ ...filters, maxPrice: e.target.value })
@@ -204,7 +271,7 @@ const FilterDialog = ({
 
           {/* Bedrooms */}
           <div>
-            <h3 className="font-semibold mb-2">Bedrooms</h3>
+            <h3 className="font-semibold mb-2">{t.bedrooms}</h3>
             <div className="flex flex-wrap gap-2">
               {[1, 2, 3, 4, "5+"].map((num) => (
                 <FilterButton
@@ -219,7 +286,7 @@ const FilterDialog = ({
 
           {/* Bathrooms */}
           <div>
-            <h3 className="font-semibold mb-2">Bathrooms</h3>
+            <h3 className="font-semibold mb-2">{t.bathrooms}</h3>
             <div className="flex flex-wrap gap-2">
               {[1, 2, 3, 4, "5+"].map((num) => (
                 <FilterButton
@@ -238,13 +305,13 @@ const FilterDialog = ({
             onClick={handleReset}
             className="w-full py-3 rounded-lg border border-gray-300 font-semibold"
           >
-            Reset
+            {t.reset}
           </button>
           <button
             onClick={handleApply}
             className="w-full py-3 rounded-lg bg-blue-600 text-white font-semibold"
           >
-            Apply Filters
+            {t.applyFilters}
           </button>
         </div>
       </div>
@@ -255,6 +322,13 @@ const FilterDialog = ({
 // --- Main Page Component ---
 
 function Page() {
+  // lang + t
+  const params = useParams();
+  const currentLang = Array.isArray(params?.lang)
+    ? (params.lang[0] as string)
+    : (params?.lang as string) || "en";
+  const t = translations[currentLang as "en" | "am"] || translations.en;
+
   const [search, setSearch] = useState("");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
@@ -337,7 +411,7 @@ function Page() {
           type="text"
           variant="faded"
           color="primary"
-          placeholder="Search for properties..."
+          placeholder={t.searchPlaceholder}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full pl-10 pr-12 py-2 rounded-lg text-primary-800 shadow focus:ring-2 focus:ring-primary-300 transition"
@@ -359,7 +433,7 @@ function Page() {
       </div>
 
       {/* --- Promotions Carousel --- */}
-      <h1>Featured Property</h1>
+      <h1>{t.featuredProperty}</h1>
       <div className="relative overflow-hidden rounded-2xl bg-yellow-50 shadow-lg mb-6 h-60">
         {isLoadingPromotion ? (
           <SkeletonLoader className=" h-full" />
@@ -403,19 +477,19 @@ function Page() {
             </button>
           </>
         ) : (
-          <EmptyState message="No promotions available right now." />
+          <EmptyState message={t.noPromotions} />
         )}
       </div>
 
       {/* --- Special Offers Section --- */}
       <div className="mb-6">
         <div className="flex items-center justify-between px-1 mb-3">
-          <h2 className="text-xl font-bold text-gray-800">Special Offers</h2>
+          <h2 className="text-xl font-bold text-gray-800">{t.specialOffers}</h2>
           <Link
-            href="/offers"
+            href={`/${currentLang}/offers`}
             className="text-sm font-semibold text-blue-600 hover:text-blue-800"
           >
-            View All
+            {t.viewAll}
           </Link>
         </div>
         <div className="columns-2 gap-4 space-y-4">
@@ -432,7 +506,7 @@ function Page() {
               ))
             : specialOfferData?.map((item: any) => (
                 <Link
-                  href={`/en/property/${item.id}`}
+                  href={`/${currentLang}/property/${item.id}`}
                   key={item.id}
                   className="group relative block overflow-hidden rounded-xl shadow-md break-inside-avoid-column"
                 >
@@ -458,19 +532,19 @@ function Page() {
               ))}
         </div>
         {specialOfferData?.length === 0 && !isLoadingSpecialOffers && (
-          <EmptyState message="No special offers available right now." />
+          <EmptyState message={t.noSpecial} />
         )}
       </div>
 
       {/* --- Categories Section --- */}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2 px-1">
-          <h2 className="text-xl font-bold text-gray-800">Explore by Type</h2>
+          <h2 className="text-xl font-bold text-gray-800">{t.exploreByType}</h2>
           <Link
-            href="/categories"
+            href={`/${currentLang}/categories`}
             className="text-sm font-semibold text-primary-600"
           >
-            View All
+            {t.viewAll}
           </Link>
         </div>
         <div className="flex gap-4 overflow-x-auto pb-2">
@@ -509,112 +583,93 @@ function Page() {
 
       {/* --- List of Properties Section --- */}
       <div>
-        {/* <div className="flex items-center justify-between px-1 mb-3">
+        <div className="flex items-center justify-between px-1 mb-3">
           <h2 className="text-xl font-bold text-gray-800">
-            List of Properties
+            {t.listOfProperties}
           </h2>
           <Link
-            href="/properties"
+            href={`/${currentLang}/properties`}
             className="text-sm font-semibold text-blue-600 hover:text-blue-800"
           >
-            See All &gt;
+            {t.seeAll}
           </Link>
-        </div> */}
+        </div>
         <div className="space-y-4">
-          {/* Fetching list based on search (not filter dialog) */}
-          {/* ...existing code showing allHouseData... */}
-          {/* Keep your existing list rendering here */}
-          {/* --- List of Properties Section --- */}
-          <div>
-            <div className="flex items-center justify-between px-1 mb-3">
-              <h2 className="text-xl font-bold text-gray-800">
-                List of Properties
-              </h2>
-              <Link
-                href="/properties"
-                className="text-sm font-semibold text-blue-600 hover:text-blue-800"
+          {isLoadingAllHouse ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="flex gap-4 rounded-lg bg-white p-3 shadow-sm"
               >
-                See All &gt;
-              </Link>
-            </div>
-            <div className="space-y-4">
-              {isLoadingAllHouse ? (
-                Array.from({ length: 4 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="flex gap-4 rounded-lg bg-white p-3 shadow-sm"
-                  >
-                    <SkeletonLoader className="h-32 w-28 flex-shrink-0 rounded-md" />
-                    <div className="flex-grow space-y-2">
-                      <SkeletonLoader className="h-5 w-3/4" />
-                      <SkeletonLoader className="h-4 w-1/2" />
-                      <SkeletonLoader className="h-4 w-full" />
-                      <SkeletonLoader className="h-4 w-2/3" />
-                      <div className="flex justify-between pt-2">
-                        <SkeletonLoader className="h-4 w-1/4" />
-                        <SkeletonLoader className="h-6 w-1/3" />
+                <SkeletonLoader className="h-32 w-28 flex-shrink-0 rounded-md" />
+                <div className="flex-grow space-y-2">
+                  <SkeletonLoader className="h-5 w-3/4" />
+                  <SkeletonLoader className="h-4 w-1/2" />
+                  <SkeletonLoader className="h-4 w-full" />
+                  <SkeletonLoader className="h-4 w-2/3" />
+                  <div className="flex justify-between pt-2">
+                    <SkeletonLoader className="h-4 w-1/4" />
+                    <SkeletonLoader className="h-6 w-1/3" />
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : allHouseData && allHouseData.length > 0 ? (
+            allHouseData.map((item) => (
+              <Link
+                href={`/${currentLang}/property/${item.id}`}
+                key={item.id}
+                className="block rounded-lg bg-white p-3 shadow-sm transition-all hover:shadow-lg hover:-translate-y-0.5"
+              >
+                <div className="flex gap-4">
+                  <Image
+                    src={`/api/filedata/${item.images[0]}`}
+                    alt={item.title}
+                    width={112}
+                    height={128}
+                    className="h-32 w-28 flex-shrink-0 rounded-md object-cover"
+                  />
+                  <div className="flex flex-col flex-grow">
+                    <h3 className="font-bold text-gray-800 truncate">
+                      {item.title}
+                    </h3>
+                    <div className="flex items-center gap-1.5 text-sm text-gray-500 mt-1">
+                      <MapPin size={14} className="flex-shrink-0" />
+                      <span>{item.location}</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm text-gray-600 mt-2">
+                      <span className="flex items-center gap-1.5">
+                        <BedDouble size={14} /> {item.bedroom} {t.beds}
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <Ruler size={14} /> {item.squareMeter} {t.m2}
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <Car size={14} /> {item.parking} {t.parking}
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <Building2 size={14} /> {item.propertyType.name}
+                      </span>
+                    </div>
+
+                    <div className="flex items-end justify-between mt-auto pt-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full capitalize">
+                          {item.offer_type.toLowerCase()}
+                        </span>
                       </div>
+                      <p className="text-lg font-bold text-blue-600">
+                        ${item.price.toLocaleString()}
+                      </p>
                     </div>
                   </div>
-                ))
-              ) : allHouseData && allHouseData.length > 0 ? (
-                allHouseData.map((item) => (
-                  <Link
-                    href={`/en/property/${item.id}`}
-                    key={item.id}
-                    className="block rounded-lg bg-white p-3 shadow-sm transition-all hover:shadow-lg hover:-translate-y-0.5"
-                  >
-                    <div className="flex gap-4">
-                      <Image
-                        src={`/api/filedata/${item.images[0]}`}
-                        alt={item.title}
-                        width={112}
-                        height={128}
-                        className="h-32 w-28 flex-shrink-0 rounded-md object-cover"
-                      />
-                      <div className="flex flex-col flex-grow">
-                        <h3 className="font-bold text-gray-800 truncate">
-                          {item.title}
-                        </h3>
-                        <div className="flex items-center gap-1.5 text-sm text-gray-500 mt-1">
-                          <MapPin size={14} className="flex-shrink-0" />
-                          <span>{item.location}</span>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm text-gray-600 mt-2">
-                          <span className="flex items-center gap-1.5">
-                            <BedDouble size={14} /> {item.bedroom} Beds
-                          </span>
-                          <span className="flex items-center gap-1.5">
-                            <Ruler size={14} /> {item.squareMeter} m²
-                          </span>
-                          <span className="flex items-center gap-1.5">
-                            <Car size={14} /> {item.parking} Parking
-                          </span>
-                          <span className="flex items-center gap-1.5">
-                            <Building2 size={14} /> {item.propertyType.name}
-                          </span>
-                        </div>
-
-                        <div className="flex items-end justify-between mt-auto pt-2">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-semibold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full capitalize">
-                              {item.offer_type.toLowerCase()}
-                            </span>
-                          </div>
-                          <p className="text-lg font-bold text-blue-600">
-                            ${item.price.toLocaleString()}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                ))
-              ) : (
-                <EmptyState message="No properties found." />
-              )}
-            </div>
-          </div>
+                </div>
+              </Link>
+            ))
+          ) : (
+            <EmptyState message={t.noProperties} />
+          )}
         </div>
       </div>
 
@@ -646,6 +701,7 @@ function Page() {
           setIsFilterOpen(false);
           setShowFiltered(true);
         }}
+        t={t}
       />
 
       {/* Full-page modal with filtered results */}
@@ -657,15 +713,15 @@ function Page() {
               className="px-3 py-1.5 rounded-lg hover:bg-gray-100 flex items-center gap-2"
             >
               <X size={16} />
-              <span>Close</span>
+              <span>{t.close}</span>
             </button>
-            <h2 className="text-lg font-bold">Filtered Results</h2>
+            <h2 className="text-lg font-bold">{t.filteredResults}</h2>
             <div className="w-16" />
           </div>
           <div className="flex-1 overflow-y-auto">
             <FilteredComponent
               filters={appliedFilters}
-              title="Filtered Results"
+              title={t.filteredResults}
             />
           </div>
         </div>

@@ -21,12 +21,66 @@ import {
   Ruler,
   Car,
   Building2,
-  Mail,
   Phone,
-  MessageSquare,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+
+// i18n strings
+const translations = {
+  en: {
+    propertyNotFound: "Property Not Found",
+    goBack: "Go Back",
+    addedToFavorites: "Added to favorites!",
+    removedFromFavorites: "Removed from favorites.",
+    linkCopied: "Link copied to clipboard!",
+    copyFailed: "Could not copy link.",
+    forSale: "For Sale",
+    forRent: "For Rent",
+    hotOffer: "Hot Offer",
+    detailsTitle: "Details",
+    createdDate: "Created Date",
+    propertyId: "Property ID",
+    price: "Price",
+    amenities: "Amenities",
+    bedrooms: "Bedrooms",
+    bathrooms: "Bathrooms",
+    m2: "m²",
+    parking: "Parking",
+    description: "Description",
+    readMore: "Read More",
+    readLess: "Read Less",
+    propertyImage: "Property image",
+    youtubeTitle: "YouTube video player",
+  },
+  am: {
+    propertyNotFound: "ንብረት አልተገኘም",
+    goBack: "ተመለስ",
+    addedToFavorites: "ወደ የምወዳቸው ተጨምሯል!",
+    removedFromFavorites: "ከየምወዳቸው ተወግዷል።",
+    linkCopied: "አገናኙ ተቀድቷል!",
+    copyFailed: "አገናኙ ማቅጠር አልተሳካም።",
+    forSale: "ሽያጭ",
+    forRent: "ኪራይ",
+    hotOffer: "ልዩ ቅናሽ",
+    detailsTitle: "ዝርዝሮች",
+    createdDate: "የተፈጠረበት ቀን",
+    propertyId: "የንብረት መለያ",
+    price: "ዋጋ",
+    amenities: "መሳሪያዎች",
+    bedrooms: "መኝታ ክፍሎች",
+    bathrooms: "መታጠቢያዎች",
+    m2: "ሜ²",
+    parking: "ፓርኪንግ",
+    description: "መግለጫ",
+    readMore: "ተጨማሪ ያንብቡ",
+    readLess: "ያነሰ አንብብ",
+    propertyImage: "የንብረት ምስል",
+    youtubeTitle: "ዩቲዩብ ቪዲዮ አጫዋች",
+  },
+} as const;
+
+type TDict = (typeof translations)[keyof typeof translations];
 
 const SkeletonLoader = ({ className }: { className?: string }) => (
   <div className={`animate-pulse bg-gray-200 rounded-lg ${className}`} />
@@ -43,11 +97,13 @@ const DetailRow = ({ label, value }: { label: string; value: string }) => (
 type MediaScrollerProps = {
   images: string[];
   youtubeLink?: string | undefined;
+  t: TDict;
 };
 
 const MediaScroller: React.FC<MediaScrollerProps> = ({
   images,
   youtubeLink,
+  t,
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -113,7 +169,7 @@ const MediaScroller: React.FC<MediaScrollerProps> = ({
           >
             <Image
               src={`/api/filedata/${img}`}
-              alt={`Property image ${index + 1}`}
+              alt={`${t.propertyImage} ${index + 1}`}
               fill
               className="object-cover"
               priority={index === 0}
@@ -129,7 +185,7 @@ const MediaScroller: React.FC<MediaScrollerProps> = ({
               width="100%"
               height="100%"
               src={embedUrl}
-              title="YouTube video player"
+              title={t.youtubeTitle}
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope;"
               allowFullScreen
@@ -170,7 +226,16 @@ const MediaScroller: React.FC<MediaScrollerProps> = ({
 
 function Page() {
   const router = useRouter();
-  const { propertyId } = useParams<{ propertyId: string }>();
+  const params = useParams();
+  const propertyId = Array.isArray((params as any).propertyId)
+    ? ((params as any).propertyId[0] as string)
+    : ((params as any).propertyId as string) || "";
+  const currentLang = Array.isArray((params as any).lang)
+    ? ((params as any).lang[0] as string)
+    : ((params as any).lang as string) || "en";
+  const t = translations[currentLang as "en" | "am"] || translations.en;
+  const locale = currentLang === "am" ? "am-ET" : "en-US";
+
   const [isExpanded, setIsExpanded] = useState(false);
 
   const { toggleFavorite, isFavorite } = useFavoriteStore();
@@ -185,19 +250,19 @@ function Page() {
   const handleToggleFavorite = () => {
     toggleFavorite(propertyId);
     if (!isFav) {
-      addToast({ description: "Added to favorites!" });
+      addToast({ description: t.addedToFavorites });
     } else {
-      addToast({ description: "Removed from favorites." });
+      addToast({ description: t.removedFromFavorites });
     }
   };
 
   const handleShare = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
-      addToast({ description: "Link copied to clipboard!" });
+      addToast({ description: t.linkCopied });
     } catch (err) {
       console.error("Failed to copy link: ", err);
-      addToast({ description: "Could not copy link." });
+      addToast({ description: t.copyFailed });
     }
   };
 
@@ -219,12 +284,12 @@ function Page() {
   if (!propertyData) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
-        <h2 className="text-2xl font-bold mb-4">Property Not Found</h2>
+        <h2 className="text-2xl font-bold mb-4">{t.propertyNotFound}</h2>
         <button
           onClick={() => router.back()}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg"
         >
-          Go Back
+          {t.goBack}
         </button>
       </div>
     );
@@ -253,7 +318,11 @@ function Page() {
     <div className="bg-gray-50 min-h-screen pb-40">
       {/* --- Image and Header --- */}
       <div className="relative">
-        <MediaScroller images={images} youtubeLink={youtubeLink ?? undefined} />
+        <MediaScroller
+          images={images}
+          youtubeLink={youtubeLink ?? undefined}
+          t={t}
+        />
         <div className="absolute top-0 left-0 right-0 flex justify-between items-center p-3 bg-gradient-to-b from-black/50 to-transparent pointer-events-none">
           <button
             onClick={() => router.back()}
@@ -294,11 +363,11 @@ function Page() {
         </p>
         <div className="flex items-center gap-2 mt-3">
           <span className="text-sm font-semibold bg-blue-100 text-blue-800 px-3 py-1 rounded-full capitalize">
-            For {offer_type.toLowerCase()}
+            {offer_type === "RENT" ? t.forRent : t.forSale}
           </span>
           {discount > 0 && (
             <span className="text-sm font-semibold bg-red-100 text-red-800 px-3 py-1 rounded-full">
-              Hot Offer
+              {t.hotOffer}
             </span>
           )}
         </div>
@@ -310,37 +379,37 @@ function Page() {
       <div className="p-4 space-y-6">
         {/* --- Details Section --- */}
         <div className="bg-white p-4 rounded-xl shadow-sm">
-          <h2 className="text-xl font-bold mb-2">Details</h2>
+          <h2 className="text-xl font-bold mb-2">{t.detailsTitle}</h2>
           <DetailRow
-            label="Created Date"
-            value={new Date(createdAt).toLocaleDateString("en-US", {
+            label={t.createdDate}
+            value={new Date(createdAt).toLocaleDateString(locale, {
               year: "numeric",
               month: "long",
               day: "numeric",
             })}
           />
-          <DetailRow label="Property ID" value={id.substring(0, 8)} />
+          <DetailRow label={t.propertyId} value={id.substring(0, 8)} />
           <DetailRow
-            label="Price"
+            label={t.price}
             value={`${currency} ${price.toLocaleString()}`}
           />
         </div>
 
         {/* --- Amenities Section --- */}
         <div className="bg-white p-4 rounded-xl shadow-sm">
-          <h2 className="text-xl font-bold mb-3">Amenities</h2>
+          <h2 className="text-xl font-bold mb-3">{t.amenities}</h2>
           <div className="grid grid-cols-2 gap-4 text-gray-700">
             <span className="flex items-center gap-2">
-              <BedDouble size={20} /> {bedroom} Bedrooms
+              <BedDouble size={20} /> {bedroom} {t.bedrooms}
             </span>
             <span className="flex items-center gap-2">
-              <Bath size={20} /> {kitchen} Bathrooms
+              <Bath size={20} /> {kitchen} {t.bathrooms}
             </span>
             <span className="flex items-center gap-2">
-              <Ruler size={20} /> {squareMeter} m²
+              <Ruler size={20} /> {squareMeter} {t.m2}
             </span>
             <span className="flex items-center gap-2">
-              <Car size={20} /> {parking} Parking
+              <Car size={20} /> {parking} {t.parking}
             </span>
             <span className="flex items-center gap-2 col-span-2">
               <Building2 size={20} /> {propertyType.name}
@@ -351,12 +420,12 @@ function Page() {
         {/* --- Description Section --- */}
         <div className="bg-white p-4 rounded-xl shadow-sm">
           <div className="flex justify-between items-center mb-2">
-            <h2 className="text-xl font-bold">Description</h2>
+            <h2 className="text-xl font-bold">{t.description}</h2>
             <button
               onClick={() => setIsExpanded(!isExpanded)}
               className="text-sm font-semibold text-blue-600"
             >
-              {isExpanded ? "Read Less" : "Read More"}
+              {isExpanded ? t.readLess : t.readMore}
             </button>
           </div>
           <p
@@ -367,6 +436,8 @@ function Page() {
             {description}
           </p>
         </div>
+
+        {/* --- Contact Shortcuts --- */}
         <div className=" bottom-0 left-0 w-full bg-white/90 border-t border-gray-200 p-3 backdrop-blur-sm">
           <div className="flex justify-between items-center gap-3">
             <Link
