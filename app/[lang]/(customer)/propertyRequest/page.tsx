@@ -8,19 +8,12 @@ import useAction from "@/hooks/useActions";
 import { getPropertyTypes } from "@/actions/customer/propertyType";
 import { propertyRequest } from "@/actions/customer/requestProperty";
 import { propertyRequestSchema } from "@/lib/zodSchema";
-import { Input, Button, Textarea, Select } from "@heroui/react";
+import { Input, Button, Textarea } from "@heroui/react";
 import { addToast } from "@heroui/toast";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import {
-  User,
-  Mail,
-  Phone,
-  Building2,
-  CircleDollarSign,
   BedDouble,
   Bath,
-  Ruler,
-  MessageSquare,
   Send,
   KeyRound,
   Handshake,
@@ -30,10 +23,78 @@ import {
 import requestBg from "@/public/cover.jpg";
 import Loading from "@/components/loading";
 
+// Simple i18n copy
+const translations = {
+  en: {
+    pageTitle: "Property Request",
+    pageDescription: "Let us know what you're looking for",
+    successMessage: "Your property request has been submitted successfully!",
+    contactInfoTitle: "Your Contact Information",
+    fullNameLabel: "Full Name",
+    fullNamePlaceholder: "John Doe",
+    emailLabel: "Email Address",
+    emailPlaceholder: "you@example.com",
+    phoneLabel: "Phone Number",
+    phonePlaceholder: "+251 91 123 4567",
+    propertyDetailsTitle: "Property Details",
+    requestTypeLabel: "I want to...",
+    requestTypeRent: "Rent",
+    requestTypeBuy: "Buy",
+    propertyTypeLabel: "Property Type",
+    loadingTypes: "Loading types...",
+    maxPriceLabel: "Maximum Price (ETB)",
+    maxPricePlaceholder: "e.g., 500,000",
+    bedroomsLabel: "Bedrooms",
+    bedroomsPlaceholder: "3",
+    bathroomsLabel: "Bathrooms",
+    bathroomsPlaceholder: "2",
+    minSizeLabel: "Minimum Size (sq. m.)",
+    minSizePlaceholder: "e.g., 120",
+    additionalInfoLabel: "Additional Information",
+    additionalInfoPlaceholder: "Tell us about any other requirements...",
+    submitting: "Submitting...",
+    submitButton: "Submit Request",
+  },
+  am: {
+    pageTitle: "የንብረት ጥያቄ",
+    pageDescription: "የሚፈልጉትን ይንገሩን",
+    successMessage: "የንብረት ጥያቄዎ በተሳካ ሁኔታ ገብቷል!",
+    contactInfoTitle: "የእርስዎ የእውቂያ መረጃ",
+    fullNameLabel: "ሙሉ ስም",
+    fullNamePlaceholder: "ሙሉ ስም",
+    emailLabel: "የኢሜል አድራሻ",
+    emailPlaceholder: "you@example.com",
+    phoneLabel: "ስልክ ቁጥር",
+    phonePlaceholder: "+251 91 123 4567",
+    propertyDetailsTitle: "የንብረት ዝርዝሮች",
+    requestTypeLabel: "እኔ የምፈልገው...",
+    requestTypeRent: "መከራየት",
+    requestTypeBuy: "መግዛት",
+    propertyTypeLabel: "የንብረት ዓይነት",
+    loadingTypes: "ዓይነቶች እየተጫኑ ነው...",
+    maxPriceLabel: "ከፍተኛ ዋጋ (በብር)",
+    maxPricePlaceholder: "ለምሳሌ, 500,000",
+    bedroomsLabel: "መኝታ ክፍሎች",
+    bedroomsPlaceholder: "3",
+    bathroomsLabel: "መታጠቢያ ቤቶች",
+    bathroomsPlaceholder: "2",
+    minSizeLabel: "ዝቅተኛ ስፋት (በካሬ ሜትር)",
+    minSizePlaceholder: "ለምሳሌ, 120",
+    additionalInfoLabel: "ተጨማሪ መረጃ",
+    additionalInfoPlaceholder: "ስለሌሎች መስፈርቶች ይንገሩን...",
+    submitting: "በማስገባት ላይ...",
+    submitButton: "ጥያቄ አስገባ",
+  },
+} as const;
+
 type RequestFormValues = z.infer<typeof propertyRequestSchema>;
 
 function PropertyRequestPage() {
   const router = useRouter();
+  const params = useParams();
+  const lang = (params.lang || "en") as "en" | "am";
+  const t = translations[lang];
+
   const {
     register,
     handleSubmit,
@@ -55,7 +116,13 @@ function PropertyRequestPage() {
     () => {},
   ]);
 
-  const [action, , loading] = useAction(propertyRequest, [, () => {}]);
+  const [action, , loading] = useAction(propertyRequest, [
+    ,
+    (res) => {
+      addToast({ description: t.successMessage });
+      router.push(`/${lang}/home`);
+    },
+  ]);
 
   const onSubmit = (data: RequestFormValues) => {
     action(data);
@@ -68,14 +135,14 @@ function PropertyRequestPage() {
       <div className="relative h-48 w-full">
         <Image
           src={requestBg}
-          alt="Modern buildings"
+          alt={t.pageTitle}
           layout="fill"
           objectFit="cover"
           className="brightness-50"
         />
         <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center p-4">
-          <h1 className="text-4xl font-bold">Property Request</h1>
-          <p className="mt-2 text-lg">Let us know what you're looking for</p>
+          <h1 className="text-4xl font-bold">{t.pageTitle}</h1>
+          <p className="mt-2 text-lg">{t.pageDescription}</p>
         </div>
       </div>
 
@@ -87,7 +154,7 @@ function PropertyRequestPage() {
         >
           <div className="col-span-1 sm:col-span-2">
             <h2 className="text-xl font-semibold text-gray-800">
-              Your Contact Information
+              {t.contactInfoTitle}
             </h2>
           </div>
 
@@ -97,11 +164,11 @@ function PropertyRequestPage() {
               htmlFor="fullName"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Full Name
+              {t.fullNameLabel}
             </label>
             <Input
               id="fullName"
-              placeholder="John Doe"
+              placeholder={t.fullNamePlaceholder}
               {...register("fullName")}
             />
             {errors.fullName && (
@@ -117,12 +184,12 @@ function PropertyRequestPage() {
               htmlFor="email"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Email Address
+              {t.emailLabel}
             </label>
             <Input
               id="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder={t.emailPlaceholder}
               {...register("email")}
             />
             {errors.email && (
@@ -138,12 +205,12 @@ function PropertyRequestPage() {
               htmlFor="phone"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Phone Number
+              {t.phoneLabel}
             </label>
             <Input
               id="phone"
               type="tel"
-              placeholder="+1 (555) 000-0000"
+              placeholder={t.phonePlaceholder}
               {...register("phone")}
             />
             {errors.phone && (
@@ -155,7 +222,7 @@ function PropertyRequestPage() {
 
           <div className="col-span-1 sm:col-span-2 pt-4">
             <h2 className="text-xl font-semibold text-gray-800">
-              Property Details
+              {t.propertyDetailsTitle}
             </h2>
           </div>
 
@@ -166,7 +233,7 @@ function PropertyRequestPage() {
             render={({ field }) => (
               <div className="col-span-1 sm:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  I want to...
+                  {t.requestTypeLabel}
                 </label>
                 <div className="grid grid-cols-2 gap-4">
                   <div
@@ -184,7 +251,7 @@ function PropertyRequestPage() {
                           : "text-gray-500"
                       }`}
                     />
-                    <span className="font-semibold">Rent</span>
+                    <span className="font-semibold">{t.requestTypeRent}</span>
                   </div>
                   <div
                     onClick={() => field.onChange("buy")}
@@ -201,7 +268,7 @@ function PropertyRequestPage() {
                           : "text-gray-500"
                       }`}
                     />
-                    <span className="font-semibold">Buy</span>
+                    <span className="font-semibold">{t.requestTypeBuy}</span>
                   </div>
                 </div>
                 {errors.requestType && (
@@ -216,7 +283,7 @@ function PropertyRequestPage() {
           {/* Property Type */}
           <div className="col-span-1 sm:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Property Type
+              {t.propertyTypeLabel}
             </label>
             <Controller
               name="propertyType"
@@ -224,7 +291,7 @@ function PropertyRequestPage() {
               render={({ field }) => (
                 <div className="flex flex-wrap gap-3">
                   {isLoadingTypes ? (
-                    <p className="text-sm text-gray-500">Loading types...</p>
+                    <p className="text-sm text-gray-500">{t.loadingTypes}</p>
                   ) : (
                     propertyTypes?.map((type: any) => (
                       <button
@@ -257,12 +324,12 @@ function PropertyRequestPage() {
               htmlFor="maxPrice"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Maximum Price
+              {t.maxPriceLabel}
             </label>
             <Input
               id="maxPrice"
               type="number"
-              placeholder="e.g., 500,000"
+              placeholder={t.maxPricePlaceholder}
               {...register("maxPrice")}
             />
             {errors.maxPrice && (
@@ -280,7 +347,7 @@ function PropertyRequestPage() {
                 htmlFor="bedrooms"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Bedrooms
+                {t.bedroomsLabel}
               </label>
               <div className="flex items-center gap-2">
                 <Button
@@ -301,7 +368,7 @@ function PropertyRequestPage() {
                   <Input
                     id="bedrooms"
                     type="number"
-                    placeholder="3"
+                    placeholder={t.bedroomsPlaceholder}
                     min="0"
                     {...register("bedroom", { valueAsNumber: true })}
                     className="pl-10 text-center"
@@ -332,7 +399,7 @@ function PropertyRequestPage() {
                 htmlFor="bathrooms"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Bathrooms
+                {t.bathroomsLabel}
               </label>
               <div className="flex items-center gap-2">
                 <Button
@@ -353,7 +420,7 @@ function PropertyRequestPage() {
                   <Input
                     id="bathrooms"
                     type="number"
-                    placeholder="2"
+                    placeholder={t.bathroomsPlaceholder}
                     min="0"
                     {...register("bathroom", { valueAsNumber: true })}
                     className="pl-10 text-center"
@@ -384,12 +451,12 @@ function PropertyRequestPage() {
               htmlFor="minSize"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Minimum Size (sq. ft.)
+              {t.minSizeLabel}
             </label>
             <Input
               id="minSize"
               type="number"
-              placeholder="1,200"
+              placeholder={t.minSizePlaceholder}
               {...register("minimumSize")}
             />
             {errors.minimumSize && (
@@ -405,11 +472,11 @@ function PropertyRequestPage() {
               htmlFor="message"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Additional Information
+              {t.additionalInfoLabel}
             </label>
             <Textarea
               id="message"
-              placeholder="Tell us about any other requirements..."
+              placeholder={t.additionalInfoPlaceholder}
               {...register("message")}
               rows={4}
             />
@@ -425,11 +492,11 @@ function PropertyRequestPage() {
               type="submit"
               color="primary"
               size="lg"
-              // loading={loading}
+              disabled={loading}
               className="w-full sm:w-auto"
             >
-              <Send className="h-5 w-5" />
-              Submit Request
+              <Send className="h-5 w-5 mr-2" />
+              {loading ? t.submitting : t.submitButton}
             </Button>
           </div>
         </form>
