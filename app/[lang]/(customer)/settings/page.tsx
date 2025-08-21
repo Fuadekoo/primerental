@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 import { useRouter, useParams } from "next/navigation";
 import { Accordion, AccordionItem } from "@heroui/react";
+import { Select, SelectItem, Avatar } from "@heroui/react";
 import { Sun, Moon, Laptop, Globe, FileText, Shield, Info } from "lucide-react";
 
 // --- Theme Switcher Component ---
@@ -53,15 +54,16 @@ const ThemeSwitcher = () => {
   );
 };
 
-// --- Language Selector Component ---
+// ...existing code...
 const LanguageSelector = () => {
   const router = useRouter();
   const params = useParams();
-  const currentLang = params.lang;
+  const currentLang = Array.isArray(params.lang)
+    ? params.lang[0]
+    : (params.lang as string) || "en";
 
   useEffect(() => {
-    // On component mount, check if the language cookie exists.
-    // If not, set the default language to 'en'.
+    // Ensure default language cookie
     if (
       !document.cookie.split("; ").find((row) => row.startsWith("NEXT_LOCALE="))
     ) {
@@ -70,9 +72,9 @@ const LanguageSelector = () => {
     }
   }, []);
 
-  const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newLang = e.target.value;
-    // Set a cookie that expires in 1 year
+  const handleSelectChange = (keys: any) => {
+    const key = Array.from(keys as Set<React.Key>)[0];
+    const newLang = String(key || "en");
     document.cookie = `NEXT_LOCALE=${newLang}; path=/; max-age=31536000; samesite=lax`;
     router.push(`/${newLang}/settings`);
   };
@@ -85,14 +87,42 @@ const LanguageSelector = () => {
           Language
         </span>
       </div>
-      <select
-        value={currentLang}
-        onChange={handleLanguageChange}
-        className="w-full rounded-lg border-gray-300 bg-gray-50 py-2 pl-3 pr-8 text-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:w-auto"
+
+      <Select
+        label="Select language"
+        labelPlacement="outside-left"
+        className="w-full sm:w-64"
+        selectedKeys={new Set([currentLang])}
+        onSelectionChange={handleSelectChange}
+        disallowEmptySelection
+        variant="flat"
       >
-        <option value="en">English</option>
-        <option value="am">amharic</option>
-      </select>
+        <SelectItem
+          key="en"
+          startContent={
+            <Avatar
+              alt="English"
+              className="w-6 h-6"
+              src="https://flagcdn.com/gb.svg"
+            />
+          }
+        >
+          English
+        </SelectItem>
+
+        <SelectItem
+          key="am"
+          startContent={
+            <Avatar
+              alt="Amharic"
+              className="w-6 h-6"
+              src="https://flagcdn.com/et.svg"
+            />
+          }
+        >
+          Amharic
+        </SelectItem>
+      </Select>
     </div>
   );
 };
