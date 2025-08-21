@@ -7,16 +7,11 @@ import { z } from "zod";
 import useAction from "@/hooks/useActions";
 import { getPropertyTypes } from "@/actions/customer/propertyType";
 import { propertyRegister } from "@/actions/customer/registerProperty";
-import { propertyRegisterSchema } from "@/lib/zodSchema"; // Make sure this schema matches the new structure
+import { propertyRegisterSchema } from "@/lib/zodSchema";
 import { Input, Button, Textarea } from "@heroui/react";
 import { addToast } from "@heroui/toast";
 import { useRouter, useParams } from "next/navigation";
 import {
-  User,
-  Mail,
-  Phone,
-  MapPin,
-  CircleDollarSign,
   KeyRound,
   Building,
   Send,
@@ -24,25 +19,73 @@ import {
 import requestBg from "@/public/cover.jpg";
 import Loading from "@/components/loading";
 
-// This should be your new schema from /lib/zodSchema.ts
-// const propertyRegisterSchema = z.object({
-//   fullName: z.string().min(2).max(100),
-//   email: z.string().email(),
-//   phone: z.string().min(10).max(15),
-//   offer_type: z.enum(["rent", "buy"]),
-//   propertyTypeId: z.string().min(1, "Please select a property type"),
-//   price: z.coerce.number().min(0),
-//   location: z.string().min(2).max(100),
-//   realLocation: z.string().min(2).max(100),
-//   description: z.string().min(2).max(500),
-// });
+// Simple i18n copy
+const translations = {
+  en: {
+    pageTitle: "Register Your Property",
+    pageDescription: "Provide your details and we'll help you find the perfect property.",
+    successMessage: "Property request submitted successfully!",
+    contactInfoTitle: "Your Contact Information",
+    fullNameLabel: "Full Name",
+    fullNamePlaceholder: "John Doe",
+    emailLabel: "Email Address",
+    emailPlaceholder: "you@example.com",
+    phoneLabel: "Phone Number",
+    phonePlaceholder: "+251 91 123 4567",
+    propertyDetailsTitle: "Property Details",
+    registerTypeLabel: "I want to...",
+    registerTypeRent: "Rent",
+    registerTypeBuy: "Buy",
+    propertyTypeLabel: "Property Type",
+    loadingTypes: "Loading types...",
+    locationLabel: "General Location",
+    locationPlaceholder: "e.g., Addis Ababa, Bole",
+    realLocationLabel: "Specific Address / Real Location",
+    realLocationPlaceholder: "e.g., Edna Mall, 2nd Floor",
+    priceLabel: "Price (ETB)",
+    pricePlaceholder: "50,000",
+    descriptionLabel: "Description",
+    descriptionPlaceholder: "Describe your ideal property...",
+    submitting: "Submitting...",
+    submitButton: "Submit Request",
+  },
+  am: {
+    pageTitle: "ንብረትዎን ያስመዝግቡ",
+    pageDescription: "ዝርዝሮችዎን ያቅርቡ እና ትክክለኛውን ንብረት እንዲያገኙ እናግዝዎታለን።",
+    successMessage: "የንብረት ጥያቄ በተሳካ ሁኔታ ገብቷል!",
+    contactInfoTitle: "የእርስዎ የእውቂያ መረጃ",
+    fullNameLabel: "ሙሉ ስም",
+    fullNamePlaceholder: "ሙሉ ስም",
+    emailLabel: "የኢሜል አድራሻ",
+    emailPlaceholder: "you@example.com",
+    phoneLabel: "ስልክ ቁጥር",
+    phonePlaceholder: "+251 91 123 4567",
+    propertyDetailsTitle: "የንብረት ዝርዝሮች",
+    registerTypeLabel: "እኔ የምፈልገው...",
+    registerTypeRent: "መከራየት",
+    registerTypeBuy: "መግዛት",
+    propertyTypeLabel: "የንብረት ዓይነት",
+    loadingTypes: "ዓይነቶች እየተጫኑ ነው...",
+    locationLabel: "አጠቃላይ አካባቢ",
+    locationPlaceholder: "ምሳሌ: አዲስ አበባ, ቦሌ",
+    realLocationLabel: "ትክክለኛ አድራሻ / እውነተኛ አካባቢ",
+    realLocationPlaceholder: "ምሳሌ: ኤድና ሞል, 2ኛ ፎቅ",
+    priceLabel: "ዋጋ (በብር)",
+    pricePlaceholder: "50,000",
+    descriptionLabel: "መግለጫ",
+    descriptionPlaceholder: "የሚፈልጉትን ንብረት ይግለጹ...",
+    submitting: "በማስገባት ላይ...",
+    submitButton: "ጥያቄ አስገባ",
+  },
+} as const;
 
 type RegisterFormValues = z.infer<typeof propertyRegisterSchema>;
 
 function PropertyRegisterPage() {
   const router = useRouter();
-  const params = useParams(); // Get the current URL params
-  const lang = params.lang;
+  const params = useParams();
+  const lang = (params.lang || "en") as "en" | "am";
+  const t = translations[lang];
 
   const {
     register,
@@ -51,9 +94,6 @@ function PropertyRegisterPage() {
     formState: { errors },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(propertyRegisterSchema),
-    defaultValues: {
-      // offer_type: "rent",
-    },
   });
 
   const [propertyTypes, , isLoadingTypes] = useAction(getPropertyTypes, [
@@ -62,13 +102,12 @@ function PropertyRegisterPage() {
   ]);
 
   const [action, , loading] = useAction(propertyRegister, [
-    ,
-    (res) => {
+    undefined,
+    (res: any) => {
       addToast({
-        // type: "success",
-        description: "Property request submitted successfully!",
+        description: t.successMessage,
       });
-      router.push(`/${lang}/home`); // Redirect after success
+      router.push(`/${lang}/home`);
     },
   ]);
 
@@ -83,16 +122,14 @@ function PropertyRegisterPage() {
       <div className="relative h-48 w-full">
         <Image
           src={requestBg}
-          alt="Register your property"
+          alt={t.pageTitle}
           layout="fill"
           objectFit="cover"
           className="brightness-50"
         />
         <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center p-4">
-          <h1 className="text-4xl font-bold">Register Your Property</h1>
-          <p className="mt-2 text-lg">
-            Provide your details and we'll help you find the perfect property.
-          </p>
+          <h1 className="text-4xl font-bold">{t.pageTitle}</h1>
+          <p className="mt-2 text-lg">{t.pageDescription}</p>
         </div>
       </div>
 
@@ -105,7 +142,7 @@ function PropertyRegisterPage() {
           {/* --- Contact Information --- */}
           <div className="col-span-1 sm:col-span-2">
             <h2 className="text-xl font-semibold text-gray-800">
-              Your Contact Information
+              {t.contactInfoTitle}
             </h2>
           </div>
 
@@ -114,11 +151,11 @@ function PropertyRegisterPage() {
               htmlFor="fullName"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Full Name
+              {t.fullNameLabel}
             </label>
             <Input
               id="fullName"
-              placeholder="John Doe"
+              placeholder={t.fullNamePlaceholder}
               {...register("fullName")}
             />
             {errors.fullName && (
@@ -133,12 +170,12 @@ function PropertyRegisterPage() {
               htmlFor="email"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Email Address
+              {t.emailLabel}
             </label>
             <Input
               id="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder={t.emailPlaceholder}
               {...register("email")}
             />
             {errors.email && (
@@ -153,12 +190,12 @@ function PropertyRegisterPage() {
               htmlFor="phone"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Phone Number
+              {t.phoneLabel}
             </label>
             <Input
               id="phone"
               type="tel"
-              placeholder="+1 (555) 000-0000"
+              placeholder={t.phonePlaceholder}
               {...register("phone")}
             />
             {errors.phone && (
@@ -171,7 +208,7 @@ function PropertyRegisterPage() {
           {/* --- Property Details --- */}
           <div className="col-span-1 sm:col-span-2 pt-4">
             <h2 className="text-xl font-semibold text-gray-800">
-              Property Details
+              {t.propertyDetailsTitle}
             </h2>
           </div>
 
@@ -182,7 +219,7 @@ function PropertyRegisterPage() {
             render={({ field }) => (
               <div className="col-span-1 sm:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  I want to...
+                  {t.registerTypeLabel}
                 </label>
                 <div className="grid grid-cols-2 gap-4">
                   <div
@@ -200,7 +237,7 @@ function PropertyRegisterPage() {
                           : "text-gray-500"
                       }`}
                     />
-                    <span className="font-semibold">Rent</span>
+                    <span className="font-semibold">{t.registerTypeRent}</span>
                   </div>
                   <div
                     onClick={() => field.onChange("buy")}
@@ -217,7 +254,7 @@ function PropertyRegisterPage() {
                           : "text-gray-500"
                       }`}
                     />
-                    <span className="font-semibold">Buy</span>
+                    <span className="font-semibold">{t.registerTypeBuy}</span>
                   </div>
                 </div>
               </div>
@@ -227,7 +264,7 @@ function PropertyRegisterPage() {
           {/* --- Property Type --- */}
           <div className="col-span-1 sm:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Property Type
+              {t.propertyTypeLabel}
             </label>
             <Controller
               name="propertyType"
@@ -235,7 +272,7 @@ function PropertyRegisterPage() {
               render={({ field }) => (
                 <div className="flex flex-wrap gap-3">
                   {isLoadingTypes ? (
-                    <p className="text-sm text-gray-500">Loading types...</p>
+                    <p className="text-sm text-gray-500">{t.loadingTypes}</p>
                   ) : (
                     propertyTypes?.map((type: any) => (
                       <button
@@ -268,11 +305,11 @@ function PropertyRegisterPage() {
               htmlFor="location"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              General Location
+              {t.locationLabel}
             </label>
             <Input
               id="location"
-              placeholder="e.g., Addis Ababa, Bole"
+              placeholder={t.locationPlaceholder}
               {...register("location")}
             />
             {errors.location && (
@@ -286,11 +323,11 @@ function PropertyRegisterPage() {
               htmlFor="realLocation"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Specific Address / Real Location
+              {t.realLocationLabel}
             </label>
             <Input
               id="realLocation"
-              placeholder="e.g., Edna Mall, 2nd Floor"
+              placeholder={t.realLocationPlaceholder}
               {...register("realLocation")}
             />
             {errors.realLocation && (
@@ -305,12 +342,12 @@ function PropertyRegisterPage() {
               htmlFor="price"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Price (ETB)
+              {t.priceLabel}
             </label>
             <Input
               id="price"
               type="number"
-              placeholder="50,000"
+              placeholder={t.pricePlaceholder}
               {...register("price")}
             />
             {errors.price && (
@@ -325,11 +362,11 @@ function PropertyRegisterPage() {
               htmlFor="description"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Description
+              {t.descriptionLabel}
             </label>
             <Textarea
               id="description"
-              placeholder="Describe your ideal property..."
+              placeholder={t.descriptionPlaceholder}
               {...register("description")}
               rows={5}
             />
@@ -350,7 +387,7 @@ function PropertyRegisterPage() {
               disabled={loading}
             >
               <Send className="h-5 w-5 mr-2" />
-              {loading ? "Submitting..." : "Submit Request"}
+              {loading ? t.submitting : t.submitButton}
             </Button>
           </div>
         </form>
