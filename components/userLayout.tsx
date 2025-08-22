@@ -109,9 +109,9 @@ function Sidebar({
           />
           {sidebar && (
             <span className="font-bold text-lg text-primary whitespace-nowrap">
-              DIGITAL
+              PRIME
               <br />
-              MENU
+              RENTAL
             </span>
           )}
         </div>

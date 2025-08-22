@@ -2,54 +2,88 @@ import React from "react";
 import { guestAuth } from "@/actions/common/authentication";
 import UserLayout from "@/components/userLayout";
 import { redirect } from "next/navigation";
-import { Home, User, ShoppingBasket } from "lucide-react";
+import {
+  Home,
+  User,
+  ShoppingBasket,
+  Settings,
+  Heart,
+  Search,
+  Phone,
+  PlusSquare,
+} from "lucide-react";
 // import Footer from "@/components/footer";
 // import CustomerSocketHandler from "@/components/CustomerSocketHandler";
 import { SocketProvider } from "@/components/SocketProvider";
 import GuestSocketRegistrar from "@/components/GuestSocketRegistrar";
 import ChatPopup from "@/components/chat";
 
+const translations = {
+  en: {
+    home: "Home",
+    propertyRequest: "Property Request",
+    propertyRegister: "Register Property",
+    favorite: "Favorites",
+    savedSearch: "Saved Searches",
+    contact: "Contact Us",
+    settings: "Settings",
+  },
+  am: {
+    home: "መነሻ",
+    propertyRequest: "የንብረት ጥያቄ",
+    propertyRegister: "ንብረት ይመዝገቡ",
+    favorite: "ተወዳጆች",
+    savedSearch: "የተቀመጡ ፍለጋዎች",
+    contact: "እኛን ያግኙን",
+    settings: "ቅንብሮች",
+  },
+} as const;
+
 export default async function Layout({
   children,
+  params,
 }: {
   children: React.ReactNode;
+  params: { lang: "en" | "am" };
 }) {
+  const lang = params.lang || "en";
+  const t = translations[lang];
   // Define menu inside the function to access params
   const menu = [
     {
-      label: "Home",
+      label: t.home,
       url: "home",
       icon: <Home size={18} />,
     },
     {
-      label: "Property Request",
+      label: t.propertyRequest,
       url: "propertyRequest",
       icon: <ShoppingBasket size={18} />,
     },
     {
-      label: "Property Register",
+      label: t.propertyRegister,
       url: "propertyRegister",
-      icon: <ShoppingBasket size={18} />,
+      icon: <PlusSquare size={18} />,
     },
     {
-      label: "Favorite",
+      label: t.favorite,
       url: "favorite",
-      icon: <User size={18} />,
+      icon: <Heart size={18} />,
     },
     {
-      label: "Saved Search",
+      label: t.savedSearch,
       url: "savedSearch",
-      icon: <User size={18} />,
+      icon: <Search size={18} />,
     },
     {
-      label: "Contact",
+      label: t.contact,
       url: "contact",
-      icon: <User size={18} />,
+      icon: <Phone size={18} />,
     },
     {
-      label: "Settings",
+      label: t.settings,
       url: "settings",
-      icon: <User size={18} />,
+      icon: <Settings size={18} />,
     },
   ];
 

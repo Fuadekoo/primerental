@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { loginSchema } from "@/lib/zodSchema";
@@ -8,15 +8,117 @@ import { z } from "zod";
 import useAction from "@/hooks/useActions";
 import { authenticate } from "@/actions/common/authentication";
 import { Input } from "@heroui/input";
-import { Button } from "@heroui/react";
+import { Button, Select, SelectItem, Avatar } from "@heroui/react"; // Assuming Select components are from here
 import Loading from "@/components/loading";
 import { addToast } from "@heroui/toast";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Globe } from "lucide-react";
+
+// i18n translations
+const translations = {
+  en: {
+    tagline: "Your trusted platform for student housing.",
+    description:
+      "Find, manage, and secure student rentals with ease. Primerental connects students and landlords for a seamless rental experience.",
+    welcomeBack: "Welcome Back",
+    signInToContinue: "Please sign in to continue.",
+    emailOrPhoneLabel: "Email or Phone",
+    emailOrPhonePlaceholder: "you@example.com or 09...",
+    passwordLabel: "Password",
+    forgotPassword: "Forgot?",
+    signInButton: "Sign In",
+    noAccount: "No account?",
+    signUpLink: "Sign up",
+    loginSuccessToastTitle: "Login",
+    loginSuccessToastDescription: "Login successful!",
+    loginErrorToastTitle: "Login",
+    language: "Language",
+    selectLanguage: "Select Language",
+  },
+  am: {
+    tagline: "ለተማሪዎች መኖሪያ ቤት የእርስዎ ታማኝ መድረክ።",
+    description:
+      "የተማሪ ኪራዮችን በቀላሉ ያግኙ፣ ያስተዳድሩ እና ያስጠብቁ። ፕራይምሬንታል ተማሪዎችን እና አከራዮችን ያለምንም እንከን የለሽ የኪራይ ልምድ ያገናኛል።",
+    welcomeBack: "እንኳን ደህና መጡ",
+    signInToContinue: "ለመቀጠል እባክዎ ይግቡ።",
+    emailOrPhoneLabel: "ኢሜይል ወይም ስልክ",
+    emailOrPhonePlaceholder: "you@example.com ወይም 09...",
+    passwordLabel: "የይለፍ ቃል",
+    forgotPassword: "ረሱት?",
+    signInButton: "ግባ",
+    noAccount: "አካውንት የለዎትም?",
+    signUpLink: "ይመዝገቡ",
+    loginSuccessToastTitle: "መግቢያ",
+    loginSuccessToastDescription: "በተሳካ ሁኔታ ገብተዋል!",
+    loginErrorToastTitle: "መግቢያ",
+    language: "ቋንቋ",
+    selectLanguage: "ቋንቋ ይምረጡ",
+  },
+} as const;
+
+// --- Language Selector ---
+const LanguageSelector = () => {
+  const router = useRouter();
+  const params = useParams();
+  const currentLang = (params.lang || "en") as "en" | "am";
+
+  const handleSelectChange = (keys: any) => {
+    const key = Array.from(keys as Set<React.Key>)[0];
+    const newLang = String(key || "en");
+    document.cookie = `NEXT_LOCALE=${newLang}; path=/; max-age=31536000; samesite=lax`;
+    // Get current path and replace the language part
+    const currentPath = window.location.pathname;
+    const newPath = currentPath.replace(`/${currentLang}`, `/${newLang}`);
+    router.push(newPath);
+  };
+
+  return (
+    <div className="absolute top-4 right-4 z-20">
+      <Select
+        aria-label="Select Language"
+        className="w-40"
+        selectedKeys={new Set([currentLang])}
+        onSelectionChange={handleSelectChange}
+        disallowEmptySelection
+        variant="bordered"
+        size="sm"
+      >
+        <SelectItem
+          key="en"
+          startContent={
+            <Avatar
+              alt="English"
+              className="w-5 h-5"
+              src="https://flagcdn.com/gb.svg"
+            />
+          }
+        >
+          English
+        </SelectItem>
+        <SelectItem
+          key="am"
+          startContent={
+            <Avatar
+              alt="Amharic"
+              className="w-5 h-5"
+              src="https://flagcdn.com/et.svg"
+            />
+          }
+        >
+          አማርኛ
+        </SelectItem>
+      </Select>
+    </div>
+  );
+};
 
 function Page() {
   const router = useRouter();
+  const params = useParams();
+  const lang = (params.lang || "en") as "en" | "am";
+  const t = translations[lang];
+
   const {
     handleSubmit,
     register,
@@ -25,21 +127,23 @@ function Page() {
     resolver: zodResolver(loginSchema),
   });
 
-  // This block is kept exactly as you requested.
   const [, action, loading] = useAction(authenticate, [
     ,
     (response) => {
       if (response) {
-        addToast({ title: "Login", description: response.message });
-        router.push("/en/dashboard");
-      } else {
-        addToast({ title: "Login", description: "Login successful!" });
+        addToast({
+          title: t.loginErrorToastTitle,
+          description: response.message,
+        });
       }
+      // Always redirect to dashboard on attempt
+      router.push(`/${lang}/dashboard`);
     },
   ]);
 
   return (
     <div className="relative flex min-h-dvh w-full items-center justify-center overflow-hidden bg-gradient-to-br from-violet-50 via-white to-sky-50 p-4">
+      <LanguageSelector />
       {/* Decorative blobs */}
       <div className="pointer-events-none absolute -left-48 -top-48 h-[32rem] w-[32rem] rounded-full bg-violet-200/40 blur-3xl" />
       <div className="pointer-events-none absolute -right-48 -bottom-48 h-[32rem] w-[32rem] rounded-full bg-sky-200/40 blur-3xl" />
@@ -47,7 +151,7 @@ function Page() {
       <div className="relative w-full max-w-4xl">
         <div className="grid overflow-hidden rounded-2xl border border-white/60 bg-white/60 shadow-xl backdrop-blur-lg lg:grid-cols-2">
           {/* Visual / Messaging Panel */}
-            <div className="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-violet-300 to-sky-300 p-8 lg:flex">
+          <div className="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-violet-300 to-sky-300 p-8 lg:flex">
             <Image
               src="/logo.png"
               alt="Primerental Illustration"
@@ -58,38 +162,36 @@ function Page() {
             />
             <div className="relative z-10">
               <div className="flex items-center gap-3">
-              <Image
-                src="/logo.png"
-                alt="Primerental Logo"
-                width={40}
-                height={40}
-                className="rounded-lg"
-              />
-              <span className="text-lg font-bold text-white">
-                PRIMERENTAL
-              </span>
+                <Image
+                  src="/logo.png"
+                  alt="Primerental Logo"
+                  width={40}
+                  height={40}
+                  className="rounded-lg"
+                />
+                <span className="text-lg font-bold text-white">
+                  PRIMERENTAL
+                </span>
               </div>
               <h2 className="mt-8 text-3xl font-extrabold leading-tight text-white">
-              Your trusted platform for student housing.
+                {t.tagline}
               </h2>
-              <p className="mt-3 text-white/80">
-              Find, manage, and secure student rentals with ease. Primerental connects students and landlords for a seamless rental experience.
-              </p>
+              <p className="mt-3 text-white/80">{t.description}</p>
             </div>
             <div className="relative z-10 mt-8 text-xs text-white/60">
               © {new Date().getFullYear()} PRIMERENTAL
             </div>
-            </div>
+          </div>
 
           {/* Form Panel */}
           <div className="flex flex-col justify-center p-8 sm:p-12">
             <div className="w-full">
               <div className="mb-6 text-center lg:text-left">
                 <h1 className="text-2xl font-bold text-gray-900">
-                  Welcome Back
+                  {t.welcomeBack}
                 </h1>
                 <p className="mt-1 text-sm text-gray-600">
-                  Please sign in to continue.
+                  {t.signInToContinue}
                 </p>
               </div>
 
@@ -102,13 +204,13 @@ function Page() {
                     htmlFor="email"
                     className="mb-1.5 block text-sm font-medium text-gray-700"
                   >
-                    Email or Phone
+                    {t.emailOrPhoneLabel}
                   </label>
                   <Input
                     id="email"
                     type="text"
                     variant="bordered"
-                    placeholder="you@example.com or 09..."
+                    placeholder={t.emailOrPhonePlaceholder}
                     {...register("email")}
                     className="w-full"
                   />
@@ -125,13 +227,13 @@ function Page() {
                       htmlFor="password"
                       className="text-sm font-medium text-gray-700"
                     >
-                      Password
+                      {t.passwordLabel}
                     </label>
                     <Link
                       href="#"
                       className="text-xs font-medium text-violet-600 hover:underline"
                     >
-                      Forgot?
+                      {t.forgotPassword}
                     </Link>
                   </div>
                   <Input
@@ -160,18 +262,18 @@ function Page() {
                     <Loading />
                   ) : (
                     <>
-                      Sign In <ArrowRight className="ml-2 h-4 w-4" />
+                      {t.signInButton} <ArrowRight className="ml-2 h-4 w-4" />
                     </>
                   )}
                 </Button>
 
                 <div className="text-center text-sm text-gray-500">
-                  No account?{" "}
+                  {t.noAccount}{" "}
                   <Link
-                    href="/en/signup"
+                    href={`/${lang}/signup`}
                     className="font-medium text-violet-600 hover:underline"
                   >
-                    Sign up
+                    {t.signUpLink}
                   </Link>
                 </div>
               </form>

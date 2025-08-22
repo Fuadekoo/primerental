@@ -1,9 +1,68 @@
+"use client";
 import React from "react";
 import Image from "next/image";
 import { MapPin, Phone, Mail, Send } from "lucide-react";
 import contactBg from "@/public/cover.jpg"; // Using the same background for consistency
+import { useParams } from "next/navigation";
+
+// Simple i18n copy
+const translations = {
+  en: {
+    pageTitle: "Get In Touch",
+    pageDescription:
+      "Have questions or ready to start your property journey? We're here to help.",
+    contactDetailsTitle: "Contact Details",
+    contactDetailsDescription:
+      "Reach out to us through any of the following methods.",
+    addressTitle: "Our Address",
+    addressLine1: "Bole, Addis Ababa",
+    phoneTitle: "Call Us",
+    phoneNumber: "+251 93 357 1691",
+    emailTitle: "Email Us",
+    emailAddress: "contact@primerental.com",
+    hoursTitle: "Business Hours",
+    hoursWeekdays: "Monday - Friday: 9am to 6pm",
+    hoursSaturday: "Saturday: 10am to 4pm",
+    hoursSunday: "Sunday: Closed",
+    formTitle: "Send Us a Message",
+    firstNameLabel: "First name",
+    lastNameLabel: "Last name",
+    emailLabel: "Email",
+    phoneLabel: "Phone Number",
+    messageLabel: "Message",
+    submitButton: "Send Message",
+  },
+  am: {
+    pageTitle: "እኛን ያግኙን",
+    pageDescription:
+      "ጥያቄዎች አሉዎት ወይስ የንብረት ጉዞዎን ለመጀመር ዝግጁ ነዎት? እኛ ለመርዳት እዚህ ነን።",
+    contactDetailsTitle: "የእውቂያ ዝርዝሮች",
+    contactDetailsDescription: "በሚከተሉት መንገዶች ያግኙን።",
+    addressTitle: "አድራሻችን",
+    addressLine1: "ቦሌ, አዲስ አበባ",
+    phoneTitle: "ይደውሉልን",
+    phoneNumber: "+251 93 357 1691",
+    emailTitle: "ኢሜይል ይላኩልን",
+    emailAddress: "contact@primerental.com",
+    hoursTitle: "የስራ ሰዓታት",
+    hoursWeekdays: "ሰኞ - አርብ: ከጠዋቱ 3 ሰዓት እስከ ምሽቱ 12 ሰዓት",
+    hoursSaturday: "ቅዳሜ: ከጠዋቱ 4 ሰዓት እስከ ምሽቱ 10 ሰዓት",
+    hoursSunday: "እሁድ: ዝግ ነው",
+    formTitle: "መልዕክት ይላኩልን",
+    firstNameLabel: "የመጀመሪያ ስም",
+    lastNameLabel: "የአባት ስም",
+    emailLabel: "ኢሜይል",
+    phoneLabel: "ስልክ ቁጥር",
+    messageLabel: "መልዕክት",
+    submitButton: "መልዕክት ላክ",
+  },
+} as const;
 
 function Page() {
+  const params = useParams();
+  const lang = (params.lang || "en") as "en" | "am";
+  const t = translations[lang];
+
   return (
     <div className="bg-gray-50">
       {/* --- Header --- */}
@@ -16,11 +75,8 @@ function Page() {
           className="brightness-50"
         />
         <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center p-4">
-          <h1 className="text-4xl font-bold">Get In Touch</h1>
-          <p className="mt-2 text-lg max-w-2xl">
-            Have questions or ready to start your property journey? We're here
-            to help.
-          </p>
+          <h1 className="text-4xl font-bold">{t.pageTitle}</h1>
+          <p className="mt-2 text-lg max-w-2xl">{t.pageDescription}</p>
         </div>
       </div>
 
@@ -30,21 +86,19 @@ function Page() {
           {/* --- Contact Information --- */}
           <div className="lg:col-span-1">
             <h2 className="text-2xl font-bold text-gray-900">
-              Contact Details
+              {t.contactDetailsTitle}
             </h2>
-            <p className="mt-2 text-gray-600">
-              Reach out to us through any of the following methods.
-            </p>
+            <p className="mt-2 text-gray-600">{t.contactDetailsDescription}</p>
             <ul className="mt-6 space-y-4">
               <li className="flex items-start">
                 <div className="flex-shrink-0">
                   <MapPin className="h-6 w-6 text-blue-600" />
                 </div>
                 <div className="ml-3">
-                  <h3 className="font-medium text-gray-900">Our Address</h3>
-                  <p className="text-gray-600">
-                    123 Prime Avenue, Real Estate City, RC 10001
-                  </p>
+                  <h3 className="font-medium text-gray-900">
+                    {t.addressTitle}
+                  </h3>
+                  <p className="text-gray-600">{t.addressLine1}</p>
                 </div>
               </li>
               <li className="flex items-start">
@@ -52,8 +106,8 @@ function Page() {
                   <Phone className="h-6 w-6 text-blue-600" />
                 </div>
                 <div className="ml-3">
-                  <h3 className="font-medium text-gray-900">Call Us</h3>
-                  <p className="text-gray-600">+1 (555) 123-4567</p>
+                  <h3 className="font-medium text-gray-900">{t.phoneTitle}</h3>
+                  <p className="text-gray-600">{t.phoneNumber}</p>
                 </div>
               </li>
               <li className="flex items-start">
@@ -61,16 +115,16 @@ function Page() {
                   <Mail className="h-6 w-6 text-blue-600" />
                 </div>
                 <div className="ml-3">
-                  <h3 className="font-medium text-gray-900">Email Us</h3>
-                  <p className="text-gray-600">contact@primerental.com</p>
+                  <h3 className="font-medium text-gray-900">{t.emailTitle}</h3>
+                  <p className="text-gray-600">{t.emailAddress}</p>
                 </div>
               </li>
             </ul>
             <div className="mt-8">
-              <h3 className="font-medium text-gray-900">Business Hours</h3>
-              <p className="mt-2 text-gray-600">Monday - Friday: 9am to 6pm</p>
-              <p className="text-gray-600">Saturday: 10am to 4pm</p>
-              <p className="text-gray-600">Sunday: Closed</p>
+              <h3 className="font-medium text-gray-900">{t.hoursTitle}</h3>
+              <p className="mt-2 text-gray-600">{t.hoursWeekdays}</p>
+              <p className="text-gray-600">{t.hoursSaturday}</p>
+              <p className="text-gray-600">{t.hoursSunday}</p>
             </div>
           </div>
 
@@ -78,7 +132,7 @@ function Page() {
           <div className="lg:col-span-2">
             <div className="rounded-2xl bg-white p-8 shadow-lg">
               <h2 className="text-2xl font-bold text-gray-900">
-                Send Us a Message
+                {t.formTitle}
               </h2>
               <form
                 action="#"
@@ -90,7 +144,7 @@ function Page() {
                     htmlFor="first-name"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    First name
+                    {t.firstNameLabel}
                   </label>
                   <div className="mt-1">
                     <input
@@ -107,7 +161,7 @@ function Page() {
                     htmlFor="last-name"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Last name
+                    {t.lastNameLabel}
                   </label>
                   <div className="mt-1">
                     <input
@@ -124,7 +178,7 @@ function Page() {
                     htmlFor="email"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Email
+                    {t.emailLabel}
                   </label>
                   <div className="mt-1">
                     <input
@@ -141,7 +195,7 @@ function Page() {
                     htmlFor="phone"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Phone Number
+                    {t.phoneLabel}
                   </label>
                   <div className="mt-1">
                     <input
@@ -158,7 +212,7 @@ function Page() {
                     htmlFor="message"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Message
+                    {t.messageLabel}
                   </label>
                   <div className="mt-1">
                     <textarea
@@ -176,7 +230,7 @@ function Page() {
                     className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   >
                     <Send className="mr-2 h-5 w-5" />
-                    Send Message
+                    {t.submitButton}
                   </button>
                 </div>
               </form>

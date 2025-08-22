@@ -33,3 +33,12 @@ export const propertyRegisterSchema = z.object({
   description: z.string().min(2).max(500),
 });
 export type PropertyRegisterType = z.infer<typeof propertyRegisterSchema>;
+
+export const propertyTypeSchema = z.object({
+  name: z.string().min(2).max(100),
+  photo: z.string().min(2).max(500),
+  description: z.string().min(2).max(500).optional(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+export type PropertyType = z.infer<typeof propertyTypeSchema>;
