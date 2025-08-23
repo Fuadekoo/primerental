@@ -13,7 +13,8 @@ import { addToast } from "@heroui/toast";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus, Trash2 } from "lucide-react";
+import CustomAlert from "@/components/custom-alert";
 
 // Zod schema for form validation
 const homeTypeSchema = z.object({
@@ -23,7 +24,8 @@ const homeTypeSchema = z.object({
 
 // Type definitions
 interface HomeTypeItem {
-  id: string | number;
+  id: string;
+  photo: string;
   key?: string | number;
   name: string;
   description?: string;
@@ -39,13 +41,15 @@ interface ColumnDef {
 function HomeTypePage() {
   const [showModal, setShowModal] = useState(false);
   const [editHomeType, setEditHomeType] = useState<HomeTypeItem | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const {
     handleSubmit,
     register,
     reset,
     setValue,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<z.infer<typeof homeTypeSchema>>({
     resolver: zodResolver(homeTypeSchema),
     mode: "onChange",
@@ -55,6 +59,28 @@ function HomeTypePage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
+  const handleActionCompletion = (
+    response: unknown,
+    successMessage: string,
+    errorMessage: string
+  ) => {
+    if (response) {
+      addToast({ title: "Success", description: successMessage });
+      refreshPropertyTypes();
+      if (showModal) {
+        setShowModal(false);
+        reset();
+        setEditHomeType(null);
+      }
+    } else {
+      addToast({
+        title: "Error",
+        description: errorMessage,
+        // type: "error",
+      });
+    }
+  };
+
   const [propertyTypeData, refreshPropertyTypes, isLoadingData] = useAction(
     getPropertyType,
     [true, () => {}],
@@ -63,29 +89,48 @@ function HomeTypePage() {
     pageSize
   );
 
-  const [executeDelete, isLoadingDelete] = useAction(deletePropertyType, [
+  const [, executeDelete, isLoadingDelete] = useAction(deletePropertyType, [
     ,
-    () => {},
+    (res) =>
+      handleActionCompletion(
+        res,
+        "Home type deleted successfully.",
+        "Failed to delete home type."
+      ),
   ]);
 
-  const [executeCreate, isLoadingCreate] = useAction(createPropertyType, [
+  const [, executeCreate, isLoadingCreate] = useAction(createPropertyType, [
     ,
-    () => {},
+    (res) =>
+      handleActionCompletion(
+        res,
+        "Home type created successfully.",
+        "Failed to create home type."
+      ),
   ]);
 
-  const [executeUpdate, isLoadingUpdate] = useAction(updatePropertyType, [
+  const [, executeUpdate, isLoadingUpdate] = useAction(updatePropertyType, [
     ,
-    () => {},
+    (res) =>
+      handleActionCompletion(
+        res,
+        "Home type updated successfully.",
+        "Failed to update home type."
+      ),
   ]);
 
-      setShowModal(false);
-      reset();
-      setEditHomeType(null);
-      refreshPropertyTypes();
+  const handleDelete = (id: string) => {
+    setDeleteId(id);
+  };
 
-  const handleDelete = async (id: string | number) => {
-    if (window.confirm("Are you sure you want to delete this home type?")) {
-       executeDelete(id);
+  const handleConfirmDelete = async () => {
+    if (!deleteId) return;
+    try {
+      setPendingDeleteId(deleteId);
+      await executeDelete(deleteId);
+      setDeleteId(null);
+    } finally {
+      setPendingDeleteId(null);
     }
   };
 
@@ -116,7 +161,7 @@ function HomeTypePage() {
     }
   };
 
-  const rows = (homeTypeData?.data || []).map((item) => ({
+  const rows = (propertyTypeData?.data || []).map((item) => ({
     ...item,
     key: item.id,
   }));
@@ -131,6 +176,7 @@ function HomeTypePage() {
       },
     },
     { key: "name", label: "Name" },
+    { key: "photo", label: "photo" },
     { key: "description", label: "Description" },
     {
       key: "createdAt",
@@ -155,27 +201,30 @@ function HomeTypePage() {
             color="danger"
             variant="flat"
             onPress={() => handleDelete(item.id)}
-            isLoading={isLoadingDelete}
+            isLoading={pendingDeleteId === item.id && isLoadingDelete}
           >
-            Delete
+            <Trash2 size={16} />
           </Button>
         </div>
       ),
     },
   ];
 
+  const disableSubmit = isLoadingCreate || isLoadingUpdate || isSubmitting;
+
   return (
     <div className="p-4 md:p-6">
       <header className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold">Manage Home Types</h1>
         <Button color="primary" onPress={handleAdd}>
+          <Plus size={20} className="mr-2" />
           Add Home Type
         </Button>
       </header>
       <CustomTable
         columns={columns}
         rows={rows}
-        totalRows={homeTypeData?.pagination?.totalRecords || 0}
+        totalRows={propertyTypeData?.pagination?.totalRecords || 0}
         page={page}
         pageSize={pageSize}
         onPageChange={setPage}
@@ -204,6 +253,7 @@ function HomeTypePage() {
                     className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
                     placeholder="e.g., Apartment, Villa"
                     {...register("name")}
+                    disabled={disableSubmit}
                   />
                   {errors.name && (
                     <span className="text-red-500 text-xs">
@@ -224,6 +274,7 @@ function HomeTypePage() {
                     placeholder="A short description of the home type"
                     {...register("description")}
                     rows={3}
+                    disabled={disableSubmit}
                   />
                 </div>
               </div>
@@ -232,15 +283,17 @@ function HomeTypePage() {
                   variant="ghost"
                   type="button"
                   onPress={() => setShowModal(false)}
+                  disabled={disableSubmit}
                 >
                   Cancel
                 </Button>
                 <Button
                   color="primary"
                   type="submit"
-                  isLoading={isLoadingCreate || isLoadingUpdate}
+                  isLoading={disableSubmit}
+                  disabled={disableSubmit}
                 >
-                  {isLoadingCreate || isLoadingUpdate ? (
+                  {disableSubmit ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
                   ) : editHomeType ? (
                     "Update"
@@ -250,6 +303,22 @@ function HomeTypePage() {
                 </Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {deleteId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-sm">
+            <CustomAlert
+              color="danger"
+              title="Delete Home Type?"
+              description="Are you sure you want to delete this home type? This action cannot be undone."
+              confirmText="Delete"
+              cancelText="Cancel"
+              onConfirm={handleConfirmDelete}
+              onCancel={() => setDeleteId(null)}
+              isConfirmLoading={pendingDeleteId === deleteId && isLoadingDelete}
+            />
           </div>
         </div>
       )}

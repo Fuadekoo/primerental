@@ -229,12 +229,6 @@ function Page() {
                     >
                       {t.passwordLabel}
                     </label>
-                    <Link
-                      href="#"
-                      className="text-xs font-medium text-violet-600 hover:underline"
-                    >
-                      {t.forgotPassword}
-                    </Link>
                   </div>
                   <Input
                     id="password"
@@ -266,16 +260,6 @@ function Page() {
                     </>
                   )}
                 </Button>
-
-                <div className="text-center text-sm text-gray-500">
-                  {t.noAccount}{" "}
-                  <Link
-                    href={`/${lang}/signup`}
-                    className="font-medium text-violet-600 hover:underline"
-                  >
-                    {t.signUpLink}
-                  </Link>
-                </div>
               </form>
             </div>
           </div>

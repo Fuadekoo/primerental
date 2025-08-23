@@ -1,4 +1,5 @@
 import { Bath } from "lucide-react";
+import { off } from "process";
 import { z } from "zod";
 
 export const loginSchema = z.object({
@@ -42,3 +43,24 @@ export const propertyTypeSchema = z.object({
   updatedAt: z.date(),
 });
 export type PropertyType = z.infer<typeof propertyTypeSchema>;
+
+export const propertySchema = z.object({
+  title: z.string().min(2).max(100),
+  description: z.string().min(2).max(500),
+  offerType: z.enum(["RENT", "SALE"]),
+  propertyTypeId: z.string().uuid(),
+  location: z.string().min(2).max(100),
+  quantity: z.string().min(1).max(100),
+  price: z.coerce.number().min(0),
+  discount: z.coerce.number().min(0),
+  currency: z.string().min(1).max(10),
+  images: z.array(z.string().min(2).max(500)),
+  youtubeLink: z.string().url().optional(),
+  kitchen: z.coerce.number().min(0),
+  bedroom: z.coerce.number().min(0),
+  squareMeter: z.coerce.number().min(0),
+  parking: z.coerce.number().min(0),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+export type Property = z.infer<typeof propertySchema>;
