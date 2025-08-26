@@ -8,7 +8,7 @@ import {
   TableRow,
   TableCell,
   getKeyValue,
-} from "@heroui/react"; // <-- Make sure this is the correct package name. If not, replace with the correct one.
+} from "@heroui/react";
 import { X, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 
@@ -20,9 +20,9 @@ export interface ColumnDef<T> {
 
 interface CustomTableProps {
   rows: Array<
-    Record<string, string> & { key?: string | number; id?: string | number }
+    Record<string, any> & { key?: string | number; id?: string | number }
   >;
-  columns: Array<ColumnDef<Record<string, string>>>;
+  columns: Array<ColumnDef<Record<string, any>>>;
   totalRows: number;
   page: number;
   pageSize: number;
@@ -33,7 +33,21 @@ interface CustomTableProps {
   isLoading?: boolean;
 }
 
-const PAGE_SIZES = [1, 2, 50, 100];
+interface ZoomedImagesState {
+  urls: string[];
+  currentIndex: number;
+}
+
+const PAGE_SIZES = [10, 25, 50, 100];
+
+// Helper to format image URLs
+const formatImageUrl = (url: string | null | undefined): string => {
+  if (!url) return "/placeholder.png";
+  // If already an absolute URL or starts with /, use as is
+  if (url.startsWith("http") || url.startsWith("/")) return url;
+  // Otherwise, fetch from local API endpoint
+  return `/api/filedata/${encodeURIComponent(url)}`;
+};
 
 function CustomTable({
   rows,
@@ -48,14 +62,37 @@ function CustomTable({
   isLoading = false,
 }: CustomTableProps) {
   const totalPages = Math.max(Math.ceil(totalRows / pageSize), 1);
-  const [zoomedImageUrl, setZoomedImageUrl] = useState<string | null>(null);
+  const [zoomedImages, setZoomedImages] = useState<ZoomedImagesState | null>(
+    null
+  );
 
-  const handleImageClick = (imageUrl: string) => {
-    setZoomedImageUrl(imageUrl);
+  const handleImageClick = (imageUrls: string[], startIndex: number = 0) => {
+    if (imageUrls && imageUrls.length > 0) {
+      setZoomedImages({ urls: imageUrls, currentIndex: startIndex });
+    }
   };
 
   const handleCloseZoom = () => {
-    setZoomedImageUrl(null);
+    setZoomedImages(null);
+  };
+
+  const handleNextImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setZoomedImages((prev) => {
+      if (!prev) return null;
+      const nextIndex = (prev.currentIndex + 1) % prev.urls.length;
+      return { ...prev, currentIndex: nextIndex };
+    });
+  };
+
+  const handlePrevImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setZoomedImages((prev) => {
+      if (!prev) return null;
+      const prevIndex =
+        (prev.currentIndex - 1 + prev.urls.length) % prev.urls.length;
+      return { ...prev, currentIndex: prevIndex };
+    });
   };
 
   return (
@@ -120,46 +157,37 @@ function CustomTable({
               >
                 {(columnKey) => {
                   const column = columns.find((col) => col.key === columnKey);
-                  return (
-                    <TableCell className="p-3 text-sm text-gray-700 whitespace-nowrap">
-                      {column && column.renderCell ? (
-                        column.renderCell(item)
-                      ) : columnKey === "photo" &&
-                        typeof item.photo === "string" &&
-                        item.photo ? (
+                  const cellValue = getKeyValue(item, columnKey);
+
+                  // Custom rendering for 'images' or 'photos' key
+                  if (
+                    (columnKey === "images" || columnKey === "photos") &&
+                    Array.isArray(cellValue) &&
+                    cellValue.length > 0
+                  ) {
+                    return (
+                      <TableCell className="p-3 text-sm text-gray-700 whitespace-nowrap">
                         <Image
-                          src={`/api/filedata/${item.photo}`}
-                          alt={`Proof for ${item.id || item.key || "entry"}`}
-                          width={300}
-                          height={300}
-                          style={{
-                            width: "100px",
-                            height: "auto",
-                            objectFit: "cover",
-                            cursor: "pointer",
-                          }}
-                          onClick={() =>
-                            handleImageClick(`/api/filedata/${item.photo}`)
-                          }
+                          src={formatImageUrl(cellValue[0])}
+                          alt={`Preview for ${item.id || item.key}`}
+                          width={100}
+                          height={60}
+                          className="object-cover rounded-md cursor-pointer h-16 w-24"
+                          onClick={() => handleImageClick(cellValue, 0)}
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
                             target.style.display = "none";
-                            const parent = target.parentElement;
-                            if (
-                              parent &&
-                              !parent.querySelector(".no-preview-text")
-                            ) {
-                              const errorText = document.createElement("span");
-                              errorText.textContent = "No preview";
-                              errorText.className =
-                                "text-xs text-gray-400 no-preview-text";
-                              parent.appendChild(errorText);
-                            }
                           }}
                         />
-                      ) : (
-                        getKeyValue(item, columnKey)
-                      )}
+                      </TableCell>
+                    );
+                  }
+
+                  return (
+                    <TableCell className="p-3 text-sm text-gray-700 whitespace-nowrap">
+                      {column && column.renderCell
+                        ? column.renderCell(item)
+                        : cellValue}
                     </TableCell>
                   );
                 }}
@@ -234,31 +262,70 @@ function CustomTable({
         )}
       </div>
 
-      {/* Image Zoom Modal */}
-      {zoomedImageUrl && (
+      {/* Image Viewer Modal */}
+      {zoomedImages && (
         <div
-          className="fixed inset-0 bg-white/30 backdrop-blur-md flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4"
           onClick={handleCloseZoom}
         >
           <div
-            className="relative bg-white p-2 shadow-xl max-w-[95vw] max-h-[95vh] flex items-center justify-center"
+            className="relative w-full h-full flex items-center justify-center"
             onClick={(e) => e.stopPropagation()}
           >
-            <Image
-              src={zoomedImageUrl}
-              alt="Zoomed proof"
-              className="block max-w-[98vw] max-h-[90vh] object-contain"
-              width={900}
-              height={600}
-              style={{ width: "900px", height: "600px" }}
-            />
+            {/* Previous Button */}
+            {zoomedImages.urls.length > 1 && (
+              <button
+                onClick={handlePrevImage}
+                className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-gray-800/50 text-white p-2 rounded-full hover:bg-gray-800/80 focus:outline-none z-10"
+                aria-label="Previous image"
+              >
+                <ChevronLeft size={24} />
+              </button>
+            )}
+
+            {/* Image Container */}
+            <div className="relative w-auto h-auto max-w-[90vw] max-h-[90vh]">
+              <Image
+                key={zoomedImages.urls[zoomedImages.currentIndex]}
+                src={formatImageUrl(
+                  zoomedImages.urls[zoomedImages.currentIndex]
+                )}
+                alt={`Zoomed view ${zoomedImages.currentIndex + 1} of ${
+                  zoomedImages.urls.length
+                }`}
+                className="block object-contain max-w-full max-h-full rounded-lg"
+                layout="intrinsic"
+                width={1200}
+                height={800}
+              />
+            </div>
+
+            {/* Next Button */}
+            {zoomedImages.urls.length > 1 && (
+              <button
+                onClick={handleNextImage}
+                className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-gray-800/50 text-white p-2 rounded-full hover:bg-gray-800/80 focus:outline-none z-10"
+                aria-label="Next image"
+              >
+                <ChevronRight size={24} />
+              </button>
+            )}
+
+            {/* Close Button */}
             <button
               onClick={handleCloseZoom}
-              className="absolute top-2 right-2 bg-gray-800 text-white p-1.5 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-white"
+              className="absolute top-2 right-2 bg-gray-800/50 text-white p-1.5 rounded-full hover:bg-gray-800/80 focus:outline-none"
               aria-label="Close zoomed image"
             >
               <X size={20} />
             </button>
+
+            {/* Counter */}
+            {zoomedImages.urls.length > 1 && (
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white text-xs px-2 py-1 rounded-full">
+                {zoomedImages.currentIndex + 1} / {zoomedImages.urls.length}
+              </div>
+            )}
           </div>
         </div>
       )}

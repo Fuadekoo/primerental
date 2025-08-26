@@ -37,10 +37,8 @@ export type PropertyRegisterType = z.infer<typeof propertyRegisterSchema>;
 
 export const propertyTypeSchema = z.object({
   name: z.string().min(2).max(100),
-  photo: z.string().min(2).max(500),
+  photo: z.string(),
   description: z.string().min(2).max(500).optional(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
 });
 export type PropertyType = z.infer<typeof propertyTypeSchema>;
 
@@ -50,7 +48,7 @@ export const propertySchema = z.object({
   offerType: z.enum(["RENT", "SALE"]),
   propertyTypeId: z.string().uuid(),
   location: z.string().min(2).max(100),
-  quantity: z.string().min(1).max(100),
+  quantity: z.coerce.number().min(0),
   price: z.coerce.number().min(0),
   discount: z.coerce.number().min(0),
   currency: z.string().min(1).max(10),

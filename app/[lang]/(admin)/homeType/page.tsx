@@ -8,19 +8,22 @@ import {
   updatePropertyType,
 } from "@/actions/admin/propertyType";
 import CustomTable from "@/components/custom-table";
-import { Button } from "@heroui/react";
+import { Button, Input } from "@heroui/react";
 import { addToast } from "@heroui/toast";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import CustomAlert from "@/components/custom-alert";
+import { propertyTypeSchema } from "@/lib/zodSchema";
+import Image from "next/image";
 
-// Zod schema for form validation
-const homeTypeSchema = z.object({
-  name: z.string().min(3, "Name must be at least 3 characters."),
-  description: z.string().optional(),
-});
+// Helper to format image URLs
+const formatImageUrl = (url: string | null | undefined): string => {
+  if (!url) return "/placeholder.png";
+  if (url.startsWith("http") || url.startsWith("/")) return url;
+  return `/${url}`;
+};
 
 // Type definitions
 interface HomeTypeItem {
@@ -43,6 +46,9 @@ function HomeTypePage() {
   const [editHomeType, setEditHomeType] = useState<HomeTypeItem | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
+  const [isConvertingImage, setIsConvertingImage] = useState(false); // Loading state
+  const [photoValue, setPhotoValue] = useState<string | null>(null); // Base64 or URL
 
   const {
     handleSubmit,
@@ -50,9 +56,10 @@ function HomeTypePage() {
     reset,
     setValue,
     formState: { errors, isSubmitting },
-  } = useForm<z.infer<typeof homeTypeSchema>>({
-    resolver: zodResolver(homeTypeSchema),
+  } = useForm<z.infer<typeof propertyTypeSchema>>({
+    resolver: zodResolver(propertyTypeSchema),
     mode: "onChange",
+    defaultValues: {},
   });
 
   const [search, setSearch] = useState("");
@@ -71,12 +78,12 @@ function HomeTypePage() {
         setShowModal(false);
         reset();
         setEditHomeType(null);
+        setSelectedPhoto(null);
       }
     } else {
       addToast({
         title: "Error",
         description: errorMessage,
-        // type: "error",
       });
     }
   };
@@ -138,26 +145,76 @@ function HomeTypePage() {
     setEditHomeType(item);
     setValue("name", item.name);
     setValue("description", item.description || "");
+    setSelectedPhoto(null); // reset photo selection
     setShowModal(true);
   };
 
   const handleAdd = () => {
     setEditHomeType(null);
     reset();
+    setSelectedPhoto(null);
     setShowModal(true);
   };
 
-  const onSubmit = async (data: z.infer<typeof homeTypeSchema>) => {
-    const formData = new FormData();
-    formData.append("name", data.name);
-    if (data.description) {
-      formData.append("description", data.description);
-    }
+  // FIXED: Use FileReader for base64 conversion
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setIsConvertingImage(true);
+      setValue("photo", "", { shouldValidate: false }); // Clear previous photo immediately
+      setPhotoValue(null); // Clear preview
 
-    if (editHomeType) {
-      await executeUpdate(editHomeType.id, formData);
+      try {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const result = reader.result as string;
+          const base64String = result.split(",")[1]; // Remove data URL prefix
+          setValue("photo", base64String, { shouldValidate: true });
+          setPhotoValue(result); // Set preview with data URL
+          setIsConvertingImage(false);
+        };
+        reader.onerror = () => {
+          addToast({
+            title: "Image Error",
+            description: "Could not process the file.",
+          });
+          setValue("photo", "", { shouldValidate: true });
+          setPhotoValue(null);
+          setIsConvertingImage(false);
+        };
+        reader.readAsDataURL(file);
+      } catch (error) {
+        console.error("Error converting file to base64:", error);
+        addToast({
+          title: "Image Error",
+          description: "Could not process the file.",
+        });
+        setValue("photo", "", { shouldValidate: true });
+        setPhotoValue(null);
+        setIsConvertingImage(false);
+      }
     } else {
-      await executeCreate(formData);
+      setValue("photo", "", { shouldValidate: true }); // Clear if no file selected
+      setPhotoValue(null); // Clear preview
+      setIsConvertingImage(false);
+    }
+  };
+
+  const onSubmit = async (data: z.infer<typeof propertyTypeSchema>) => {
+    const payload = {
+      name: data.name,
+      photo: data.photo,
+      createdAt: editHomeType?.createdAt
+        ? new Date(editHomeType.createdAt)
+        : new Date(),
+      updatedAt: new Date(),
+      description: data.description || undefined,
+    };
+
+    if (editHomeType?.id) {
+      executeUpdate(editHomeType.id, payload);
+    } else {
+      executeCreate(payload);
     }
   };
 
@@ -176,7 +233,22 @@ function HomeTypePage() {
       },
     },
     { key: "name", label: "Name" },
-    { key: "photo", label: "photo" },
+    {
+      key: "photo",
+      label: "Photo",
+      renderCell: (item) =>
+        item.photo ? (
+          <Image
+            src={formatImageUrl(item.photo)}
+            alt={item.name}
+            width={60}
+            height={40}
+            className="rounded object-cover"
+          />
+        ) : (
+          <span className="text-gray-400">No photo</span>
+        ),
+    },
     { key: "description", label: "Description" },
     {
       key: "createdAt",
@@ -240,6 +312,7 @@ function HomeTypePage() {
               {editHomeType ? "Edit Home Type" : "Add Home Type"}
             </h2>
             <form onSubmit={handleSubmit(onSubmit)}>
+              {/* <p className="">{JSON.stringify(errors)}</p> */}
               <div className="flex flex-col gap-4">
                 <div>
                   <label
@@ -277,6 +350,64 @@ function HomeTypePage() {
                     disabled={disableSubmit}
                   />
                 </div>
+                <div>
+                  <label
+                    htmlFor="photo"
+                    className="block mb-1 text-sm font-medium"
+                  >
+                    Photo
+                  </label>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    {...register("photo", { onChange: handleImageChange })}
+                    className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                    disabled={isConvertingImage}
+                  />
+
+                  {isConvertingImage && (
+                    <div className="flex items-center text-xs text-gray-500 mt-1">
+                      <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                      Processing image...
+                    </div>
+                  )}
+                  {errors.photo && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.photo.message as string}
+                    </p>
+                  )}
+                </div>
+
+                {photoValue &&
+                  typeof photoValue === "string" &&
+                  !isConvertingImage && (
+                    <div className="mt-2 border rounded-md p-2">
+                      <span className="text-xs text-gray-500 block text-center mb-1">
+                        Preview
+                      </span>
+                      <Image
+                        src={photoValue}
+                        alt="Product preview"
+                        className="max-h-40 rounded mx-auto"
+                        width={160}
+                        height={160}
+                        style={{ objectFit: "contain" }}
+                        unoptimized
+                      />
+                    </div>
+                  )}
+
+                {editHomeType && !selectedPhoto && editHomeType.photo && (
+                  <div className="mt-2">
+                    <Image
+                      src={formatImageUrl(editHomeType.photo)}
+                      alt="Current"
+                      width={120}
+                      height={80}
+                      className="rounded object-cover"
+                    />
+                  </div>
+                )}
               </div>
               <div className="flex justify-end gap-3 mt-6">
                 <Button

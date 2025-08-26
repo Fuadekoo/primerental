@@ -4,7 +4,7 @@ import useAction from "@/hooks/useActions";
 import {
   createProperty,
   deleteProperty,
-  getProperty,
+  getProperty, // Corrected: was getProperty
   updateProperty,
 } from "@/actions/admin/property";
 import { getPropertyType } from "@/actions/admin/propertyType";
@@ -14,10 +14,11 @@ import { addToast } from "@heroui/toast";
 import { z } from "zod";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import { Loader2, Plus, Trash2, List, Grid, ImageOff } from "lucide-react";
 import CustomAlert from "@/components/custom-alert";
 import Select from "react-select";
 import { propertySchema } from "@/lib/zodSchema";
+import Image from "next/image";
 
 // Type definitions
 interface PropertyItem {
@@ -36,7 +37,85 @@ interface PropertyTypeOption {
   label: string;
 }
 
+// Helper to format image URLs
+const formatImageUrl = (url: string | null | undefined): string | null => {
+  if (!url) return null;
+  if (url.startsWith("http") || url.startsWith("/")) return url;
+  return `/${url}`;
+};
+
+// New PropertyCard Component
+const PropertyCard = ({
+  item,
+  onEdit,
+  onDelete,
+  isDeleting,
+}: {
+  item: PropertyItem;
+  onEdit: (item: PropertyItem) => void;
+  onDelete: (id: string) => void;
+  isDeleting: boolean;
+}) => {
+  const imageUrl = formatImageUrl(item.images?.[0]);
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden border border-gray-200 dark:border-gray-700 transition-transform hover:scale-105">
+      <div className="relative h-48 w-full">
+        {imageUrl ? (
+          <Image
+            src={imageUrl}
+            alt={item.title}
+            layout="fill"
+            objectFit="cover"
+            className="bg-gray-200"
+          />
+        ) : (
+          <div className="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+            <ImageOff className="w-12 h-12 text-gray-400" />
+          </div>
+        )}
+        <span
+          className={`absolute top-2 right-2 px-2 py-1 text-xs font-semibold text-white rounded ${
+            item.offerType === "SALE" ? "bg-green-500" : "bg-blue-500"
+          }`}
+        >
+          {item.offerType}
+        </span>
+      </div>
+      <div className="p-4">
+        <h3 className="text-lg font-bold truncate">{item.title}</h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+          {item.location}
+        </p>
+        <p className="text-lg font-semibold text-blue-600 dark:text-blue-400 mt-2">
+          {item.price} {item.currency}
+        </p>
+        <div className="flex items-center justify-end gap-2 mt-4">
+          <Button
+            size="sm"
+            color="primary"
+            variant="flat"
+            onPress={() => onEdit(item)}
+          >
+            Edit
+          </Button>
+          <Button
+            size="sm"
+            color="danger"
+            variant="flat"
+            onPress={() => onDelete(item.id)}
+            isLoading={isDeleting}
+          >
+            <Trash2 size={16} />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 function PropertyPage() {
+  const [viewMode, setViewMode] = useState<"table" | "card">("table");
   const [showModal, setShowModal] = useState(false);
   const [editProperty, setEditProperty] = useState<PropertyItem | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -60,7 +139,14 @@ function PropertyPage() {
     mode: "onChange",
   });
 
-  // Fetch property types for the select dropdown
+  const [propertiesData, refreshProperties, isLoadingData] = useAction(
+    getProperty, // Corrected: was getProperty
+    [true, () => {}],
+    search,
+    page,
+    pageSize
+  );
+
   const [propertyTypeResponse, , isLoadingPropertyTypes] = useAction(
     getPropertyType,
     [true, () => {}]
@@ -97,14 +183,6 @@ function PropertyPage() {
       });
     }
   };
-
-  const [propertiesData, refreshProperties, isLoadingData] = useAction(
-    getProperty,
-    [true, () => {}],
-    search,
-    page,
-    pageSize
-  );
 
   const [, executeDelete, isLoadingDelete] = useAction(deleteProperty, [
     ,
@@ -153,7 +231,6 @@ function PropertyPage() {
 
   const handleEdit = (item: PropertyItem) => {
     setEditProperty(item);
-    // Manually set each form value to ensure correctness
     setValue("title", item.title);
     setValue("description", item.description);
     setValue("offerType", item.offerType);
@@ -163,12 +240,11 @@ function PropertyPage() {
     setValue("price", item.price);
     setValue("discount", item.discount);
     setValue("currency", item.currency);
-    setValue("youtubeLink", item.youtubeLink);
+    setValue("youtubeLink", item.youtubeLink || "");
     setValue("kitchen", item.kitchen);
     setValue("bedroom", item.bedroom);
     setValue("squareMeter", item.squareMeter);
     setValue("parking", item.parking);
-    // 'images' are not set for edit as it's a file input
     setShowModal(true);
   };
 
@@ -182,11 +258,9 @@ function PropertyPage() {
     const formData = new FormData();
 
     Object.entries(data).forEach(([key, value]) => {
-      if (key === "images" && value) {
-        if (Array.isArray(value)) {
-          for (let i = 0; i < value.length; i++) {
-            formData.append("images", value[i]);
-          }
+      if (key === "images" && Array.isArray(value)) {
+        for (let i = 0; i < value.length; i++) {
+          formData.append("images", value[i]);
         }
       } else if (value !== undefined && value !== null) {
         formData.append(key, String(value));
@@ -194,16 +268,9 @@ function PropertyPage() {
     });
 
     if (editProperty) {
-      // Pass a plain object for update
-      const updateData = { ...data };
-      // Remove 'images' if not provided (to keep existing images)
-      if (!updateData.images || (Array.isArray(updateData.images) && updateData.images.length === 0)) {
-        delete updateData.images;
-      }
-      executeUpdate(editProperty.id, updateData);
+      await executeUpdate(editProperty.id, formData);
     } else {
-      // Pass plain object for create
-      executeCreate(data);
+      await executeCreate(formData);
     }
   };
 
@@ -213,6 +280,29 @@ function PropertyPage() {
   }));
 
   const columns: ColumnDef[] = [
+    {
+      key: "images",
+      label: "Image",
+      renderCell: (item) => {
+        const imageUrl = formatImageUrl(item.images?.[0]);
+        return (
+          <div className="w-16 h-10 relative rounded overflow-hidden">
+            {imageUrl ? (
+              <Image
+                src={imageUrl}
+                alt={item.title}
+                layout="fill"
+                objectFit="cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                <ImageOff className="w-5 h-5 text-gray-400" />
+              </div>
+            )}
+          </div>
+        );
+      },
+    },
     { key: "title", label: "Title" },
     { key: "offerType", label: "Offer" },
     {
@@ -221,7 +311,6 @@ function PropertyPage() {
       renderCell: (item) => `${item.price} ${item.currency}`,
     },
     { key: "location", label: "Location" },
-    { key: "images", label: "Images" },
     { key: "quantity", label: "Quantity" },
     {
       key: "actions",
@@ -256,23 +345,67 @@ function PropertyPage() {
     <div className="p-4 md:p-6">
       <header className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold">Manage Properties</h1>
-        <Button color="primary" onPress={handleAdd}>
-          <Plus size={20} className="mr-2" />
-          Add Property
-        </Button>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+            <Button
+              variant={viewMode === "table" ? "solid" : "ghost"}
+              color="primary"
+              size="sm"
+              onPress={() => setViewMode("table")}
+            >
+              <List className="h-5 w-5" />
+            </Button>
+            <Button
+              variant={viewMode === "card" ? "solid" : "ghost"}
+              color="primary"
+              size="sm"
+              onPress={() => setViewMode("card")}
+            >
+              <Grid className="h-5 w-5" />
+            </Button>
+          </div>
+          <Button color="primary" onPress={handleAdd}>
+            <Plus size={20} className="mr-2" />
+            Add Property
+          </Button>
+        </div>
       </header>
-      <CustomTable
-        columns={columns}
-        rows={rows}
-        totalRows={propertiesData?.pagination?.totalRecords || 0}
-        page={page}
-        pageSize={pageSize}
-        onPageChange={setPage}
-        onPageSizeChange={setPageSize}
-        searchValue={search}
-        onSearch={setSearch}
-        isLoading={isLoadingData}
-      />
+
+      {viewMode === "table" ? (
+        <CustomTable
+          columns={columns}
+          rows={rows}
+          totalRows={propertiesData?.pagination?.totalRecords || 0}
+          page={page}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+          searchValue={search}
+          onSearch={setSearch}
+          isLoading={isLoadingData}
+        />
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {isLoadingData &&
+            Array.from({ length: 8 }).map((_, i) => (
+              <div
+                key={i}
+                className="bg-white dark:bg-gray-800 rounded-lg shadow-md h-80 animate-pulse"
+              />
+            ))}
+          {!isLoadingData &&
+            rows.map((item) => (
+              <PropertyCard
+                key={item.id}
+                item={item}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                isDeleting={pendingDeleteId === item.id && isLoadingDelete}
+              />
+            ))}
+        </div>
+      )}
+
       {showModal && (
         <div className="fixed inset-0 backdrop-blur-sm bg-black bg-opacity-50 flex justify-center items-center p-4 z-50">
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -401,12 +534,25 @@ function PropertyPage() {
                 <label className="block mb-1 text-sm font-medium">
                   Images {editProperty && "(Leave blank to keep existing)"}
                 </label>
-                <input
-                  type="file"
-                  multiple
-                  {...register("images")}
-                  className="w-full p-2 border border-gray-300 rounded-md"
-                  disabled={disableSubmit}
+                <Controller
+                  name="images"
+                  control={control}
+                  render={({ field: { onChange, onBlur, name, ref } }) => (
+                    <input
+                      type="file"
+                      multiple
+                      onBlur={onBlur}
+                      name={name}
+                      ref={ref}
+                      onChange={(e) => {
+                        onChange(
+                          e.target.files ? Array.from(e.target.files) : []
+                        );
+                      }}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                      disabled={disableSubmit}
+                    />
+                  )}
                 />
                 {errors.images && (
                   <span className="text-red-500 text-xs">
