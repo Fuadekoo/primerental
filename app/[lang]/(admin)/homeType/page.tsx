@@ -18,11 +18,12 @@ import CustomAlert from "@/components/custom-alert";
 import { propertyTypeSchema } from "@/lib/zodSchema";
 import Image from "next/image";
 
-// Helper to format image URLs
 const formatImageUrl = (url: string | null | undefined): string => {
   if (!url) return "/placeholder.png";
+  // If already an absolute URL or starts with /, use as is
   if (url.startsWith("http") || url.startsWith("/")) return url;
-  return `/${url}`;
+  // Otherwise, fetch from local API endpoint
+  return `/api/filedata/${encodeURIComponent(url)}`;
 };
 
 // Type definitions

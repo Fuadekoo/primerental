@@ -9,7 +9,7 @@ import {
 } from "@/actions/admin/property";
 import { getPropertyType } from "@/actions/admin/propertyType";
 import CustomTable from "@/components/custom-table";
-import { Button } from "@heroui/react";
+import { Button, Input, Textarea } from "@heroui/react";
 import { addToast } from "@heroui/toast";
 import { z } from "zod";
 import { useForm, Controller } from "react-hook-form";
@@ -37,11 +37,12 @@ interface PropertyTypeOption {
   label: string;
 }
 
-// Helper to format image URLs
-const formatImageUrl = (url: string | null | undefined): string | null => {
-  if (!url) return null;
+const formatImageUrl = (url: string | null | undefined): string => {
+  if (!url) return "/placeholder.png";
+  // If already an absolute URL or starts with /, use as is
   if (url.startsWith("http") || url.startsWith("/")) return url;
-  return `/${url}`;
+  // Otherwise, fetch from local API endpoint
+  return `/api/filedata/${encodeURIComponent(url)}`;
 };
 
 // New PropertyCard Component
@@ -127,6 +128,24 @@ function PropertyPage() {
 
   const [propertyTypes, setPropertyTypes] = useState<PropertyTypeOption[]>([]);
 
+  type PropertyFormType = {
+    title: string;
+    description: string;
+    offerType: "RENT" | "SALE";
+    propertyTypeId: string;
+    location: string;
+    quantity: number;
+    price: number;
+    discount: number;
+    currency: string;
+    images: string[];
+    kitchen: number;
+    bedroom: number;
+    squareMeter: number;
+    parking: number;
+    youtubeLink?: string;
+  };
+
   const {
     handleSubmit,
     register,
@@ -134,7 +153,7 @@ function PropertyPage() {
     setValue,
     control,
     formState: { errors, isSubmitting },
-  } = useForm<z.infer<typeof propertySchema>>({
+  } = useForm<PropertyFormType>({
     resolver: zodResolver(propertySchema),
     mode: "onChange",
   });
@@ -254,23 +273,71 @@ function PropertyPage() {
     setShowModal(true);
   };
 
+  const [isConvertingImages, setIsConvertingImages] = useState(false);
+  const [imagesPreview, setImagesPreview] = useState<string[]>([]);
+
+  const handleImagesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files ? Array.from(e.target.files) : [];
+    if (files.length === 0) {
+      setValue("images", [], { shouldValidate: true });
+      setImagesPreview([]);
+      setIsConvertingImages(false);
+      return;
+    }
+    setIsConvertingImages(true);
+    const base64Promises = files.map(
+      (file) =>
+        new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const result = reader.result as string;
+            resolve(result); // keep full data URL for preview
+          };
+          reader.onerror = () => reject(new Error("Could not process file"));
+          reader.readAsDataURL(file);
+        })
+    );
+    try {
+      const results = await Promise.all(base64Promises);
+      setImagesPreview(results);
+      // Remove data URL prefix for backend (if needed)
+      const base64Strings = results.map((r) => r.split(",")[1]);
+      setValue("images", base64Strings, { shouldValidate: true });
+    } catch (error) {
+      addToast({
+        title: "Image Error",
+        description: "Could not process one or more files.",
+      });
+      setValue("images", [], { shouldValidate: true });
+      setImagesPreview([]);
+    }
+    setIsConvertingImages(false);
+  };
+
   const onSubmit = async (data: z.infer<typeof propertySchema>) => {
-    const formData = new FormData();
+    console.log("Form Data:", data);
+    const payload = {
+      title: data.title,
+      description: data.description,
+      offerType: data.offerType,
+      propertyTypeId: data.propertyTypeId,
+      location: data.location,
+      quantity: data.quantity,
+      price: data.price,
+      discount: data.discount,
+      currency: data.currency,
+      youtubeLink: data.youtubeLink || undefined,
+      kitchen: data.kitchen,
+      bedroom: data.bedroom,
+      squareMeter: data.squareMeter,
+      parking: data.parking,
+      images: data.images, // array of base64 strings
+    };
 
-    Object.entries(data).forEach(([key, value]) => {
-      if (key === "images" && Array.isArray(value)) {
-        for (let i = 0; i < value.length; i++) {
-          formData.append("images", value[i]);
-        }
-      } else if (value !== undefined && value !== null) {
-        formData.append(key, String(value));
-      }
-    });
-
-    if (editProperty) {
-      await executeUpdate(editProperty.id, formData);
+    if (editProperty?.id) {
+      executeUpdate(editProperty.id, payload);
     } else {
-      await executeCreate(formData);
+      executeCreate(payload);
     }
   };
 
@@ -416,18 +483,19 @@ function PropertyPage() {
               onSubmit={handleSubmit(onSubmit)}
               className="grid grid-cols-1 md:grid-cols-2 gap-4"
             >
+              <p className="">
+                {JSON.stringify(Object.values(errors).map((v) => v.message))}
+              </p>
               {/* Form fields */}
               <InputField
                 label="Title"
-                name="title"
-                register={register}
+                {...register("title")}
                 errors={errors}
                 disabled={disableSubmit}
               />
               <InputField
                 label="Description"
-                name="description"
-                register={register}
+                {...register("description")}
                 errors={errors}
                 disabled={disableSubmit}
                 isTextArea
@@ -454,112 +522,97 @@ function PropertyPage() {
               />
               <InputField
                 label="Location"
-                name="location"
-                register={register}
+                {...register("location")}
                 errors={errors}
                 disabled={disableSubmit}
               />
               <InputField
                 label="Quantity"
-                name="quantity"
                 type="number"
-                register={register}
+                {...register("quantity")}
                 errors={errors}
                 disabled={disableSubmit}
               />
               <InputField
                 label="Price"
-                name="price"
                 type="number"
-                register={register}
+                {...register("price")}
                 errors={errors}
                 disabled={disableSubmit}
               />
               <InputField
                 label="Discount"
-                name="discount"
                 type="number"
-                register={register}
+                {...register("discount")}
                 errors={errors}
                 disabled={disableSubmit}
               />
               <InputField
                 label="Currency"
-                name="currency"
-                register={register}
+                {...register("currency")}
                 errors={errors}
                 disabled={disableSubmit}
                 placeholder="e.g., USD"
               />
               <InputField
                 label="YouTube Link"
-                name="youtubeLink"
-                register={register}
+                {...register("youtubeLink")}
                 errors={errors}
                 disabled={disableSubmit}
               />
               <InputField
                 label="Kitchens"
-                name="kitchen"
                 type="number"
-                register={register}
+                {...register("kitchen")}
                 errors={errors}
                 disabled={disableSubmit}
               />
               <InputField
                 label="Bedrooms"
-                name="bedroom"
                 type="number"
-                register={register}
+                {...register("bedroom")}
                 errors={errors}
                 disabled={disableSubmit}
               />
               <InputField
                 label="Square Meters"
-                name="squareMeter"
                 type="number"
-                register={register}
+                {...register("squareMeter")}
                 errors={errors}
                 disabled={disableSubmit}
               />
               <InputField
                 label="Parking Spots"
-                name="parking"
                 type="number"
-                register={register}
+                {...register("parking")}
                 errors={errors}
                 disabled={disableSubmit}
               />
-              <div className="md:col-span-2">
-                <label className="block mb-1 text-sm font-medium">
-                  Images {editProperty && "(Leave blank to keep existing)"}
-                </label>
-                <Controller
-                  name="images"
-                  control={control}
-                  render={({ field: { onChange, onBlur, name, ref } }) => (
-                    <input
-                      type="file"
-                      multiple
-                      onBlur={onBlur}
-                      name={name}
-                      ref={ref}
-                      onChange={(e) => {
-                        onChange(
-                          e.target.files ? Array.from(e.target.files) : []
-                        );
-                      }}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                      disabled={disableSubmit}
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleImagesChange}
+                className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                disabled={isConvertingImages}
+              />
+              {imagesPreview.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {imagesPreview.map((src, idx) => (
+                    <img
+                      key={idx}
+                      src={src}
+                      alt={`Preview ${idx + 1}`}
+                      className="w-20 h-20 object-cover rounded border"
                     />
-                  )}
-                />
-                {errors.images && (
-                  <span className="text-red-500 text-xs">
-                    {errors.images.message as string}
-                  </span>
-                )}
-              </div>
+                  ))}
+                </div>
+              )}
+              {errors.images && (
+                <span className="text-red-500 text-xs">
+                  {errors.images.message as string}
+                </span>
+              )}
 
               <div className="md:col-span-2 flex justify-end gap-3 mt-6">
                 <Button
@@ -612,39 +665,36 @@ function PropertyPage() {
 // Helper components for form fields to reduce repetition
 const InputField = ({
   label,
-  name,
-  type = "text",
-  register,
   errors,
   disabled,
   placeholder,
   isTextArea = false,
+  ...props
 }: any) => (
   <div>
-    <label htmlFor={name} className="block mb-1 text-sm font-medium">
+    <label htmlFor={props.name} className="block mb-1 text-sm font-medium">
       {label}
     </label>
     {isTextArea ? (
-      <textarea
-        id={name}
-        {...register(name)}
+      <Textarea
+        {...props}
         disabled={disabled}
         placeholder={placeholder}
-        rows={3}
+        minRows={3}
+        error={!!errors?.[props.name]}
         className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
       />
     ) : (
-      <input
-        id={name}
-        type={type}
-        {...register(name)}
+      <Input
+        {...props}
         disabled={disabled}
         placeholder={placeholder}
+        error={!!errors?.[props.name]}
         className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
       />
     )}
-    {errors[name] && (
-      <span className="text-red-500 text-xs">{errors[name].message}</span>
+    {errors?.[props.name] && (
+      <span className="text-red-500 text-xs">{errors[props.name].message}</span>
     )}
   </div>
 );
