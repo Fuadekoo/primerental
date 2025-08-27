@@ -9,7 +9,7 @@ import {
 } from "@/actions/admin/property";
 import { getPropertyType } from "@/actions/admin/propertyType";
 import CustomTable from "@/components/custom-table";
-import { Button, Input, Textarea } from "@heroui/react";
+import { Button, Form, Input, Textarea } from "@heroui/react";
 import { addToast } from "@heroui/toast";
 import { z } from "zod";
 import { useForm, Controller } from "react-hook-form";
@@ -479,8 +479,11 @@ function PropertyPage() {
             <h2 className="text-xl font-semibold mb-4">
               {editProperty ? "Edit Property" : "Add Property"}
             </h2>
-            <form
-              onSubmit={handleSubmit(onSubmit)}
+            <Form
+              // onSubmit={(data) => {
+              //   console.log(data);
+              // }}
+              onSubmit={handleSubmit((value) => {})}
               className="grid grid-cols-1 md:grid-cols-2 gap-4"
             >
               <p className="">
@@ -638,7 +641,7 @@ function PropertyPage() {
                   )}
                 </Button>
               </div>
-            </form>
+            </Form>
           </div>
         </div>
       )}
