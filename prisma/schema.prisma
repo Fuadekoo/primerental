@@ -55,7 +55,7 @@ model property {
   propertyType   propertyType @relation(fields: [propertyTypeId], references: [id])
   propertyTypeId String
   location       String
-  quantity       String
+  quantity       Int
   price          Float
   discount       Float
   currency       String

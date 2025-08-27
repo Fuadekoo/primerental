@@ -19,6 +19,7 @@ import CustomAlert from "@/components/custom-alert";
 import Select from "react-select";
 import { propertySchema } from "@/lib/zodSchema";
 import Image from "next/image";
+import { on } from "events";
 
 // Type definitions
 interface PropertyItem {
@@ -69,6 +70,8 @@ const PropertyCard = ({
             layout="fill"
             objectFit="cover"
             className="bg-gray-200"
+            loading="lazy"
+            placeholder="blur"
           />
         ) : (
           <div className="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
@@ -315,29 +318,10 @@ function PropertyPage() {
   };
 
   const onSubmit = async (data: z.infer<typeof propertySchema>) => {
-    console.log("Form Data:", data);
-    const payload = {
-      title: data.title,
-      description: data.description,
-      offerType: data.offerType,
-      propertyTypeId: data.propertyTypeId,
-      location: data.location,
-      quantity: data.quantity,
-      price: data.price,
-      discount: data.discount,
-      currency: data.currency,
-      youtubeLink: data.youtubeLink || undefined,
-      kitchen: data.kitchen,
-      bedroom: data.bedroom,
-      squareMeter: data.squareMeter,
-      parking: data.parking,
-      images: data.images, // array of base64 strings
-    };
-
     if (editProperty?.id) {
-      executeUpdate(editProperty.id, payload);
+      executeUpdate(editProperty.id, data);
     } else {
-      executeCreate(payload);
+      executeCreate(data);
     }
   };
 
@@ -360,6 +344,7 @@ function PropertyPage() {
                 alt={item.title}
                 layout="fill"
                 objectFit="cover"
+                loading="lazy"
               />
             ) : (
               <div className="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
@@ -480,15 +465,15 @@ function PropertyPage() {
               {editProperty ? "Edit Property" : "Add Property"}
             </h2>
             <Form
-              // onSubmit={(data) => {
-              //   console.log(data);
-              // }}
-              onSubmit={handleSubmit((value) => {})}
+              // onSubmit={handleSubmit((value) => {
+              //   console.log(value);
+              // })}
+              onSubmit={handleSubmit(onSubmit)}
               className="grid grid-cols-1 md:grid-cols-2 gap-4"
             >
-              <p className="">
+              {/* <p className="">
                 {JSON.stringify(Object.values(errors).map((v) => v.message))}
-              </p>
+              </p> */}
               {/* Form fields */}
               <InputField
                 label="Title"

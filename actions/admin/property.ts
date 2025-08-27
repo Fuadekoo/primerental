@@ -110,13 +110,12 @@ export async function createProperty(data: z.infer<typeof propertySchema>) {
     if (Array.isArray(data.images)) {
       for (const image of data.images) {
         // Generate a unique filename for each image.
-        const ext = ".jpg"; // You can parse the extension from the mime type if available.
+        const ext = ".jpg"; // or parse from data.photo if you have mime info
         const uniqueName = `${randomUUID()}${ext}`;
-        const uploadDir = path.join(process.cwd(), "public", "uploads");
-        const filePath = path.join(uploadDir, uniqueName);
+        const filePath = path.join(process.cwd(), "filedata", uniqueName);
 
         // Ensure the upload directory exists.
-        await fs.mkdir(uploadDir, { recursive: true });
+        await fs.mkdir(path.dirname(filePath), { recursive: true });
 
         // Decode the base64 string into a buffer.
         let buffer: Buffer;
@@ -133,9 +132,6 @@ export async function createProperty(data: z.infer<typeof propertySchema>) {
 
         // Write the file to the public directory.
         await fs.writeFile(filePath, buffer);
-
-        // Add the public URL to the array.
-        imageUrls.push(`/uploads/${uniqueName}`);
       }
     }
 
