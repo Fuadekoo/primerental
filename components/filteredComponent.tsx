@@ -1,19 +1,7 @@
 "use client";
 import React, { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import {
-  Search,
-  MapPin,
-  BedDouble,
-  Ruler,
-  Car,
-  Building2,
-  // ...existing code...
-  // Removed BookmarkPlus; we will use Save + Check
-  Save,
-  Check,
-} from "lucide-react";
+
+import { Search, Save, Check } from "lucide-react";
 import useAction from "@/hooks/useActions";
 import { filterProperty } from "@/actions/customer/property";
 import { useSavedSearch } from "@/hooks/useSavedSearch";
@@ -28,8 +16,6 @@ export interface FilterInput {
   bathroom?: number;
   // add more filters if needed (e.g., location, parking, etc.)
 }
-
-// ...existing code...
 
 interface FilteredComponentProps {
   filters: FilterInput;

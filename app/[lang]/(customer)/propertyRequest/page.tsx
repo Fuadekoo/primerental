@@ -105,19 +105,21 @@ function PropertyRequestPage() {
   } = useForm<RequestFormValues>({
     resolver: zodResolver(propertyRequestSchema),
     defaultValues: {
-      requestType: "rent",
-      bedroom: 1,
-      bathroom: 1,
+      offerType: "rent",
+      bedrooms: 1,
+      bathrooms: 1,
     },
   });
 
-  const [propertyTypes, , isLoadingTypes] = useAction(getPropertyTypes, [
+  // Handle propertyTypes result structure
+  const [propertyTypesResult, , isLoadingTypes] = useAction(getPropertyTypes, [
     true,
     () => {},
   ]);
+  const propertyTypes = propertyTypesResult;
 
-  const [action, , loading] = useAction(propertyRequest, [
-    ,
+  const [, action, loading] = useAction(propertyRequest, [
+    undefined,
     (res) => {
       addToast({ description: t.successMessage });
       router.push(`/${lang}/home`);
@@ -158,22 +160,42 @@ function PropertyRequestPage() {
             </h2>
           </div>
 
-          {/* Full Name */}
-          <div className="col-span-1 sm:col-span-2 md:col-span-1">
+          {/* First Name */}
+          <div>
             <label
-              htmlFor="fullName"
+              htmlFor="firstName"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              {t.fullNameLabel}
+              First Name
             </label>
             <Input
-              id="fullName"
-              placeholder={t.fullNamePlaceholder}
-              {...register("fullName")}
+              id="firstName"
+              placeholder="First Name"
+              {...register("firstName")}
             />
-            {errors.fullName && (
+            {errors.firstName && (
               <p className="text-sm text-red-600 mt-1">
-                {errors.fullName.message}
+                {errors.firstName.message}
+              </p>
+            )}
+          </div>
+
+          {/* Last Name */}
+          <div>
+            <label
+              htmlFor="lastName"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Last Name
+            </label>
+            <Input
+              id="lastName"
+              placeholder="Last Name"
+              {...register("lastName")}
+            />
+            {errors.lastName && (
+              <p className="text-sm text-red-600 mt-1">
+                {errors.lastName.message}
               </p>
             )}
           </div>
@@ -226,9 +248,9 @@ function PropertyRequestPage() {
             </h2>
           </div>
 
-          {/* Request Type */}
+          {/* Offer Type */}
           <Controller
-            name="requestType"
+            name="offerType"
             control={control}
             render={({ field }) => (
               <div className="col-span-1 sm:col-span-2">
@@ -271,9 +293,9 @@ function PropertyRequestPage() {
                     <span className="font-semibold">{t.requestTypeBuy}</span>
                   </div>
                 </div>
-                {errors.requestType && (
+                {errors.offerType && (
                   <p className="text-sm text-red-600 mt-1">
-                    {errors.requestType.message}
+                    {errors.offerType.message}
                   </p>
                 )}
               </div>
@@ -292,8 +314,9 @@ function PropertyRequestPage() {
                 <div className="flex flex-wrap gap-3">
                   {isLoadingTypes ? (
                     <p className="text-sm text-gray-500">{t.loadingTypes}</p>
-                  ) : (
-                    propertyTypes?.map((type: any) => (
+                  ) : Array.isArray(propertyTypes) &&
+                    propertyTypes.length > 0 ? (
+                    propertyTypes.map((type: any) => (
                       <button
                         type="button"
                         key={type.id}
@@ -307,6 +330,10 @@ function PropertyRequestPage() {
                         {type.name}
                       </button>
                     ))
+                  ) : (
+                    <p className="text-sm text-red-500">
+                      No property types available.
+                    </p>
                   )}
                 </div>
               )}
@@ -319,7 +346,7 @@ function PropertyRequestPage() {
           </div>
 
           {/* Max Price */}
-          <div className="col-span-1 sm:col-span-2 md:col-span-1">
+          <div>
             <label
               htmlFor="maxPrice"
               className="block text-sm font-medium text-gray-700 mb-1"
@@ -330,7 +357,7 @@ function PropertyRequestPage() {
               id="maxPrice"
               type="number"
               placeholder={t.maxPricePlaceholder}
-              {...register("maxPrice")}
+              {...register("maxPrice", { valueAsNumber: true })}
             />
             {errors.maxPrice && (
               <p className="text-sm text-red-600 mt-1">
@@ -339,114 +366,52 @@ function PropertyRequestPage() {
             )}
           </div>
 
-          {/* Bedrooms and Bathrooms */}
-          <div className="col-span-1 sm:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
-            {/* Bedrooms */}
-            <div>
-              <label
-                htmlFor="bedrooms"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                {t.bedroomsLabel}
-              </label>
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onPress={() =>
-                    setValue(
-                      "bedroom",
-                      Math.max(0, Number(watch("bedroom") || 0) - 1)
-                    )
-                  }
-                  className="p-2"
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-                <div className="relative flex-grow">
-                  <BedDouble className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <Input
-                    id="bedrooms"
-                    type="number"
-                    placeholder={t.bedroomsPlaceholder}
-                    min="0"
-                    {...register("bedroom", { valueAsNumber: true })}
-                    className="pl-10 text-center"
-                  />
-                </div>
-                <Button
-                  type="button"
-                  color="success"
-                  variant="shadow"
-                  onPress={() =>
-                    setValue("bedroom", Number(watch("bedroom") || 0) + 1)
-                  }
-                  className="p-2"
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-              {errors.bedroom && (
-                <p className="text-sm text-red-600 mt-1">
-                  {errors.bedroom.message}
-                </p>
-              )}
-            </div>
+          {/* Bedrooms */}
+          <div>
+            <label
+              htmlFor="bedrooms"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              {t.bedroomsLabel}
+            </label>
+            <Input
+              id="bedrooms"
+              type="number"
+              placeholder={t.bedroomsPlaceholder}
+              min="0"
+              {...register("bedrooms", { valueAsNumber: true })}
+            />
+            {errors.bedrooms && (
+              <p className="text-sm text-red-600 mt-1">
+                {errors.bedrooms.message}
+              </p>
+            )}
+          </div>
 
-            {/* Bathrooms */}
-            <div>
-              <label
-                htmlFor="bathrooms"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                {t.bathroomsLabel}
-              </label>
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onPress={() =>
-                    setValue(
-                      "bathroom",
-                      Math.max(0, Number(watch("bathroom") || 0) - 1)
-                    )
-                  }
-                  className="p-2"
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-                <div className="relative flex-grow">
-                  <Bath className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <Input
-                    id="bathrooms"
-                    type="number"
-                    placeholder={t.bathroomsPlaceholder}
-                    min="0"
-                    {...register("bathroom", { valueAsNumber: true })}
-                    className="pl-10 text-center"
-                  />
-                </div>
-                <Button
-                  type="button"
-                  variant="solid"
-                  onPress={() =>
-                    setValue("bathroom", Number(watch("bathroom") || 0) + 1)
-                  }
-                  className="p-2"
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-              {errors.bathroom && (
-                <p className="text-sm text-red-600 mt-1">
-                  {errors.bathroom.message}
-                </p>
-              )}
-            </div>
+          {/* Bathrooms */}
+          <div>
+            <label
+              htmlFor="bathrooms"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              {t.bathroomsLabel}
+            </label>
+            <Input
+              id="bathrooms"
+              type="number"
+              placeholder={t.bathroomsPlaceholder}
+              min="0"
+              {...register("bathrooms", { valueAsNumber: true })}
+            />
+            {errors.bathrooms && (
+              <p className="text-sm text-red-600 mt-1">
+                {errors.bathrooms.message}
+              </p>
+            )}
           </div>
 
           {/* Minimum Size */}
-          <div className="col-span-1 sm:col-span-2">
+          <div>
             <label
               htmlFor="minSize"
               className="block text-sm font-medium text-gray-700 mb-1"
@@ -457,7 +422,7 @@ function PropertyRequestPage() {
               id="minSize"
               type="number"
               placeholder={t.minSizePlaceholder}
-              {...register("minimumSize")}
+              {...register("minimumSize", { valueAsNumber: true })}
             />
             {errors.minimumSize && (
               <p className="text-sm text-red-600 mt-1">
@@ -487,6 +452,7 @@ function PropertyRequestPage() {
             )}
           </div>
 
+          {/* Submit */}
           <div className="col-span-1 sm:col-span-2 flex justify-end">
             <Button
               type="submit"

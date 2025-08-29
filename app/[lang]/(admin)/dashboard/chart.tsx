@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   BarChart,
   Bar,
@@ -11,53 +11,24 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { getDashboardGraphData } from "@/actions/admin/dashboard";
 
-const data = [
-  {
-    name: "Jan",
-    uv: 4000,
-    pv: 2400,
-    amt: 2400,
-  },
-  {
-    name: "Feb",
-    uv: 3000,
-    pv: 1398,
-    amt: 2210,
-  },
-  {
-    name: "Mar",
-    uv: 2000,
-    pv: 9800,
-    amt: 2290,
-  },
-  {
-    name: "Apr",
-    uv: 2780,
-    pv: 3908,
-    amt: 2000,
-  },
-  {
-    name: "May",
-    uv: 1890,
-    pv: 4800,
-    amt: 2181,
-  },
-  {
-    name: "Jun",
-    uv: 2390,
-    pv: 3800,
-    amt: 2500,
-  },
-  {
-    name: "Jul",
-    uv: 3490,
-    pv: 4300,
-    amt: 2100,
-  },
+const months = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
 ];
 
-const RevenueChart = ({ t }: { t: any }) => (
+const RevenueChart = ({ data, t }: { data: any[]; t: any }) => (
   <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
     <h3 className="font-bold text-lg text-gray-800 dark:text-white">
       {t.revenueOverview}
@@ -74,7 +45,7 @@ const RevenueChart = ({ t }: { t: any }) => (
           }}
         >
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
+          <XAxis dataKey="monthName" />
           <YAxis />
           <Tooltip
             contentStyle={{
@@ -84,13 +55,15 @@ const RevenueChart = ({ t }: { t: any }) => (
           />
           <Legend />
           <Bar
-            dataKey="pv"
+            dataKey="requestCount"
             fill="#8884d8"
+            name="Requests"
             activeBar={<Rectangle fill="pink" stroke="blue" />}
           />
           <Bar
-            dataKey="uv"
+            dataKey="registerCount"
             fill="#82ca9d"
+            name="Registered"
             activeBar={<Rectangle fill="gold" stroke="purple" />}
           />
         </BarChart>
@@ -100,14 +73,43 @@ const RevenueChart = ({ t }: { t: any }) => (
 );
 
 function Chart() {
-  // Example translation object
-  const t = {
-    revenueOverview: "Revenue Overview",
-  };
+  const t = { revenueOverview: "Requests & Registered Overview" };
+  const [year, setYear] = useState(new Date().getFullYear());
+  const [graphData, setGraphData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    getDashboardGraphData(year).then((data) => {
+      setGraphData(data);
+      setLoading(false);
+    });
+  }, [year]);
 
   return (
     <div>
-      <RevenueChart t={t} />
+      <div className="flex items-center gap-4 mb-4">
+        <label className="font-semibold">Year:</label>
+        <select
+          value={year}
+          onChange={(e) => setYear(Number(e.target.value))}
+          className="border rounded px-2 py-1"
+        >
+          {Array.from({ length: 5 }).map((_, i) => {
+            const y = new Date().getFullYear() - i;
+            return (
+              <option key={y} value={y}>
+                {y}
+              </option>
+            );
+          })}
+        </select>
+      </div>
+      {loading ? (
+        <div className="text-gray-500 py-10 text-center">Loading chart...</div>
+      ) : (
+        <RevenueChart data={graphData} t={t} />
+      )}
     </div>
   );
 }

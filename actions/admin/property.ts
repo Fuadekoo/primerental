@@ -132,6 +132,8 @@ export async function createProperty(data: z.infer<typeof propertySchema>) {
 
         // Write the file to the public directory.
         await fs.writeFile(filePath, buffer);
+        // help me plase save the image fime name in database in aray
+        imageUrls.push(`${uniqueName}`);
       }
     }
 
@@ -156,10 +158,9 @@ export async function createProperty(data: z.infer<typeof propertySchema>) {
         },
       },
     });
-    return { success: "Property type created successfully." };
+    return { message: "Property type created successfully." };
   } catch (error) {
-    console.error("Failed to create property type:", error);
-    return { error: "Database error: Failed to create property type." };
+    return { message: `error` };
   }
 }
 
@@ -198,7 +199,7 @@ export async function updateProperty(
         await fs.writeFile(filePath, buffer);
 
         // Add the public URL to the array.
-        imageUrls.push(`/uploads/${uniqueName}`);
+        imageUrls.push(`${uniqueName}`);
       }
     }
 
@@ -224,10 +225,9 @@ export async function updateProperty(
         },
       },
     });
-    return { success: "Property type updated successfully." };
+    return { message: "Property type updated successfully." };
   } catch (error) {
-    console.error("Failed to update property type:", error);
-    return { error: "Database error: Failed to update property type." };
+    return { message: `error` };
   }
 }
 
@@ -236,9 +236,8 @@ export async function deleteProperty(id: string) {
     await prisma.property.delete({
       where: { id },
     });
-    return { success: "Property deleted successfully." };
+    return { message: "Property deleted successfully." };
   } catch (error) {
-    console.error("Failed to delete property:", error);
-    return { error: "Database error: Failed to delete property." };
+    return { message: `error` };
   }
 }

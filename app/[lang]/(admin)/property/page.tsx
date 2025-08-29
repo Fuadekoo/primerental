@@ -71,7 +71,7 @@ const PropertyCard = ({
             objectFit="cover"
             className="bg-gray-200"
             loading="lazy"
-            placeholder="blur"
+            // placeholder="blur"
           />
         ) : (
           <div className="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
@@ -184,56 +184,52 @@ function PropertyPage() {
     }
   }, [propertyTypeResponse]);
 
+  const toastSuccess = (description: string, title = "Success") =>
+    addToast({
+      title,
+      description,
+      color: "secondary", // Use a primary color for text
+      variant: "flat",
+    });
+
+  const toastError = (description: string, title = "Error") =>
+    addToast({
+      title,
+      description,
+      color: "primary", // Use a primary color for text
+      variant: "flat",
+    });
+
   const handleActionCompletion = (
-    response: any,
+    response: { error?: string; message?: string } | null | undefined,
     successMessage: string,
-    errorMessage: string
+    onSuccess?: () => void
   ) => {
-    if (response?.success) {
-      addToast({ title: "Success", description: successMessage });
-      refreshProperties();
-      if (showModal) {
-        setShowModal(false);
-        reset();
-        setEditProperty(null);
-      }
+    if (response && !response.error) {
+      toastSuccess(response?.message || successMessage);
+      onSuccess?.();
+      // close the open modal
+      setShowModal(false);
     } else {
-      addToast({
-        title: "Error",
-        description: response?.error || errorMessage,
-        // type: "error",
-      });
+      toastError(
+        response?.error || response?.message || "An unexpected error occurred."
+      );
     }
   };
 
   const [, executeDelete, isLoadingDelete] = useAction(deleteProperty, [
     ,
-    (res) =>
-      handleActionCompletion(
-        res,
-        "Property deleted successfully.",
-        "Failed to delete property."
-      ),
+    (res) => handleActionCompletion(res, res?.message, refreshProperties),
   ]);
 
   const [, executeCreate, isLoadingCreate] = useAction(createProperty, [
     ,
-    (res) =>
-      handleActionCompletion(
-        res,
-        "Property created successfully.",
-        "Failed to create property."
-      ),
+    (res) => handleActionCompletion(res, res?.message, refreshProperties),
   ]);
 
   const [, executeUpdate, isLoadingUpdate] = useAction(updateProperty, [
     ,
-    (res) =>
-      handleActionCompletion(
-        res,
-        "Property updated successfully.",
-        "Failed to update property."
-      ),
+    (res) => handleActionCompletion(res, res?.message, refreshProperties),
   ]);
 
   const handleDelete = (id: string) => {
@@ -535,12 +531,16 @@ function PropertyPage() {
                 errors={errors}
                 disabled={disableSubmit}
               />
-              <InputField
+              <SelectField
                 label="Currency"
-                {...register("currency")}
+                name="currency"
+                control={control}
+                options={[
+                  { value: "USD", label: "USD" },
+                  { value: "BIRR", label: "BIRR" },
+                ]}
                 errors={errors}
                 disabled={disableSubmit}
-                placeholder="e.g., USD"
               />
               <InputField
                 label="YouTube Link"

@@ -11,11 +11,7 @@ import { propertyRegisterSchema } from "@/lib/zodSchema";
 import { Input, Button, Textarea } from "@heroui/react";
 import { addToast } from "@heroui/toast";
 import { useRouter, useParams } from "next/navigation";
-import {
-  KeyRound,
-  Building,
-  Send,
-} from "lucide-react";
+import { KeyRound, Building, Send } from "lucide-react";
 import requestBg from "@/public/cover.jpg";
 import Loading from "@/components/loading";
 
@@ -23,7 +19,8 @@ import Loading from "@/components/loading";
 const translations = {
   en: {
     pageTitle: "Register Your Property",
-    pageDescription: "Provide your details and we'll help you find the perfect property.",
+    pageDescription:
+      "Provide your details and we'll help you find the perfect property.",
     successMessage: "Property request submitted successfully!",
     contactInfoTitle: "Your Contact Information",
     fullNameLabel: "Full Name",
@@ -42,8 +39,6 @@ const translations = {
     locationPlaceholder: "e.g., Addis Ababa, Bole",
     realLocationLabel: "Specific Address / Real Location",
     realLocationPlaceholder: "e.g., Edna Mall, 2nd Floor",
-    priceLabel: "Price (ETB)",
-    pricePlaceholder: "50,000",
     descriptionLabel: "Description",
     descriptionPlaceholder: "Describe your ideal property...",
     submitting: "Submitting...",
@@ -70,8 +65,6 @@ const translations = {
     locationPlaceholder: "ምሳሌ: አዲስ አበባ, ቦሌ",
     realLocationLabel: "ትክክለኛ አድራሻ / እውነተኛ አካባቢ",
     realLocationPlaceholder: "ምሳሌ: ኤድና ሞል, 2ኛ ፎቅ",
-    priceLabel: "ዋጋ (በብር)",
-    pricePlaceholder: "50,000",
     descriptionLabel: "መግለጫ",
     descriptionPlaceholder: "የሚፈልጉትን ንብረት ይግለጹ...",
     submitting: "በማስገባት ላይ...",
@@ -94,14 +87,21 @@ function PropertyRegisterPage() {
     formState: { errors },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(propertyRegisterSchema),
+    defaultValues: {
+      isVisit: false,
+      isVisited: false,
+    },
   });
 
-  const [propertyTypes, , isLoadingTypes] = useAction(getPropertyTypes, [
+  const [propertyTypesResult, , isLoadingTypes] = useAction(getPropertyTypes, [
     true,
     () => {},
   ]);
 
-  const [action, , loading] = useAction(propertyRegister, [
+  // If your getPropertyTypes returns { data: [...] }, use propertyTypesResult?.data
+  const propertyTypes = propertyTypesResult;
+
+  const [, action, loading] = useAction(propertyRegister, [
     undefined,
     (res: any) => {
       addToast({
@@ -112,6 +112,7 @@ function PropertyRegisterPage() {
   ]);
 
   const onSubmit = (data: RegisterFormValues) => {
+    // No mapping needed, just pass data directly
     action(data);
   };
 
@@ -148,39 +149,19 @@ function PropertyRegisterPage() {
 
           <div>
             <label
-              htmlFor="fullName"
+              htmlFor="fullname"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
               {t.fullNameLabel}
             </label>
             <Input
-              id="fullName"
+              id="fullname"
               placeholder={t.fullNamePlaceholder}
-              {...register("fullName")}
+              {...register("fullname")}
             />
-            {errors.fullName && (
+            {errors.fullname && (
               <p className="text-sm text-red-600 mt-1">
-                {errors.fullName.message}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              {t.emailLabel}
-            </label>
-            <Input
-              id="email"
-              type="email"
-              placeholder={t.emailPlaceholder}
-              {...register("email")}
-            />
-            {errors.email && (
-              <p className="text-sm text-red-600 mt-1">
-                {errors.email.message}
+                {errors.fullname.message}
               </p>
             )}
           </div>
@@ -194,9 +175,9 @@ function PropertyRegisterPage() {
             </label>
             <Input
               id="phone"
-              type="tel"
+              type="number"
               placeholder={t.phonePlaceholder}
-              {...register("phone")}
+              {...register("phone", { valueAsNumber: true })}
             />
             {errors.phone && (
               <p className="text-sm text-red-600 mt-1">
@@ -214,7 +195,7 @@ function PropertyRegisterPage() {
 
           {/* --- Offer Type --- */}
           <Controller
-            name="registerType"
+            name="type"
             control={control}
             render={({ field }) => (
               <div className="col-span-1 sm:col-span-2">
@@ -273,8 +254,9 @@ function PropertyRegisterPage() {
                 <div className="flex flex-wrap gap-3">
                   {isLoadingTypes ? (
                     <p className="text-sm text-gray-500">{t.loadingTypes}</p>
-                  ) : (
-                    propertyTypes?.map((type: any) => (
+                  ) : Array.isArray(propertyTypes) &&
+                    propertyTypes.length > 0 ? (
+                    propertyTypes.map((type: any) => (
                       <button
                         type="button"
                         key={type.id}
@@ -288,6 +270,10 @@ function PropertyRegisterPage() {
                         {type.name}
                       </button>
                     ))
+                  ) : (
+                    <p className="text-sm text-red-500">
+                      No property types available.
+                    </p>
                   )}
                 </div>
               )}
@@ -299,7 +285,7 @@ function PropertyRegisterPage() {
             )}
           </div>
 
-          {/* --- Location & Price --- */}
+          {/* --- Location & Real Location --- */}
           <div>
             <label
               htmlFor="location"
@@ -337,26 +323,7 @@ function PropertyRegisterPage() {
             )}
           </div>
 
-          <div className="col-span-1 sm:col-span-2">
-            <label
-              htmlFor="price"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              {t.priceLabel}
-            </label>
-            <Input
-              id="price"
-              type="number"
-              placeholder={t.pricePlaceholder}
-              {...register("price")}
-            />
-            {errors.price && (
-              <p className="text-sm text-red-600 mt-1">
-                {errors.price.message}
-              </p>
-            )}
-          </div>
-
+          {/* --- Description --- */}
           <div className="col-span-1 sm:col-span-2">
             <label
               htmlFor="description"
@@ -376,6 +343,10 @@ function PropertyRegisterPage() {
               </p>
             )}
           </div>
+
+          {/* --- Hidden optional booleans for schema --- */}
+          <input type="hidden" {...register("isVisit")} />
+          <input type="hidden" {...register("isVisited")} />
 
           {/* --- Submission --- */}
           <div className="col-span-1 sm:col-span-2 flex justify-end pt-4">
