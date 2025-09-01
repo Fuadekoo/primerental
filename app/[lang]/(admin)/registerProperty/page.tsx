@@ -133,18 +133,21 @@ function RegisterPropertyPage() {
           className="mb-4"
         />
       )}
-      <CustomTable
-        columns={columns}
-        rows={propertiesData?.data || []}
-        totalRows={propertiesData?.pagination?.totalRecords || 0}
-        page={page}
-        pageSize={pageSize}
-        onPageChange={setPage}
-        onPageSizeChange={setPageSize}
-        searchValue={search}
-        onSearch={setSearch}
-        isLoading={isLoadingDatas}
-      />
+      {/* --- Table with overflow --- */}
+      <div className="overflow-x-auto">
+        <CustomTable
+          columns={columns}
+          rows={propertiesData?.data || []}
+          totalRows={propertiesData?.pagination?.totalRecords || 0}
+          page={page}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+          searchValue={search}
+          onSearch={setSearch}
+          isLoading={isLoadingDatas}
+        />
+      </div>
     </div>
   );
 }
