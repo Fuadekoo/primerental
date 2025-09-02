@@ -180,21 +180,21 @@ async function main() {
   // --- Create Chat Messages ---
   await prisma.chat.create({
     data: {
-      message:
-        "Hello, I am interested in the downtown apartment. Is it still available?",
-      senderRole: Role.GUEST,
-      userId: regularUser.id,
-      guestId: guest1.id,
+      msg: "Hello, I am interested in the downtown apartment. Is it still available?",
+      fromUserId: regularUser.id,
+      toUserId: adminUser.id,
+      // fromGuestId: guest1.id, // If guest is sender, set this instead
+      // toGuestId: guest1.id,   // If guest is receiver, set this instead
     },
   });
 
   await prisma.chat.create({
     data: {
-      message:
-        "Hi there! Yes, it is. When would you like to schedule a viewing?",
-      senderRole: Role.GUEST,
-      userId: regularUser.id,
-      guestId: guest1.id,
+      msg: "Hi there! Yes, it is. When would you like to schedule a viewing?",
+      fromUserId: adminUser.id,
+      toUserId: regularUser.id,
+      // fromGuestId: guest1.id,
+      // toGuestId: guest1.id,
     },
   });
   console.log("Created chat messages.");

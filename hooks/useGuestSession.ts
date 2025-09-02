@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 // Helper to generate a simple unique ID
 const generateUniqueId = (): string => {
-  return "guest_" + Math.random().toString(36).substr(2, 9) + Date.now();
+  return "primeRent_" + Math.random().toString(36).substr(2, 9) + Date.now();
 };
 
 // Helper to get cookie by name
@@ -19,7 +19,7 @@ const setCookie = (name: string, value: string, days = 365) => {
   )}; expires=${expires}; path=/`;
 };
 
-const COOKIE_NAME = "guest_session_id";
+const COOKIE_NAME = "prime_rent_guest_id";
 
 const useGuestSession = (): string => {
   const [guestId, setGuestId] = useState<string>("");

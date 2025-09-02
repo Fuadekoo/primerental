@@ -35,7 +35,8 @@ model user {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  chat      chat[]
+  chatsFrom chat[]   @relation("FromUser")
+  chatsTo   chat[]   @relation("ToUser")
 }
 
 model guest {
@@ -44,7 +45,8 @@ model guest {
   socket    String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  chat      chat[]
+  chatsFrom chat[]   @relation("FromGuest")
+  chatsTo   chat[]   @relation("ToGuest")
 }
 
 model property {
@@ -133,19 +135,22 @@ model propertyRegistration {
 }
 
 model chat {
-  id         String @id @default(uuid())
-  message    String
-  senderRole Role // Can be USER or GUEST
+  id          String   @id @default(uuid())
+  fromUser    user?    @relation("FromUser", fields: [fromUserId], references: [id], onDelete: Cascade)
+  fromUserId  String?
+  fromGuest   guest?   @relation("FromGuest", fields: [fromGuestId], references: [id], onDelete: Cascade)
+  fromGuestId String?
+  toUser      user?    @relation("ToUser", fields: [toUserId], references: [id], onDelete: Cascade)
+  toUserId    String?
+  toGuest     guest?   @relation("ToGuest", fields: [toGuestId], references: [id], onDelete: Cascade)
+  toGuestId   String?
+  msg         String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  // The user and guest who are part of this conversation
-  user    user   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId  String
-  guest   guest  @relation(fields: [guestId], references: [id], onDelete: Cascade)
-  guestId String
+  // Ensure only guest<->admin messages are allowed (enforced in application logic)
+  // guest to guest and admin to admin are not allowed
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // An index to quickly find all messages between a user and a guest
-  @@index([userId, guestId])
+  @@index([fromUserId, toUserId])
+  @@index([fromGuestId, toGuestId])
 }

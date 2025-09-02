@@ -33,7 +33,7 @@ export function SocketProvider({
     if (!userId && !guestId) return null;
 
     const socketUrl =
-      process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:5000";
+      process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3000";
     if (!socketUrl) {
       console.error("NEXT_PUBLIC_SOCKET_URL environment variable is not set");
       return null; // or you can throw an error
@@ -82,27 +82,27 @@ export function SocketProvider({
       [key: string]: any;
     }
 
-    interface OrderNotification {
-      orderCode?: string;
-      table?: TableInfo;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      [key: string]: any;
-    }
+    // interface OrderNotification {
+    //   orderCode?: string;
+    //   table?: TableInfo;
+    //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    //   [key: string]: any;
+    // }
 
-    const onNewOrderNotification = (order: OrderNotification) => {
-      console.log("New order notification received:", order);
-      if (userId) {
-        // Only for admin
-        const audio = new Audio("/sound/notice.wav");
-        audio.play().catch(() => {});
-        toast.success(
-          `New Order #${order.orderCode?.slice(-5)} from Table ${
-            order.table?.name
-          }`,
-          { duration: 8000, position: "top-center", icon: "🔔" }
-        );
-      }
-    };
+    // const onNewOrderNotification = (order: OrderNotification) => {
+    //   console.log("New order notification received:", order);
+    //   if (userId) {
+    //     // Only for admin
+    //     const audio = new Audio("/sound/notice.wav");
+    //     audio.play().catch(() => {});
+    //     toast.success(
+    //       `New Order #${order.orderCode?.slice(-5)} from Table ${
+    //         order.table?.name
+    //       }`,
+    //       { duration: 8000, position: "top-center", icon: "🔔" }
+    //     );
+    //   }
+    // };
 
     // Handler for order status updates (for Customer)
     // const onOrderStatusUpdate = (order: any) => {
@@ -124,33 +124,33 @@ export function SocketProvider({
     // --- Customer: Order Status Update ---
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const onOrderStatusUpdate = (order: any) => {
-      console.log("Order status update received:", order);
-      if (guestId && order.status === "confirmed") {
-        // Only for customer
-        const audio = new Audio("/sound/notice.wav");
-        audio.play().catch(() => {});
-        toast.success(
-          `Your order #${order.orderCode.slice(-5)} has been confirmed.`,
-          { duration: 8000, position: "top-center", icon: "✅" }
-        );
-      }
-    };
+    // const onOrderStatusUpdate = (order: any) => {
+    //   console.log("Order status update received:", order);
+    //   if (guestId && order.status === "confirmed") {
+    //     // Only for customer
+    //     const audio = new Audio("/sound/notice.wav");
+    //     audio.play().catch(() => {});
+    //     toast.success(
+    //       `Your order #${order.orderCode.slice(-5)} has been confirmed.`,
+    //       { duration: 8000, position: "top-center", icon: "✅" }
+    //     );
+    //   }
+    // };
 
     // --- Attach event listeners ---
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
     // Attach only relevant listeners
-    if (userId) socket.on("new_order_notification", onNewOrderNotification);
-    if (guestId) socket.on("order_status_update", onOrderStatusUpdate);
+    // if (userId) socket.on("new_order_notification", onNewOrderNotification);
+    // if (guestId) socket.on("order_status_update", onOrderStatusUpdate);
 
     // --- Cleanup on unmount (when user logs out or closes tab) ---
     return () => {
       //   console.log("Cleaning up persistent socket connection.");
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
-      if (userId) socket.off("new_order_notification", onNewOrderNotification);
-      if (guestId) socket.off("order_status_update", onOrderStatusUpdate);
+      // if (userId) socket.off("new_order_notification", onNewOrderNotification);
+      // if (guestId) socket.off("order_status_update", onOrderStatusUpdate);
       //   socket.off('all')
       socket.disconnect();
     };

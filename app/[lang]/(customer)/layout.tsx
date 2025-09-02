@@ -39,14 +39,16 @@ const translations = {
   },
 } as const;
 
+type Lang = keyof typeof translations;
+
 export default async function Layout({
   children,
   params,
 }: {
   children: React.ReactNode;
-  params: { lang: "en" | "am" };
+  params: Promise<{ lang: Lang }>;
 }) {
-  const lang = params.lang || "en";
+  const { lang } = await params;
   const t = translations[lang];
   // Define menu inside the function to access params
   const menu = [
