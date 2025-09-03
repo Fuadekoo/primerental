@@ -29,7 +29,7 @@ export function SocketProvider({
 }) {
   // useMemo creates the socket instance only ONCE, preventing reconnections on re-renders.
   const socket = useMemo(() => {
-    // Only connect if we have an identifier (userId or tableId)
+    // Only connect if we have an identifier (userId or guestId)
     if (!userId && !guestId) return null;
 
     const socketUrl =
@@ -43,6 +43,9 @@ export function SocketProvider({
       // Send authentication details if they exist
       auth: {
         id: userId,
+      },
+      // Pass guestId in query for guest connections
+      query: {
         guestId: guestId,
       },
       reconnection: true,
@@ -52,19 +55,12 @@ export function SocketProvider({
 
   useEffect(() => {
     if (!socket) return;
-    // joint the table room
-    if (guestId) {
-      socket.emit("join_room", `table_${guestId}`);
-      console.log(`Socket ${socket.id} joined room table_${guestId}`);
-    }
 
     // --- Define all event handlers ---
     const onConnect = () => {
       console.log("Socket connected persistently with ID:", socket.id);
-      // If it's a customer, register the table
-      if (guestId) {
-        socket.emit("register_table_socket", { guestId });
-      }
+      // The server now handles connection logic automatically.
+      // No need to emit an event from here.
     };
 
     const onDisconnect = (reason: string) => {

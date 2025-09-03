@@ -1,7 +1,9 @@
-import React from "react";
+"use client";
+import React, { useEffect } from "react";
 import { guestAuth } from "@/actions/common/authentication";
 import UserLayout from "@/components/userLayout";
-import { redirect } from "next/navigation";
+import useGuestSession from "@/hooks/useGuestSession";
+import { redirect, useParams } from "next/navigation";
 import {
   Home,
   User,
@@ -41,14 +43,9 @@ const translations = {
 
 type Lang = keyof typeof translations;
 
-export default async function Layout({
-  children,
-  params,
-}: {
-  children: React.ReactNode;
-  params: Promise<{ lang: Lang }>;
-}) {
-  const { lang } = await params;
+export default function Layout({ children }: { children: React.ReactNode }) {
+  const params = useParams();
+  const lang = params.lang as Lang;
   const t = translations[lang];
   // Define menu inside the function to access params
   const menu = [
@@ -89,22 +86,33 @@ export default async function Layout({
     },
   ];
 
-  // const guestId = (await cookies()).get("guest-session-id")?.value;
-
-  // // Check customer auth using passcode and tid from URL
-  // if (!guestId) {
-  //   redirect("/en/forbidden");
-  // }
-  // const isAuth = await guestAuth(guestId);
-  // if (!isAuth) {
-  //   redirect("/en/forbidden");
-  // }
-
   const isManager = false;
+  const guestId = useGuestSession();
+
+  useEffect(() => {
+    if (guestId === null) return; // Wait for the hook to determine the guestId
+
+    // const checkAuth = async () => {
+    //   if (!guestId) {
+    //     redirect(`/${lang}/forbidden`);
+    //     return;
+    //   }
+    //   const isAuth = await guestAuth(guestId);
+    //   if (!isAuth) {
+    //     redirect(`/${lang}/forbidden`);
+    //   }
+    // };
+
+    // checkAuth();
+  }, [guestId, lang]);
+
+  if (!guestId) {
+    return null; // Or a loading spinner while checking auth
+  }
 
   return (
     <UserLayout menu={menu} isManager={isManager}>
-      <SocketProvider>
+      <SocketProvider guestId={guestId}>
         <GuestSocketRegistrar />
         {children}
       </SocketProvider>

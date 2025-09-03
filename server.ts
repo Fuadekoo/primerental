@@ -24,8 +24,9 @@ const Events = {
 async function handleUserConnection(socket: Socket) {
   if (!socket.data.id) return;
   try {
-    const user = await prisma.user.findUnique({
+    const user = await prisma.user.update({
       where: { id: socket.data.id },
+      data: { socket: socket.id },
     });
 
     // --- Join the admin room if the user is an admin ---
@@ -91,7 +92,7 @@ async function handleChatToAdmin(
   try {
     // Find guest and user
     const guest = await prisma.guest.findUnique({
-      where: { id: fromGuestId },
+      where: { guestId: fromGuestId },
       select: { id: true, socket: true },
     });
     const user = await prisma.user.findUnique({
@@ -240,7 +241,10 @@ app
     });
 
     io.use(async (socket, next) => {
+      // For logged-in users (admins)
       socket.data.id = socket.handshake.auth.id;
+
+      // For guest users
       const guestId = socket.handshake.query.guestId as string | undefined;
       if (guestId) {
         socket.data.guestId = guestId;
@@ -251,12 +255,20 @@ app
     io.on("connection", async (socket) => {
       console.log("Socket connected:", socket.id);
 
-      // Log when a user (admin/user) connects
-      socket.on(Events.ADMIN_CONNECTION, ({ userId }) => {
-        console.log(`Admin connected: userId=${userId}, socketId=${socket.id}`);
-      });
+      // --- Handle user connection immediately if userId is present ---
+      if (socket.data.id) {
+        await handleUserConnection(socket);
+      }
 
-      // Log when a customer connects
+      // --- Handle guest connection immediately if guestId is present ---
+      if (socket.data.guestId) {
+        console.log(
+          `[SOCKET] Guest connection detected for guestId: ${socket.data.guestId}, socketId: ${socket.id}`
+        );
+        await handleCustomerConnection(socket, socket.data.guestId);
+      }
+
+      // This event is now redundant if the client sends guestId on connection, but we can keep it as a fallback.
       socket.on(Events.CUSTOMER_CONNECTION, async ({ guestId }) => {
         console.log(
           `[SOCKET] CUSTOMER_CONNECTION event received for guestId: ${guestId}, socketId: ${socket.id}`
@@ -264,7 +276,10 @@ app
         await handleCustomerConnection(socket, guestId);
       });
 
-      handleUserConnection(socket);
+      // This event is also likely not needed if the user connection is handled above.
+      socket.on(Events.ADMIN_CONNECTION, async () => {
+        await handleUserConnection(socket);
+      });
 
       // Chat between guest and admin
       socket.on(
