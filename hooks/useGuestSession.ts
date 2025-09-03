@@ -19,12 +19,26 @@ const setCookie = (name: string, value: string, days = 365) => {
   )}; expires=${expires}; path=/`;
 };
 
+// Helper to delete cookie
+const deleteCookie = (name: string) => {
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+};
+
 const COOKIE_NAME = "prime_rent_guest_id";
 
 const useGuestSession = (): string => {
   const [guestId, setGuestId] = useState<string>("");
 
   useEffect(() => {
+    const userToken = getCookie("token");
+
+    if (userToken) {
+      // If user is logged in, delete the guest session cookie and clear the state.
+      deleteCookie(COOKIE_NAME);
+      setGuestId("");
+      return;
+    }
+
     let id = getCookie(COOKIE_NAME);
     if (!id) {
       id = generateUniqueId();

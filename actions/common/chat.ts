@@ -14,6 +14,10 @@ export const getLoginUserId = async () => {
 export async function getAdminChat(guestId: string) {
   const mydata = await getLoginUserId();
   const adminId = mydata?.id;
+  const guestDataId = await prisma.guest.findUnique({
+    where: { guestId },
+    select: { id: true },
+  });
   if (!adminId) {
     return []; // Not logged in
   }
@@ -22,9 +26,9 @@ export async function getAdminChat(guestId: string) {
       OR: [
         // Messages from other party (user or guest) to me (admin)
 
-        { fromGuestId: guestId, toUserId: adminId },
+        { fromGuestId: guestDataId?.id, toUserId: adminId },
         // Messages from me (admin) to other party (user or guest)
-        { fromUserId: adminId, toGuestId: guestId },
+        { fromUserId: adminId, toGuestId: guestDataId?.id },
       ],
     },
     orderBy: { createdAt: "asc" },
@@ -53,6 +57,11 @@ export async function getGuestChat(guestId: string) {
     where: { role: "ADMIN" },
     select: { id: true },
   });
+
+  const guestDataId = await prisma.guest.findUnique({
+    where: { guestId },
+    select: { id: true },
+  });
   if (!adminId) {
     return []; // Admin not found
   }
@@ -60,9 +69,9 @@ export async function getGuestChat(guestId: string) {
     where: {
       OR: [
         // Messages from guest to admin
-        { fromGuestId: guestId, toUserId: adminId.id },
+        { fromGuestId: guestDataId?.id, toUserId: adminId.id },
         // Messages from admin to guest
-        { fromUserId: adminId.id, toGuestId: guestId },
+        { fromUserId: adminId.id, toGuestId: guestDataId?.id },
       ],
     },
     orderBy: { createdAt: "asc" },

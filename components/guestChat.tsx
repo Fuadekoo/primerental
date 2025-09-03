@@ -31,7 +31,12 @@ export default function ChatPopup() {
   // Action to get existing chat messages
   const [fetchChat, isRefresh, isFetchingChat] = useAction(
     getGuestChat,
-    [true, () => {}],
+    [
+      true,
+      (data) => {
+        console.log("Fetched chat messages:>>guestchat", data);
+      },
+    ],
     guestId
   );
 
@@ -44,7 +49,7 @@ export default function ChatPopup() {
     }
 
     const socketUrl =
-      process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3001";
+      process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3000";
     if (!socketUrl) {
       console.error("NEXT_PUBLIC_SOCKET_URL environment variable is not set");
       return;

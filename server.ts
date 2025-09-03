@@ -9,7 +9,7 @@ import prisma from "./lib/db";
 // --- Constants for Socket Events ---
 const Events = {
   // customer to server
-  CUSTOMER_CONNECTION: "customer_connection",
+  CUSTOMER_CONNECTION: " customer_connection",
   CHAT_TO_ADMIN: "chat_to_admin",
 
   // admin to customer
@@ -199,9 +199,21 @@ async function handleChatToCustomer(
 async function handleDisconnect(socket: Socket) {
   console.log("Socket disconnected:", socket.id);
   try {
-    // Clean up guest sockets on disconnect
-    await prisma.guest.deleteMany({ where: { socket: socket.id } });
-    console.log(`De-registered disconnected guest socket ${socket.id}`);
+    // Set guest socket to null on disconnect instead of deleting
+    await prisma.guest.updateMany({
+      where: { socket: socket.id },
+      data: { socket: null },
+    });
+    console.log(
+      `Set socket to null for disconnected guest socket ${socket.id}`
+    );
+
+    // Also set user socket to null on disconnect
+    await prisma.user.updateMany({
+      where: { socket: socket.id },
+      data: { socket: null },
+    });
+    console.log(`Set socket to null for disconnected user socket ${socket.id}`);
   } catch (error) {
     console.error(`Error de-registering socket ${socket.id}:`, error);
   }
