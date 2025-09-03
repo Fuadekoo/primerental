@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 // import AdminSocketHandler from "@/components/AdminSocketHandler";
 import { SocketProvider } from "@/components/SocketProvider";
-import ChatPopup from "@/components/chat";
+import ChatPopup from "@/components/adminChat";
 
 const translations = {
   en: {

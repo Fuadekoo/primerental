@@ -18,7 +18,7 @@ import {
 // import CustomerSocketHandler from "@/components/CustomerSocketHandler";
 import { SocketProvider } from "@/components/SocketProvider";
 import GuestSocketRegistrar from "@/components/GuestSocketRegistrar";
-import ChatPopup from "@/components/chat";
+import ChatPopup from "@/components/guestChat";
 
 const translations = {
   en: {

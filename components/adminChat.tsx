@@ -1,0 +1,225 @@
+"use client";
+import useAction from "@/hooks/useActions";
+import useGuestSession from "@/hooks/useGuestSession";
+import {
+  getAdminChat,
+  getGuestList,
+  getLoginUserId,
+} from "@/actions/common/chat";
+import io, { Socket } from "socket.io-client";
+import React, { useState, useEffect, useRef } from "react";
+import { MessageSquare, X, Send } from "lucide-react";
+
+// Use the new, more detailed message type
+type ChatMessage = {
+  id: string;
+  fromUserId: string; // Can be guestId or adminId
+  toUserId: string; // Can be guestId or adminId
+  msg: string;
+  createdAt: Date;
+  self?: boolean;
+};
+
+export default function ChatPopup() {
+  const guestId = useGuestSession();
+  const [currentUser] = useAction(getLoginUserId, [true, () => {}]);
+  const [isOpen, setIsOpen] = useState(false);
+  // Update state to use the new ChatMessage type
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [socket, setSocket] = useState<typeof Socket | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Action to get the admin user to message
+  const [adminUser] = useAction(getGuestList, [true, () => {}]);
+
+  // Action to get existing chat messages
+  const [fetchChat, isRefresh, isFetchingChat] = useAction(
+    getAdminChat,
+    [true, () => {}],
+    guestId
+  );
+
+  // Effect to manage Socket.IO connection
+  useEffect(() => {
+    if (!isOpen || !guestId) {
+      socket?.disconnect();
+      setSocket(null);
+      return;
+    }
+
+    const socketUrl =
+      process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3001";
+    if (!socketUrl) {
+      console.error("NEXT_PUBLIC_SOCKET_URL environment variable is not set");
+      return;
+    }
+
+    const newSocket = io(socketUrl, {
+      query: { guestId },
+      reconnection: true,
+      reconnectionAttempts: 5,
+    });
+    setSocket(newSocket);
+
+    const onConnect = () => {
+      console.log("Socket connected for guest with ID:", guestId);
+      // Fetch chat history once connected
+      //   fetchChat(guestId);
+    };
+
+    const onDisconnect = (reason: string) => {
+      console.log("Socket disconnected. Reason:", reason);
+      if (reason === "io server disconnect") {
+        newSocket.connect();
+      }
+    };
+
+    // Handle incoming messages from the admin
+    const handleAdminMessage = (message: ChatMessage) => {
+      setMessages((prev) => [...prev, { ...message, self: false }]);
+    };
+
+    newSocket.on("connect", onConnect);
+    newSocket.on("disconnect", onDisconnect);
+    newSocket.on("admin_to_guest", handleAdminMessage);
+
+    return () => {
+      newSocket.off("connect", onConnect);
+      newSocket.off("disconnect", onDisconnect);
+      newSocket.off("admin_to_guest", handleAdminMessage);
+      newSocket.disconnect();
+    };
+  }, [isOpen, guestId]);
+
+  // Effect to scroll to the latest message
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const toggleChat = () => {
+    setIsOpen(!isOpen);
+  };
+
+  const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (newMessage.trim() === "" || !socket || !guestId || !adminUser) return;
+
+    // Create the message object for optimistic UI update
+    const userMessage: ChatMessage = {
+      id: Date.now().toString(), // Temporary ID for the key
+      fromUserId: guestId,
+      toUserId: adminUser,
+      msg: newMessage,
+      createdAt: new Date(),
+      self: true,
+    };
+    setMessages((prev) => [...prev, userMessage]);
+
+    // Emit the message to the server
+    socket.emit("chat_to_customer", {
+      fromGuestId: guestId,
+      toUserId: adminUser,
+      msg: newMessage,
+    });
+
+    setNewMessage("");
+  };
+
+  return (
+    <div className="fixed bottom-4 right-4 z-50">
+      {/* Chat Window */}
+      <div
+        className={`w-80 h-96 bg-white rounded-lg shadow-2xl flex flex-col transition-all duration-300 ease-in-out ${
+          isOpen
+            ? "translate-y-0 opacity-100"
+            : "hidden translate-y-4 opacity-0 pointer-events-none"
+        }`}
+      >
+        {/* Header */}
+        <div className="flex justify-between items-center p-3 bg-blue-600 text-white rounded-t-lg">
+          <h3 className="font-bold">Chat with an Agent</h3>
+          <button
+            onClick={toggleChat}
+            className="hover:bg-blue-700 p-1 rounded-full"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Messages */}
+        <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
+          <div className="space-y-3">
+            {isFetchingChat ? (
+              <div className="text-center text-gray-500">Loading chat...</div>
+            ) : (
+              messages.map((msg) => (
+                <div
+                  key={msg.id}
+                  className={`flex ${
+                    msg.self ? "justify-end" : "justify-start"
+                  }`}
+                >
+                  <div
+                    className={`max-w-xs px-3 py-2 rounded-lg text-sm shadow ${
+                      msg.self
+                        ? "bg-blue-500 text-white rounded-br-none"
+                        : "bg-white text-gray-800 rounded-bl-none"
+                    }`}
+                  >
+                    <p>{msg.msg}</p>
+                    <div
+                      className={`text-xs mt-1 text-right ${
+                        msg.self ? "text-blue-100" : "text-gray-400"
+                      }`}
+                    >
+                      {new Date(msg.createdAt).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+        </div>
+
+        {/* Input */}
+        <div className="p-3 border-t bg-white">
+          <form
+            onSubmit={handleSendMessage}
+            className="flex items-center gap-2"
+          >
+            <input
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder="Type your message..."
+              className="flex-1 w-full rounded-md border-gray-300 py-2 px-3 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              disabled={!adminUser}
+            />
+            <button
+              type="submit"
+              className="bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition-colors flex-shrink-0 disabled:bg-blue-400 disabled:cursor-not-allowed"
+              aria-label="Send Message"
+              disabled={!newMessage.trim() || !adminUser}
+            >
+              <Send size={20} />
+            </button>
+          </form>
+        </div>
+      </div>
+
+      {/* Chat Toggle Button */}
+      <button
+        onClick={toggleChat}
+        className="mt-4 float-right p-3 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-transform duration-200 hover:scale-110"
+        aria-label="Toggle Chat"
+      >
+        <MessageSquare size={24} />
+      </button>
+    </div>
+  );
+}
