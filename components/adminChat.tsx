@@ -7,7 +7,7 @@ import {
   getLoginUserId,
 } from "@/actions/common/chat";
 import io, { Socket } from "socket.io-client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { MessageSquare, X, Send, ArrowLeft } from "lucide-react";
 
 // Use the new, more detailed message type
@@ -34,6 +34,7 @@ export default function ChatPopup() {
   const [socket, setSocket] = useState<typeof Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [selectGuestId, setSelectGuestId] = useState<string | null>(null);
+  console.log("Selected Guest ID in AdminChatPopup:", selectGuestId);
 
   useEffect(() => {
     if (user) {
@@ -48,20 +49,36 @@ export default function ChatPopup() {
   );
 
   // Action to get existing chat messages
-  const [fetchChat, fetchAction, isFetchingChat] = useAction(getAdminChat, [
-    ,
-    (data) => {
-      console.log("Fetched chat messages:>>adminchat", data);
-    },
-  ]);
+  const [chatHistory, fetchChat, isFetchingChat] = useAction(
+    getAdminChat,
+    [true, () => {}],
+    selectGuestId ?? ""
+  );
 
   useEffect(() => {
-    if (selectGuestId) {
-      fetchAction(selectGuestId);
+    if (chatHistory && userId) {
+      const formattedMessages = chatHistory.map((msg: any) => ({
+        id: msg.id,
+        fromUserId: msg.fromUserId ?? msg.fromGuestId ?? "",
+        toUserId: msg.toUserId ?? msg.toGuestId ?? "",
+        msg: msg.msg,
+        createdAt: new Date(msg.createdAt),
+        self: (msg.fromUserId ?? msg.fromGuestId ?? "") === userId,
+      }));
+      setMessages(formattedMessages);
     } else {
       setMessages([]);
     }
-  }, [selectGuestId]);
+  }, [chatHistory, userId]);
+
+  const stableFetchChat = useCallback(fetchChat, []);
+
+  useEffect(() => {
+    setMessages([]); // Clear messages when guest selection changes
+    if (selectGuestId) {
+      stableFetchChat();
+    }
+  }, [selectGuestId, stableFetchChat]);
 
   // Effect to manage Socket.IO connection
   useEffect(() => {
@@ -105,12 +122,12 @@ export default function ChatPopup() {
 
     newSocket.on("connect", onConnect);
     newSocket.on("disconnect", onDisconnect);
-    newSocket.on("admin_to_guest", handleAdminMessage);
+    newSocket.on("chat_to_admin", handleAdminMessage);
 
     return () => {
       newSocket.off("connect", onConnect);
       newSocket.off("disconnect", onDisconnect);
-      newSocket.off("admin_to_guest", handleAdminMessage);
+      newSocket.off("chat_to_admin", handleAdminMessage);
       newSocket.disconnect();
     };
   }, [isOpen, userId]);
@@ -143,7 +160,7 @@ export default function ChatPopup() {
     // Emit the message to the server
     socket.emit("chat_to_customer", {
       fromUserId: userId,
-      toUserId: selectGuestId,
+      toGuestId: selectGuestId,
       msg: newMessage,
     });
 
@@ -264,11 +281,11 @@ export default function ChatPopup() {
               guestList?.map((guest: any) => (
                 <div
                   key={guest.id}
-                  onClick={() => setSelectGuestId(guest.id)}
+                  onClick={() => setSelectGuestId(guest.guestId)}
                   className="p-3 hover:bg-gray-100 cursor-pointer border-b"
                 >
                   <p className="font-semibold">{guest.name || "Guest"}</p>
-                  <p className="text-sm text-gray-500">{guest.id}</p>
+                  <p className="text-sm text-gray-500">{guest.guestId}</p>
                 </div>
               ))
             )}

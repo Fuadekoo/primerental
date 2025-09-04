@@ -82,14 +82,13 @@ async function handleCustomerConnection(socket: Socket, guestId: string) {
 
 async function handleChatToAdmin(
   socket: Socket,
-  {
-    fromGuestId,
-    toUserId,
-    msg,
-  }: { fromGuestId: string; toUserId: string; msg: string },
+  { toUserId, msg }: { toUserId: string; msg: string },
   io: Server
 ) {
   try {
+    const fromGuestId = socket.data.guestId;
+    console.log("guestid>>>>", fromGuestId);
+    console.log("toUserId>>>>", toUserId);
     // Find guest and user
     const guest = await prisma.guest.findUnique({
       where: { guestId: fromGuestId },
@@ -123,7 +122,7 @@ async function handleChatToAdmin(
       }
       // Emit to sender (guest)
       if (guest.socket) {
-        io.to(guest.socket).emit("chat_to_admin", {
+        io.to(guest.socket).emit("chat_to_customer", {
           id: chat.id,
           fromGuestId: chat.fromGuestId,
           toUserId: chat.toUserId,
@@ -148,13 +147,15 @@ async function handleChatToCustomer(
   io: Server
 ) {
   try {
+    console.log("fromUserId>>>> in admin", fromUserId);
+    console.log("toGuestId>>>> in admin", toGuestId);
     // Find user and guest
     const user = await prisma.user.findUnique({
       where: { id: fromUserId, role: "ADMIN" },
       select: { id: true, socket: true, role: true },
     });
     const guest = await prisma.guest.findUnique({
-      where: { id: toGuestId },
+      where: { guestId: toGuestId },
       select: { id: true, socket: true },
     });
 
@@ -181,7 +182,7 @@ async function handleChatToCustomer(
       }
       // Emit to sender (admin)
       if (user.socket) {
-        io.to(user.socket).emit("chat_to_customer", {
+        io.to(user.socket).emit("chat_to_admin", {
           id: chat.id,
           fromUserId: chat.fromUserId,
           toGuestId: chat.toGuestId,
@@ -297,7 +298,6 @@ app
       socket.on(
         Events.CHAT_TO_ADMIN,
         async ({
-          fromGuestId,
           toUserId,
           msg,
         }: {
@@ -305,7 +305,7 @@ app
           toUserId: string;
           msg: string;
         }) => {
-          await handleChatToAdmin(socket, { fromGuestId, toUserId, msg }, io);
+          await handleChatToAdmin(socket, { toUserId, msg }, io);
         }
       );
 

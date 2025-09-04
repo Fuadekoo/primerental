@@ -8,8 +8,14 @@ import {
   DropdownTrigger,
 } from "@heroui/react";
 import { LogOutIcon, UserIcon } from "lucide-react";
-import { AlignLeft, ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import {
+  AlignLeft,
+  ChevronLeft,
+  ChevronRight,
+  Wifi,
+  WifiOff,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { logout } from "@/actions/common/authentication";
@@ -33,8 +39,75 @@ export default function UserLayout({
   isManager?: boolean;
 }) {
   const [sidebar, setSidebar] = useState(false);
+  // --- Add online status state ---
+  const [isOnline, setIsOnline] = useState(true);
+  const [showOfflinePopup, setShowOfflinePopup] = useState(false);
+
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      setShowOfflinePopup(false);
+    };
+    const handleOffline = () => {
+      setIsOnline(false);
+      setShowOfflinePopup(true);
+    };
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    // Initial check
+    if (!navigator.onLine) {
+      setIsOnline(false);
+      setShowOfflinePopup(true);
+    }
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
   return (
     <div className=" grid lg:grid-cols-[auto_1fr] overflow-hidden h-dvh w-dvw ">
+      {/* --- Offline Popup --- */}
+      {showOfflinePopup && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-xs w-full flex flex-col items-center">
+            <WifiOff className="text-red-500 mb-2" size={32} />
+            <h2 className="text-lg font-semibold mb-2 text-center">
+              You are offline
+            </h2>
+            <p className="text-sm text-gray-600 mb-4 text-center">
+              Please check your internet connection.
+            </p>
+            <div className="flex gap-3 w-full">
+              <Button
+                className="flex-1"
+                color="secondary"
+                variant="flat"
+                onPress={() => setShowOfflinePopup(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="flex-1"
+                color="primary"
+                variant="solid"
+                onPress={() => {
+                  if (navigator.onLine) {
+                    setIsOnline(true);
+                    setShowOfflinePopup(false);
+                  } else {
+                    setIsOnline(false);
+                    setShowOfflinePopup(true);
+                  }
+                }}
+              >
+                Reconnect
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* --- End Offline Popup --- */}
       <Sidebar {...{ sidebar, setSidebar, menu, isManager }} />
       <div className="grid grid-rows-[auto_1fr] gap-2 overflow-hidden">
         <Header
