@@ -43,6 +43,7 @@ export default function ChatPopup() {
   const [socket, setSocket] = useState<typeof Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [selectGuestId, setSelectGuestId] = useState<string | null>(null);
+  const [onlineGuests, setOnlineGuests] = useState<Set<string>>(new Set());
   console.log("Selected Guest ID in AdminChatPopup:", selectGuestId);
 
   useEffect(() => {
@@ -155,14 +156,36 @@ export default function ChatPopup() {
       }
     };
 
+    const handleOnlineGuests = (onlineGuestIds: string[]) => {
+      setOnlineGuests(new Set(onlineGuestIds));
+    };
+
+    const handleGuestOnline = (guestId: string) => {
+      setOnlineGuests((prev) => new Set(prev).add(guestId));
+    };
+
+    const handleGuestOffline = (guestId: string) => {
+      setOnlineGuests((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(guestId);
+        return newSet;
+      });
+    };
+
     newSocket.on("connect", onConnect);
     newSocket.on("disconnect", onDisconnect);
     newSocket.on("chat_to_admin", handleAdminMessage);
+    newSocket.on("online_guests_list", handleOnlineGuests);
+    newSocket.on("guest_online", handleGuestOnline);
+    newSocket.on("guest_offline", handleGuestOffline);
 
     return () => {
       newSocket.off("connect", onConnect);
       newSocket.off("disconnect", onDisconnect);
       newSocket.off("chat_to_admin", handleAdminMessage);
+      newSocket.off("online_guests_list", handleOnlineGuests);
+      newSocket.off("guest_online", handleGuestOnline);
+      newSocket.off("guest_offline", handleGuestOffline);
       newSocket.disconnect();
     };
   }, [isOpen, userId, selectGuestId]);
@@ -331,7 +354,18 @@ export default function ChatPopup() {
                   onClick={() => setSelectGuestId(guest.guestId)}
                   className="p-3 hover:bg-gray-100 cursor-pointer border-b"
                 >
-                  <p className="font-semibold">{guest.name || "Guest"}</p>
+                  <div className="flex justify-between items-center">
+                    <p className="font-semibold">{guest.name || "Guest"}</p>
+                    {onlineGuests.has(guest.guestId) ? (
+                      <span className="text-xs text-green-500 font-medium">
+                        Online
+                      </span>
+                    ) : (
+                      <span className="text-xs text-red-500 font-medium">
+                        Offline
+                      </span>
+                    )}
+                  </div>
                   <p className="text-sm text-gray-500">{guest.guestId}</p>
                 </div>
               ))

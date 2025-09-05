@@ -6,6 +6,10 @@ import next from "next";
 import { Server, Socket } from "socket.io";
 import prisma from "./lib/db";
 
+// In-memory storage for online users
+const onlineGuests = new Map<string, string>(); // Map<guestId, socketId>
+const onlineAdmins = new Set<string>(); // Set<socketId>
+
 // --- Constants for Socket Events ---
 const Events = {
   // customer to server
@@ -15,6 +19,11 @@ const Events = {
   // admin to customer
   ADMIN_CONNECTION: "admin_connection",
   CHAT_TO_CUSTOMER: "chat_to_customer",
+
+  // online guest status
+  ONLINE_GUESTS_LIST: "online_guests_list",
+  GUEST_ONLINE: "guest_online",
+  GUEST_OFFLINE: "guest_offline",
 
   // Error Events
   GENERAL_ERROR: "socket_error",
@@ -33,6 +42,10 @@ async function handleUserConnection(socket: Socket) {
     if (user && user.role === "ADMIN") {
       socket.join("admin_room");
       console.log(`Admin user ${user.id} joined 'admin_room'`);
+
+      // Add admin to online list and send them the current guest list
+      onlineAdmins.add(socket.id);
+      socket.emit(Events.ONLINE_GUESTS_LIST, Array.from(onlineGuests.keys()));
     }
   } catch (error) {
     console.error(
@@ -42,7 +55,11 @@ async function handleUserConnection(socket: Socket) {
   }
 }
 
-async function handleCustomerConnection(socket: Socket, guestId: string) {
+async function handleCustomerConnection(
+  socket: Socket,
+  guestId: string,
+  io: Server
+) {
   // Add a log to confirm function execution
   console.log(
     `[SOCKET] handleCustomerConnection called for guestId: ${guestId}, socketId: ${socket.id}`
@@ -72,6 +89,12 @@ async function handleCustomerConnection(socket: Socket, guestId: string) {
     socket.join(roomName);
     socket.emit("join_room", roomName);
     console.log(`[SOCKET] Socket ${socket.id} joined room ${roomName}`);
+
+    // Add guest to online list and notify admins
+    onlineGuests.set(guestId, socket.id);
+    onlineAdmins.forEach((adminSocketId) => {
+      io.to(adminSocketId).emit(Events.GUEST_ONLINE, guestId);
+    });
   } catch (error) {
     console.error(`[SOCKET] Error during customer socket registration:`, error);
     socket.emit(Events.GENERAL_ERROR, {
@@ -197,8 +220,26 @@ async function handleChatToCustomer(
   }
 }
 
-async function handleDisconnect(socket: Socket) {
+async function handleDisconnect(socket: Socket, io: Server) {
   console.log("Socket disconnected:", socket.id);
+
+  // --- Update online status tracking ---
+  const guestId = socket.data.guestId;
+  if (guestId && onlineGuests.get(guestId) === socket.id) {
+    onlineGuests.delete(guestId);
+    // Notify all admins that this guest has gone offline
+    onlineAdmins.forEach((adminSocketId) => {
+      io.to(adminSocketId).emit(Events.GUEST_OFFLINE, guestId);
+    });
+    console.log(`Guest ${guestId} went offline.`);
+  }
+
+  if (onlineAdmins.has(socket.id)) {
+    onlineAdmins.delete(socket.id);
+    console.log(`Admin with socket ${socket.id} went offline.`);
+  }
+  // --- End of online status tracking update ---
+
   try {
     // Set guest socket to null on disconnect instead of deleting
     await prisma.guest.updateMany({
@@ -278,7 +319,7 @@ app
         console.log(
           `[SOCKET] Guest connection detected for guestId: ${socket.data.guestId}, socketId: ${socket.id}`
         );
-        await handleCustomerConnection(socket, socket.data.guestId);
+        await handleCustomerConnection(socket, socket.data.guestId, io);
       }
 
       // This event is now redundant if the client sends guestId on connection, but we can keep it as a fallback.
@@ -286,7 +327,7 @@ app
         console.log(
           `[SOCKET] CUSTOMER_CONNECTION event received for guestId: ${guestId}, socketId: ${socket.id}`
         );
-        await handleCustomerConnection(socket, guestId);
+        await handleCustomerConnection(socket, guestId, io);
       });
 
       // This event is also likely not needed if the user connection is handled above.
@@ -330,8 +371,7 @@ app
       );
 
       socket.on("disconnect", () => {
-        console.log("Socket disconnected:", socket.id);
-        handleDisconnect(socket);
+        handleDisconnect(socket, io);
       });
       socket.on("error", (err) => console.log("Socket error:", err.message));
     });
