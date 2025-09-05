@@ -92,7 +92,7 @@ async function handleChatToAdmin(
     // Find guest and user
     const guest = await prisma.guest.findUnique({
       where: { guestId: fromGuestId },
-      select: { id: true, socket: true },
+      select: { id: true, guestId: true, socket: true },
     });
     const user = await prisma.user.findUnique({
       where: { id: toUserId, role: "ADMIN" },
@@ -113,7 +113,7 @@ async function handleChatToAdmin(
       if (user.socket) {
         io.to(user.socket).emit("chat_to_admin", {
           id: chat.id,
-          fromGuestId: chat.fromGuestId,
+          fromGuestId: fromGuestId,
           toUserId: chat.toUserId,
           msg: chat.msg,
           createdAt: chat.createdAt,

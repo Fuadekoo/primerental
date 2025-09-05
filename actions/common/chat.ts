@@ -11,44 +11,58 @@ export const getLoginUserId = async () => {
   return { id: session.user.id };
 };
 
-export async function getAdminChat(guestId: string) {
-  const mydata = await getLoginUserId();
-  const adminId = mydata?.id;
-  const guestDataId = await prisma.guest.findUnique({
-    where: { guestId },
-    select: { id: true },
-  });
-  if (!adminId) {
-    return []; // Not logged in
-  }
-  const chat = await prisma.chat.findMany({
-    where: {
-      OR: [
-        // Messages from other party (user or guest) to me (admin)
+export async function getAdminChat(guestId: string | undefined) {
+  try {
+    console.log("guestidat messaege>>>>>>>", guestId);
+    const mydata = await getLoginUserId();
+    const adminId = mydata?.id;
 
-        { fromGuestId: guestDataId?.id, toUserId: adminId },
-        // Messages from me (admin) to other party (user or guest)
-        { fromUserId: adminId, toGuestId: guestDataId?.id },
-      ],
-    },
-    orderBy: { createdAt: "asc" },
-    select: {
-      id: true,
-      msg: true,
-      fromUserId: true,
-      fromGuestId: true,
-      toUserId: true,
-      toGuestId: true,
-      createdAt: true,
-      updatedAt: true,
-    },
-  });
-  // when my adminId is found in fromuserid then add a self and true
-  const chats = chat.map((c) => ({
-    ...c,
-    self: c.fromUserId === adminId,
-  }));
-  return chats;
+    if (!guestId || !adminId) {
+      return []; // Not logged in or no guest specified
+    }
+
+    const guestData = await prisma.guest.findUnique({
+      where: { guestId },
+      select: { id: true },
+    });
+
+    if (!guestData) {
+      return []; // Guest not found in the database
+    }
+
+    const chat = await prisma.chat.findMany({
+      where: {
+        OR: [
+          // Messages from guest to me (admin)
+          { fromGuestId: guestData.id, toUserId: adminId },
+          // Messages from me (admin) to guest
+          { fromUserId: adminId, toGuestId: guestData.id },
+        ],
+      },
+      orderBy: { createdAt: "asc" },
+      select: {
+        id: true,
+        msg: true,
+        fromUserId: true,
+        fromGuestId: true,
+        toUserId: true,
+        toGuestId: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+    // when my adminId is found in fromuserid then add a self and true
+    const chats = chat.map((c) => ({
+      ...c,
+      self: c.fromUserId === adminId,
+    }));
+
+    // console.log("Admin chats:", chats);
+    return chats;
+  } catch (error) {
+    console.error("Error in getAdminChat:", error);
+    return []; // Return empty array on any error
+  }
 }
 
 export async function getGuestChat(guestId: string) {

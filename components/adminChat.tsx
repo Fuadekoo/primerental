@@ -49,21 +49,20 @@ export default function ChatPopup() {
   );
 
   // Action to get existing chat messages
-  const [chatHistory, fetchChat, isFetchingChat] = useAction(
-    getAdminChat,
-    [true, () => {}],
-    selectGuestId ?? ""
-  );
+  const [chatHistory, fetchChat, isFetchingChat] = useAction(getAdminChat, [
+    ,
+    () => {},
+  ]);
 
   useEffect(() => {
     if (chatHistory && userId) {
       const formattedMessages = chatHistory.map((msg: any) => ({
         id: msg.id,
-        fromUserId: msg.fromUserId ?? msg.fromGuestId ?? "",
-        toUserId: msg.toUserId ?? msg.toGuestId ?? "",
+        fromUserId: msg.fromUserId ?? msg.fromGuestId, // Keep original IDs
+        toUserId: msg.toUserId ?? msg.toGuestId,
         msg: msg.msg,
         createdAt: new Date(msg.createdAt),
-        self: (msg.fromUserId ?? msg.fromGuestId ?? "") === userId,
+        self: msg.fromUserId === userId, // Message is "self" if from admin
       }));
       setMessages(formattedMessages);
     } else {
@@ -76,7 +75,7 @@ export default function ChatPopup() {
   useEffect(() => {
     setMessages([]); // Clear messages when guest selection changes
     if (selectGuestId) {
-      stableFetchChat();
+      fetchChat(selectGuestId);
     }
   }, [selectGuestId, stableFetchChat]);
 
@@ -96,7 +95,7 @@ export default function ChatPopup() {
     }
 
     const newSocket = io(socketUrl, {
-      query: { user: userId },
+      auth: { id: userId },
       reconnection: true,
       reconnectionAttempts: 5,
     });
@@ -115,9 +114,28 @@ export default function ChatPopup() {
       }
     };
 
-    // Handle incoming messages from the admin
-    const handleAdminMessage = (message: ChatMessage) => {
-      setMessages((prev) => [...prev, { ...message, self: false }]);
+    // Handle incoming messages for the admin
+    const handleAdminMessage = (message: any) => {
+      // These are the session/DB IDs from the server payload
+      const fromId = message.fromGuestId ?? message.fromUserId;
+      const toId = message.toGuestId ?? message.toUserId;
+      console.log(
+        "Received message from admin : ",
+        fromId,
+        toId,
+        selectGuestId,
+        userId
+      );
+
+      // Check if the message belongs to the currently active chat
+      if (
+        (fromId === selectGuestId && toId === userId) || // Message from selected guest to me
+        (fromId === userId && toId === selectGuestId) // Message from me to selected guest (echo)
+      ) {
+        setMessages((prev) => [...prev, message]);
+      } else {
+        console.log("ELSE : ", message);
+      }
     };
 
     newSocket.on("connect", onConnect);
@@ -130,7 +148,7 @@ export default function ChatPopup() {
       newSocket.off("chat_to_admin", handleAdminMessage);
       newSocket.disconnect();
     };
-  }, [isOpen, userId]);
+  }, [isOpen, userId, selectGuestId]);
 
   // Effect to scroll to the latest message
   useEffect(() => {

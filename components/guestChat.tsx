@@ -36,11 +36,10 @@ export default function GuestChatPopup() {
     }
   }, [admin]);
 
-  const [chatHistory, fetchChat, isFetchingChat] = useAction(
-    getGuestChat,
-    [true, () => {}],
-    guestId ?? ""
-  );
+  const [chatHistory, fetchChat, isFetchingChat] = useAction(getGuestChat, [
+    ,
+    () => {},
+  ]);
 
   useEffect(() => {
     if (chatHistory && guestId) {
@@ -62,7 +61,7 @@ export default function GuestChatPopup() {
 
   useEffect(() => {
     if (isOpen && guestId) {
-      stableFetchChat();
+      fetchChat(guestId);
     }
   }, [isOpen, guestId, stableFetchChat]);
 
