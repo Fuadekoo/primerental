@@ -1,10 +1,14 @@
 "use client";
 import useAction from "@/hooks/useActions";
 import useGuestSession from "@/hooks/useGuestSession";
-import { getGuestChat, getAdmin } from "@/actions/common/chat";
+import {
+  getGuestChat,
+  getAdmin,
+  readGuestMessages,
+} from "@/actions/common/chat";
 import io, { Socket } from "socket.io-client";
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { MessageSquare, X, Send } from "lucide-react";
+import { MessageSquare, X, Send, Check, CheckCheck } from "lucide-react";
 
 type ChatMessage = {
   id: string;
@@ -12,6 +16,7 @@ type ChatMessage = {
   toUserId: string;
   msg: string;
   createdAt: Date;
+  isRead?: boolean;
   self?: boolean;
 };
 
@@ -41,6 +46,12 @@ export default function GuestChatPopup() {
     () => {},
   ]);
 
+  // action when guest read a message from admin
+  const [markRead, readAction, isMarkingReadLoading] = useAction(
+    readGuestMessages,
+    [, () => {}]
+  );
+
   useEffect(() => {
     if (chatHistory && guestId) {
       const formattedMessages = chatHistory.map((msg: any) => ({
@@ -49,6 +60,7 @@ export default function GuestChatPopup() {
         toUserId: msg.toUserId ?? msg.toGuestId ?? "",
         msg: msg.msg,
         createdAt: new Date(msg.createdAt),
+        isRead: msg.isRead,
         self: msg.fromGuestId !== null, // Correctly identify messages sent by the guest
       }));
       setMessages(formattedMessages);
@@ -62,6 +74,7 @@ export default function GuestChatPopup() {
   useEffect(() => {
     if (isOpen && guestId) {
       fetchChat(guestId);
+      readAction(guestId);
     }
   }, [isOpen, guestId, stableFetchChat]);
 
@@ -186,14 +199,25 @@ export default function GuestChatPopup() {
                     >
                       <p>{msg.msg}</p>
                       <div
-                        className={`text-xs mt-1 text-right ${
+                        className={`flex items-center justify-end gap-1 text-xs mt-1 ${
                           msg.self ? "text-blue-100" : "text-gray-400"
                         }`}
                       >
-                        {new Date(msg.createdAt).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        <span>
+                          {new Date(msg.createdAt).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
+                        {msg.self && (
+                          <span className="flex-shrink-0">
+                            {msg.isRead ? (
+                              <CheckCheck size={16} />
+                            ) : (
+                              <Check size={16} />
+                            )}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>

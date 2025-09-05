@@ -5,10 +5,18 @@ import {
   getAdminChat,
   getGuestList,
   getLoginUserId,
+  readAdminMessages,
 } from "@/actions/common/chat";
 import io, { Socket } from "socket.io-client";
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { MessageSquare, X, Send, ArrowLeft } from "lucide-react";
+import {
+  MessageSquare,
+  X,
+  Send,
+  ArrowLeft,
+  Check,
+  CheckCheck,
+} from "lucide-react";
 
 // Use the new, more detailed message type
 type ChatMessage = {
@@ -17,6 +25,7 @@ type ChatMessage = {
   toUserId: string; // Can be guestId or adminId
   msg: string;
   createdAt: Date;
+  isRead?: boolean; // New field to track read status
   self?: boolean;
 };
 
@@ -54,6 +63,12 @@ export default function ChatPopup() {
     () => {},
   ]);
 
+  // action to mark messages as read
+  const [markRead, readAction, isMarkingReadLoading] = useAction(
+    readAdminMessages,
+    [, () => {}]
+  );
+
   useEffect(() => {
     if (chatHistory && userId) {
       const formattedMessages = chatHistory.map((msg: any) => ({
@@ -62,6 +77,7 @@ export default function ChatPopup() {
         toUserId: msg.toUserId ?? msg.toGuestId,
         msg: msg.msg,
         createdAt: new Date(msg.createdAt),
+        isRead: msg.isRead,
         self: msg.fromUserId === userId, // Message is "self" if from admin
       }));
       setMessages(formattedMessages);
@@ -76,6 +92,7 @@ export default function ChatPopup() {
     setMessages([]); // Clear messages when guest selection changes
     if (selectGuestId) {
       fetchChat(selectGuestId);
+      readAction(selectGuestId); // Mark messages as read when fetching
     }
   }, [selectGuestId, stableFetchChat]);
 
@@ -172,6 +189,7 @@ export default function ChatPopup() {
       msg: newMessage,
       createdAt: new Date(),
       self: true,
+      // isRead: true,
     };
     setMessages((prev) => [...prev, userMessage]);
 
@@ -246,14 +264,25 @@ export default function ChatPopup() {
                       >
                         <p>{msg.msg}</p>
                         <div
-                          className={`text-xs mt-1 text-right ${
+                          className={`flex items-center justify-end gap-1 text-xs mt-1 ${
                             msg.self ? "text-blue-100" : "text-gray-400"
                           }`}
                         >
-                          {new Date(msg.createdAt).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
+                          <span>
+                            {new Date(msg.createdAt).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </span>
+                          {msg.self && (
+                            <span className="flex-shrink-0">
+                              {msg.isRead ? (
+                                <CheckCheck size={16} />
+                              ) : (
+                                <Check size={16} />
+                              )}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>

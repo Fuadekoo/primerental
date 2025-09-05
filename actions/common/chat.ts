@@ -49,6 +49,7 @@ export async function getAdminChat(guestId: string | undefined) {
         toGuestId: true,
         createdAt: true,
         updatedAt: true,
+        isRead: true,
       },
     });
     // when my adminId is found in fromuserid then add a self and true
@@ -98,6 +99,7 @@ export async function getGuestChat(guestId: string) {
       toGuestId: true,
       createdAt: true,
       updatedAt: true,
+      isRead: true,
     },
   });
   // when my guestId is found in fromGuestId then add a self and true
@@ -125,4 +127,67 @@ export async function getGuestList() {
     orderBy: { updatedAt: "asc" },
   });
   return guests;
+}
+
+export async function readGuestMessages(guestId: string) {
+  try {
+    const guestData = await prisma.guest.findUnique({
+      where: { guestId },
+      select: { id: true, guestId: true },
+    });
+
+    if (!guestData) {
+      console.error("Guest not found for reading messages");
+      return;
+    }
+
+    // Mark messages sent TO the guest as read
+    await prisma.chat.updateMany({
+      where: {
+        toGuestId: guestData.id,
+        isRead: false,
+      },
+      data: {
+        isRead: true,
+      },
+    });
+  } catch (error) {
+    console.error("Error in readGuestMessages:", error);
+  }
+}
+
+export async function readAdminMessages(guestId: string) {
+  try {
+    const mydata = await getLoginUserId();
+    const adminId = mydata?.id;
+
+    if (!adminId) {
+      console.error("Admin not logged in for reading messages");
+      return;
+    }
+
+    const guestData = await prisma.guest.findUnique({
+      where: { guestId },
+      select: { id: true, guestId: true },
+    });
+
+    if (!guestData) {
+      console.error("Guest not found for reading messages");
+      return;
+    }
+
+    // Mark messages sent TO the admin FROM this guest as read
+    await prisma.chat.updateMany({
+      where: {
+        fromGuestId: guestData.id,
+        toUserId: adminId,
+        isRead: false,
+      },
+      data: {
+        isRead: true,
+      },
+    });
+  } catch (error) {
+    console.error("Error in readAdminMessages:", error);
+  }
 }
