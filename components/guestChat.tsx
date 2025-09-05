@@ -50,7 +50,7 @@ export default function GuestChatPopup() {
         toUserId: msg.toUserId ?? msg.toGuestId ?? "",
         msg: msg.msg,
         createdAt: new Date(msg.createdAt),
-        self: (msg.fromUserId ?? msg.fromGuestId ?? "") === guestId,
+        self: msg.fromGuestId !== null, // Correctly identify messages sent by the guest
       }));
       setMessages(formattedMessages);
     } else {
@@ -99,7 +99,7 @@ export default function GuestChatPopup() {
     };
 
     const handleAdminMessage = (message: ChatMessage) => {
-      setMessages((prev) => [...prev, { ...message, self: false }]);
+      setMessages((prev) => [...prev, message]);
     };
 
     newSocket.on("connect", onConnect);
@@ -126,14 +126,14 @@ export default function GuestChatPopup() {
     e.preventDefault();
     if (newMessage.trim() === "" || !socket || !guestId || !adminId) return;
 
-    const userMessage: ChatMessage = {
-      id: Date.now().toString(),
-      fromUserId: guestId,
-      toUserId: adminId,
-      msg: newMessage,
-      createdAt: new Date(),
-      self: true,
-    };
+    // const userMessage: ChatMessage = {
+    //   id: Date.now().toString(),
+    //   fromUserId: guestId,
+    //   toUserId: adminId,
+    //   msg: newMessage,
+    //   createdAt: new Date(),
+    //   self: true,
+    // };
     // setMessages((prev) => [...prev, userMessage]);
 
     socket.emit("chat_to_admin", {
@@ -156,7 +156,7 @@ export default function GuestChatPopup() {
       >
         <div className="flex justify-between items-center p-3 bg-blue-600 text-white rounded-t-lg">
           <h3 className="font-bold flex-1 text-center">Chat with Support</h3>
-          {/* <h2 className="text-red-500">you are online</h2> */}
+          <h2 className="text-red-500">you are online</h2>
           <button
             onClick={toggleChat}
             className="hover:bg-blue-700 p-1 rounded-full"
