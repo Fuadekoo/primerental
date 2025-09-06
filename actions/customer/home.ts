@@ -26,6 +26,7 @@ export async function specialOffers() {
     const offers = await prisma.property.findMany({
       where: { discount: { gt: 0 } },
       include: { propertyType: true },
+      // take: 4,
     });
     // Map over the offers to calculate the new price after discount
     const offersWithDiscountedPrice = offers.map((offer) => {
