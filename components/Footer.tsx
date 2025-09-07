@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { Facebook, Twitter, Instagram } from "lucide-react";
+import { Facebook, Youtube, Instagram } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -32,7 +32,7 @@ export default function Footer() {
                 aria-label="Twitter"
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
-                <Twitter size={18} />
+                <Youtube size={18} />
               </Link>
               <Link
                 href="#"

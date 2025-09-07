@@ -193,7 +193,7 @@ function Sidebar({
           )}
         </Button>
 
-        <div className="flex items-center gap-3 px-5 pt-3 pb-2">
+        <div className=" bg-blue-400 flex items-center gap-3 px-5 pt-3 pb-2 mb-4">
           <Image
             src="/logo.png"
             alt="Prime Rental"
