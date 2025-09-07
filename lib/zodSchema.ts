@@ -62,3 +62,19 @@ export const propertySchema = z.object({
   parking: z.coerce.number().min(0),
 });
 export type Property = z.infer<typeof propertySchema>;
+
+export const passwordChangeSchema = z.object({
+  oldPassword: z.string().min(8, "Password must be at least 8 characters long"),
+  newPassword: z.string().min(8, "Password must be at least 8 characters long"),
+  confirmNewPassword: z
+    .string()
+    .min(8, "Password must be at least 8 characters long"),
+});
+export type passwordChange = z.infer<typeof passwordChangeSchema>;
+
+export const updateUserSchema = z.object({
+  name: z.string().min(1),
+  phone: z.string().min(1),
+  email: z.string().email(),
+});
+export type updateUserType = z.infer<typeof updateUserSchema>;
