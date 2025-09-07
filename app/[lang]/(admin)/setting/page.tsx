@@ -239,7 +239,7 @@ const LanguageSelector = ({
     const key = Array.from(keys as Set<React.Key>)[0];
     const newLang = String(key || "en");
     document.cookie = `NEXT_LOCALE=${newLang}; path=/; max-age=31536000; samesite=lax`;
-    router.push(`/${newLang}/settings`);
+    router.push(`/${newLang}/setting`);
   };
 
   return (

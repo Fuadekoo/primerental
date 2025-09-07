@@ -283,7 +283,7 @@ function Header({
 
       <div className="flex justify-between items-center w-full">
         <h1 className="text-sm sm:text-base font-semibold text-slate-800 dark:text-slate-200">
-          Menu
+          PrimeRental
         </h1>
         <div className="flex items-center gap-2">
           {isManager ? <AdminSocketConnected /> : <ClientSocketConnected />}
