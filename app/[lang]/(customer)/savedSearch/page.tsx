@@ -48,8 +48,9 @@ const translations = {
   },
 } as const;
 
+// Refined Pill with light/dark surfaces
 const Pill = ({ children }: { children: React.ReactNode }) => (
-  <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
+  <span className="inline-flex items-center rounded-full bg-slate-100 dark:bg-neutral-800/80 border border-slate-200 dark:border-neutral-700 px-2 py-0.5 text-xs font-medium text-slate-700 dark:text-slate-300">
     {children}
   </span>
 );
@@ -109,18 +110,22 @@ function Page() {
     id ? typeNameById.get(String(id)) || id : t.anyType;
 
   return (
-    <div className="bg-gray-50 min-h-screen p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen w-full overflow-x-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-4 sm:p-6 lg:p-8">
       <div className="mx-auto max-w-4xl">
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{t.pageTitle}</h1>
-            <p className="mt-1 text-gray-600">{t.pageDescription}</p>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+              {t.pageTitle}
+            </h1>
+            <p className="mt-1 text-slate-600 dark:text-slate-400">
+              {t.pageDescription}
+            </p>
           </div>
           {searches.length > 0 && (
             <button
               onClick={() => clear()}
-              className="text-sm font-medium text-red-600 hover:text-red-700 inline-flex items-center gap-2"
+              className="text-sm font-medium inline-flex items-center gap-2 text-red-600 hover:text-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/40 rounded-md px-2 py-1"
               aria-label={t.clearAll}
               title={t.clearAll}
             >
@@ -133,7 +138,7 @@ function Page() {
         {/* List of saved searches */}
         <div className="space-y-3">
           {searches.length === 0 ? (
-            <div className="rounded-lg border border-dashed bg-white p-8 text-center text-gray-600">
+            <div className="rounded-lg border border-dashed border-slate-300 dark:border-neutral-700 bg-white/80 dark:bg-neutral-900 p-8 text-center text-slate-600 dark:text-slate-400">
               {t.noSearches}{" "}
               <Save className="inline h-4 w-4 align-text-bottom" />.
             </div>
@@ -141,12 +146,12 @@ function Page() {
             searches.map((s, idx) => (
               <div
                 key={idx}
-                className="group relative rounded-lg bg-white p-4 shadow-sm ring-1 ring-gray-200 hover:shadow-md transition"
+                className="group relative rounded-lg p-4 transition shadow-sm hover:shadow-md bg-white/80 dark:bg-neutral-900 border border-slate-200/70 dark:border-neutral-800"
               >
                 {/* Remove button */}
                 <button
                   onClick={() => removeAt(idx)}
-                  className="absolute top-2 right-2 p-1 rounded-full bg-white/80 text-gray-600 hover:text-red-600 hover:bg-white transition opacity-0 group-hover:opacity-100"
+                  className="absolute top-2 right-2 p-1 rounded-full bg-white/80 dark:bg-neutral-800 text-slate-600 dark:text-slate-300 hover:text-red-600 hover:bg-white dark:hover:bg-neutral-700 transition opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/40"
                   aria-label={t.removeSearch}
                   title={t.remove}
                 >
@@ -166,7 +171,7 @@ function Page() {
                       <Pill>{fmtCount(s.bedroom, t.bedroomsUnit)}</Pill>
                       <Pill>{fmtCount(s.bathroom, t.bathroomsUnit)}</Pill>
                     </div>
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
                       {t.viewResults}
                     </p>
                   </div>
@@ -174,7 +179,12 @@ function Page() {
                   {/* Open button */}
                   <button
                     onClick={() => openSearch(s)}
-                    className="inline-flex items-center gap-2 self-start rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    className="inline-flex items-center gap-2 self-start rounded-md border px-3 py-2 text-sm font-medium transition
+                               border-slate-300 dark:border-neutral-700
+                               bg-white/90 dark:bg-neutral-900
+                               text-slate-700 dark:text-slate-200
+                               hover:bg-slate-50 dark:hover:bg-neutral-800
+                               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/40"
                     aria-label={t.openResults}
                   >
                     {t.openResults}
@@ -189,11 +199,11 @@ function Page() {
 
       {/* Full-page modal showing FilteredComponent */}
       {showFiltered && selectedFilters && (
-        <div className="fixed inset-0 z-[60] bg-white flex flex-col">
-          <div className="sticky top-0 bg-white border-b p-3 flex items-center justify-between">
+        <div className="fixed inset-0 z-[60] bg-white dark:bg-neutral-950 flex flex-col">
+          <div className="sticky top-0 bg-white/90 dark:bg-neutral-950/90 backdrop-blur border-b border-slate-200 dark:border-neutral-800 p-3 flex items-center justify-between">
             <button
               onClick={closeOverlay}
-              className="px-3 py-1.5 rounded-lg hover:bg-gray-100 flex items-center gap-2"
+              className="px-3 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-neutral-800 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/40"
             >
               <X className="h-4 w-4" />
               {t.close}

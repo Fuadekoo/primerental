@@ -66,16 +66,16 @@ export default function UserLayout({
   }, []);
 
   return (
-    <div className=" grid lg:grid-cols-[auto_1fr] overflow-hidden h-dvh w-dvw ">
+    <div className="min-h-dvh w-full grid lg:grid-cols-[auto_1fr] overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
       {/* --- Offline Popup --- */}
       {showOfflinePopup && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-lg shadow-lg p-6 max-w-xs w-full flex flex-col items-center">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-xl p-6 max-w-xs w-full flex flex-col items-center border border-slate-200 dark:border-neutral-800">
             <WifiOff className="text-red-500 mb-2" size={32} />
             <h2 className="text-lg font-semibold mb-2 text-center">
               You are offline
             </h2>
-            <p className="text-sm text-gray-600 mb-4 text-center">
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 text-center">
               Please check your internet connection.
             </p>
             <div className="flex gap-3 w-full">
@@ -115,7 +115,9 @@ export default function UserLayout({
           setSidebar={setSidebar}
           isManager={isManager}
         />
-        <div className="m-0 rounded-xl overflow-y-auto grid">{children}</div>
+        <div className="m-0 rounded-xl overflow-y-auto p-2 sm:p-4 grid">
+          {children}
+        </div>
       </div>
     </div>
   );
@@ -148,13 +150,13 @@ function Sidebar({
     <aside
       className={cn(
         "z-50 relative accent3 grid grid-cols-[auto_1fr] overflow-hidden",
-        sidebar ? "max-lg:absolute max-lg:inset-0 " : "max-lg:hidden"
+        sidebar ? "max-lg:absolute max-lg:inset-0" : "max-lg:hidden"
       )}
     >
       <div
         className={cn(
-          "relative  bg-primary-100 grid grid-rows-[auto_1fr_auto] overflow-hidden",
-          sidebar ? "max-xl:lg:w-60 w-80" : "max-xl:lg:w-14 w-20"
+          "relative grid grid-rows-[auto_1fr_auto] overflow-hidden bg-white/80 dark:bg-neutral-900 backdrop-blur supports-[backdrop-filter]:bg-white/70 border-r border-slate-200 dark:border-neutral-800",
+          sidebar ? "max-xl:lg:w-64 w-72" : "max-xl:lg:w-14 w-20"
         )}
       >
         <Button
@@ -163,7 +165,7 @@ function Sidebar({
           color="primary"
           size="sm"
           radius="full"
-          className="max-lg:hidden z-[100] absolute top-8 -right-3.5 bg-default-50 border border-default-300 "
+          className="max-lg:hidden z-[100] absolute top-8 -right-3.5 bg-white/80 dark:bg-neutral-900 border border-slate-200 dark:border-neutral-700 shadow"
           onPress={() => setSidebar((prev) => !prev)}
         >
           {sidebar ? (
@@ -172,69 +174,76 @@ function Sidebar({
             <ChevronRight className="size-4" />
           )}
         </Button>
-        <div className="flex items-center gap-3 px-5 pt-2 pb-2">
+
+        <div className="flex items-center gap-3 px-5 pt-3 pb-2">
           <Image
             src="/logo.png"
-            alt="Qr Menu"
+            alt="Prime Rental"
             width={80}
             height={80}
-            className="rounded-full"
+            className="rounded-full ring-1 ring-slate-200 dark:ring-neutral-800"
           />
           {sidebar && (
-            <span className="font-bold text-lg text-primary whitespace-nowrap">
+            <span className="font-bold text-lg text-primary-700 dark:text-primary-300 whitespace-nowrap">
               PRIME
               <br />
               RENTAL
             </span>
           )}
         </div>
-        <div className="max-xl:lg:px-2 px-5 pt-3 grid gap-2 auto-rows-min overflow-auto">
+
+        <div className="max-xl:lg:px-2 px-3 sm:px-5 pt-3 grid gap-2 auto-rows-min overflow-auto">
           {menu.map(({ label, url, icon }, i) => {
-            // Active if the current path ends with the menu url
             const isActive = pathname.endsWith(`/${url}`);
             return (
               <Button
                 key={i + ""}
                 isIconOnly={false}
-                color={isActive ? "primary" : "secondary"}
+                color={isActive ? "primary" : "default"}
                 variant={isActive ? "solid" : "light"}
                 className={`
-                  w-full px-3 inline-flex gap-5 justify-start
-                  transition-all duration-200
+                  w-full px-3 inline-flex gap-5 justify-start items-center
+                  transition-all duration-200 rounded-lg
                   border-l-4
                   ${
                     isActive
-                      ? "border-primary-500 bg-primary-50 text-primary-700 font-bold shadow"
-                      : "border-secondary-300 text-secondary-700"
+                      ? "border-primary-500 bg-primary-50 dark:bg-primary-500/10 text-primary-700 dark:text-primary-300 font-semibold shadow-sm"
+                      : "border-slate-200 dark:border-neutral-800 text-slate-600 dark:text-slate-300"
                   }
-                  hover:border-primary-400 hover:bg-primary-100 hover:text-primary-800 hover:scale-105
-                  active:scale-95
-                  rounded-lg
+                  hover:border-primary-400 hover:bg-primary-50/70 dark:hover:bg-neutral-800 hover:text-primary-700 dark:hover:text-primary-300
+                  hover:scale-[1.01] active:scale-95
                 `}
                 as={Link}
                 href={`/${lang}/${url}`}
                 onClick={handleMenuClick}
               >
                 <span
-                  className={`mr-2 ${
-                    isActive ? "text-primary-700" : "text-secondary-500"
+                  className={`${
+                    isActive
+                      ? "text-primary-600 dark:text-primary-300"
+                      : "text-slate-500 dark:text-slate-400"
                   }`}
                 >
                   {icon}
                 </span>
-                {sidebar && <span className="px-5 capitalize">{label}</span>}
+                {sidebar && (
+                  <span className="px-5 capitalize truncate">{label}</span>
+                )}
               </Button>
             );
           })}
         </div>
+
         <div className="p-5 max-xl:lg:p-2 grid gap-2 overflow-hidden">
           {isManager && <User sidebar={sidebar} />}
         </div>
       </div>
+
       {/* Overlay for mobile to close sidebar when clicking outside */}
       <div
         onClick={() => setSidebar(false)}
-        className="lg:hidden bg-foreground-500/50 backdrop-blur-xs"
+        className="lg:hidden bg-black/40 backdrop-blur-sm"
+        aria-hidden="true"
       />
     </aside>
   );
@@ -249,7 +258,7 @@ function Header({
   isManager?: boolean;
 }) {
   return (
-    <header className="z-30 h-12 m-0 p-2 flex gap-4 items-center max-lg:shadow-sm bg-white/100">
+    <header className="sticky top-0 z-30 h-12 m-0 px-2 py-2 flex gap-4 items-center bg-white/70 dark:bg-neutral-900/70 backdrop-blur border-b border-slate-200 dark:border-neutral-800">
       <Button
         isIconOnly
         variant="flat"
@@ -261,7 +270,9 @@ function Header({
       </Button>
 
       <div className="flex justify-between items-center w-full">
-        <h1>Menu</h1>
+        <h1 className="text-sm sm:text-base font-semibold text-slate-800 dark:text-slate-200">
+          Menu
+        </h1>
         <div className="flex items-center gap-2">
           {isManager ? <AdminSocketConnected /> : <ClientSocketConnected />}
           {isManager ? <NotificationBell /> : <CustomerNotificationHandler />}
@@ -270,6 +281,7 @@ function Header({
     </header>
   );
 }
+
 function User({ sidebar }: { sidebar: boolean }) {
   const pathname = usePathname() ?? "";
   const [, lang] = pathname.split("/");
@@ -280,10 +292,13 @@ function User({ sidebar }: { sidebar: boolean }) {
         <div
           className={cn(
             "flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg transition-colors",
-            "bg-gradient-to-r from-primary-600 to-secondary-700",
-            "border border-primary-400 hover:border-primary-600",
-            "hover:bg-gradient-to-r hover:from-primary-700 hover:to-secondary-800"
+            "bg-gradient-to-r from-primary-600 to-primary-500",
+            "border border-primary-400/70 dark:border-primary-400/30",
+            "hover:from-primary-700 hover:to-primary-600",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/50"
           )}
+          role="button"
+          tabIndex={0}
         >
           <UserIcon className="size-5 text-white" />
           {sidebar && <span className="text-white font-medium">Account</span>}
@@ -293,7 +308,7 @@ function User({ sidebar }: { sidebar: boolean }) {
         <DropdownItem
           key={"signout"}
           startContent={<LogOutIcon className="size-4 text-red-600" />}
-          className="!text-red-600 font-semibold rounded-md border border-red-200 bg-red-50 hover:bg-red-100 transition-colors"
+          className="!text-red-600 font-semibold rounded-md border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
           onClick={async () => {
             await logout();
             window.location.href = `/${lang}/signin`;

@@ -2,7 +2,7 @@
 import React from "react";
 import Image from "next/image";
 import { MapPin, Phone, Mail, Send } from "lucide-react";
-import contactBg from "@/public/cover.jpg"; // Using the same background for consistency
+import contactBg from "@/public/cover.jpg";
 import { useParams } from "next/navigation";
 
 // Simple i18n copy
@@ -64,19 +64,21 @@ function Page() {
   const t = translations[lang];
 
   return (
-    <div className="bg-gray-50">
+    <div className="min-h-screen w-full overflow-x-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
       {/* --- Header --- */}
-      <div className="relative h-48 w-full">
+      <div className="relative h-48 w-full overflow-hidden">
         <Image
           src={contactBg}
           alt="Contact us background"
-          layout="fill"
-          objectFit="cover"
-          className="brightness-50"
+          fill
+          className="object-cover"
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
         <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center p-4">
-          <h1 className="text-4xl font-bold">{t.pageTitle}</h1>
-          <p className="mt-2 text-lg max-w-2xl">{t.pageDescription}</p>
+          <h1 className="text-3xl sm:text-4xl font-bold">{t.pageTitle}</h1>
+          <p className="mt-2 text-base sm:text-lg max-w-2xl opacity-90">
+            {t.pageDescription}
+          </p>
         </div>
       </div>
 
@@ -85,53 +87,73 @@ function Page() {
         <div className="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-3">
           {/* --- Contact Information --- */}
           <div className="lg:col-span-1">
-            <h2 className="text-2xl font-bold text-gray-900">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
               {t.contactDetailsTitle}
             </h2>
-            <p className="mt-2 text-gray-600">{t.contactDetailsDescription}</p>
+            <p className="mt-2 text-slate-600 dark:text-slate-400">
+              {t.contactDetailsDescription}
+            </p>
             <ul className="mt-6 space-y-4">
               <li className="flex items-start">
                 <div className="flex-shrink-0">
-                  <MapPin className="h-6 w-6 text-blue-600" />
+                  <MapPin className="h-6 w-6 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div className="ml-3">
-                  <h3 className="font-medium text-gray-900">
+                  <h3 className="font-medium text-slate-900 dark:text-slate-100">
                     {t.addressTitle}
                   </h3>
-                  <p className="text-gray-600">{t.addressLine1}</p>
+                  <p className="text-slate-600 dark:text-slate-400">
+                    {t.addressLine1}
+                  </p>
                 </div>
               </li>
               <li className="flex items-start">
                 <div className="flex-shrink-0">
-                  <Phone className="h-6 w-6 text-blue-600" />
+                  <Phone className="h-6 w-6 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div className="ml-3">
-                  <h3 className="font-medium text-gray-900">{t.phoneTitle}</h3>
-                  <p className="text-gray-600">{t.phoneNumber}</p>
+                  <h3 className="font-medium text-slate-900 dark:text-slate-100">
+                    {t.phoneTitle}
+                  </h3>
+                  <p className="text-slate-600 dark:text-slate-400">
+                    {t.phoneNumber}
+                  </p>
                 </div>
               </li>
               <li className="flex items-start">
                 <div className="flex-shrink-0">
-                  <Mail className="h-6 w-6 text-blue-600" />
+                  <Mail className="h-6 w-6 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div className="ml-3">
-                  <h3 className="font-medium text-gray-900">{t.emailTitle}</h3>
-                  <p className="text-gray-600">{t.emailAddress}</p>
+                  <h3 className="font-medium text-slate-900 dark:text-slate-100">
+                    {t.emailTitle}
+                  </h3>
+                  <p className="text-slate-600 dark:text-slate-400">
+                    {t.emailAddress}
+                  </p>
                 </div>
               </li>
             </ul>
             <div className="mt-8">
-              <h3 className="font-medium text-gray-900">{t.hoursTitle}</h3>
-              <p className="mt-2 text-gray-600">{t.hoursWeekdays}</p>
-              <p className="text-gray-600">{t.hoursSaturday}</p>
-              <p className="text-gray-600">{t.hoursSunday}</p>
+              <h3 className="font-medium text-slate-900 dark:text-slate-100">
+                {t.hoursTitle}
+              </h3>
+              <p className="mt-2 text-slate-600 dark:text-slate-400">
+                {t.hoursWeekdays}
+              </p>
+              <p className="text-slate-600 dark:text-slate-400">
+                {t.hoursSaturday}
+              </p>
+              <p className="text-slate-600 dark:text-slate-400">
+                {t.hoursSunday}
+              </p>
             </div>
           </div>
 
           {/* --- Contact Form --- */}
           <div className="lg:col-span-2">
-            <div className="rounded-2xl bg-white p-8 shadow-lg">
-              <h2 className="text-2xl font-bold text-gray-900">
+            <div className="rounded-2xl bg-white/80 dark:bg-neutral-900 border border-slate-200/70 dark:border-neutral-800 p-8 shadow-lg">
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                 {t.formTitle}
               </h2>
               <form
@@ -142,7 +164,7 @@ function Page() {
                 <div>
                   <label
                     htmlFor="first-name"
-                    className="block text-sm font-medium text-gray-700"
+                    className="block text-sm font-medium text-slate-700 dark:text-slate-300"
                   >
                     {t.firstNameLabel}
                   </label>
@@ -152,14 +174,14 @@ function Page() {
                       name="first-name"
                       id="first-name"
                       autoComplete="given-name"
-                      className="block w-full rounded-md border-gray-300 py-2 px-3 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      className="block w-full rounded-md border border-slate-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 py-2 px-3 shadow-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-500/30 outline-none"
                     />
                   </div>
                 </div>
                 <div>
                   <label
                     htmlFor="last-name"
-                    className="block text-sm font-medium text-gray-700"
+                    className="block text-sm font-medium text-slate-700 dark:text-slate-300"
                   >
                     {t.lastNameLabel}
                   </label>
@@ -169,14 +191,14 @@ function Page() {
                       name="last-name"
                       id="last-name"
                       autoComplete="family-name"
-                      className="block w-full rounded-md border-gray-300 py-2 px-3 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      className="block w-full rounded-md border border-slate-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 py-2 px-3 shadow-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-500/30 outline-none"
                     />
                   </div>
                 </div>
                 <div className="sm:col-span-2">
                   <label
                     htmlFor="email"
-                    className="block text-sm font-medium text-gray-700"
+                    className="block text-sm font-medium text-slate-700 dark:text-slate-300"
                   >
                     {t.emailLabel}
                   </label>
@@ -186,14 +208,14 @@ function Page() {
                       name="email"
                       type="email"
                       autoComplete="email"
-                      className="block w-full rounded-md border-gray-300 py-2 px-3 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      className="block w-full rounded-md border border-slate-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 py-2 px-3 shadow-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-500/30 outline-none"
                     />
                   </div>
                 </div>
                 <div className="sm:col-span-2">
                   <label
                     htmlFor="phone"
-                    className="block text-sm font-medium text-gray-700"
+                    className="block text-sm font-medium text-slate-700 dark:text-slate-300"
                   >
                     {t.phoneLabel}
                   </label>
@@ -203,14 +225,14 @@ function Page() {
                       name="phone"
                       id="phone"
                       autoComplete="tel"
-                      className="block w-full rounded-md border-gray-300 py-2 px-3 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      className="block w-full rounded-md border border-slate-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 py-2 px-3 shadow-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-500/30 outline-none"
                     />
                   </div>
                 </div>
                 <div className="sm:col-span-2">
                   <label
                     htmlFor="message"
-                    className="block text-sm font-medium text-gray-700"
+                    className="block text-sm font-medium text-slate-700 dark:text-slate-300"
                   >
                     {t.messageLabel}
                   </label>
@@ -219,7 +241,7 @@ function Page() {
                       id="message"
                       name="message"
                       rows={4}
-                      className="block w-full rounded-md border-gray-300 py-2 px-3 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      className="block w-full rounded-md border border-slate-300 dark:border-neutral-700 bg-white/90 dark:bg-neutral-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 py-2 px-3 shadow-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-500/30 outline-none"
                       defaultValue={""}
                     />
                   </div>
@@ -227,7 +249,7 @@ function Page() {
                 <div className="sm:col-span-2 flex justify-end">
                   <button
                     type="submit"
-                    className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    className="inline-flex items-center justify-center rounded-md bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-400 px-6 py-3 text-base font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-0"
                   >
                     <Send className="mr-2 h-5 w-5" />
                     {t.submitButton}
@@ -236,6 +258,7 @@ function Page() {
               </form>
             </div>
           </div>
+          {/* --- End Contact Form --- */}
         </div>
       </div>
     </div>

@@ -191,8 +191,8 @@ const FilterDialog = ({
       }
       className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
         (filters as any)[stateKey] === value
-          ? "bg-blue-600 text-white border-blue-600"
-          : "bg-gray-100 text-gray-700 border-gray-200"
+          ? "bg-indigo-600 text-white border-indigo-600 dark:bg-indigo-500 dark:border-indigo-500"
+          : "bg-gray-100 text-gray-700 border-gray-200 dark:bg-neutral-800 dark:text-gray-300 dark:border-neutral-700"
       }`}
     >
       {label}
@@ -201,14 +201,14 @@ const FilterDialog = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end">
-      <div className="bg-white w-full max-h-[90dvh] rounded-t-2xl p-4 flex flex-col">
-        <div className="flex items-center justify-between mb-4 pb-2 border-b">
+      <div className="bg-white dark:bg-neutral-950 w-full max-h-[90dvh] rounded-t-2xl p-4 flex flex-col border-t border-slate-200 dark:border-neutral-800">
+        <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-200 dark:border-neutral-800">
           <h2 className="text-xl font-bold">{t.filtersTitle}</h2>
           <button
             onClick={onClose}
-            className="p-1 rounded-full hover:bg-gray-100"
+            className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-white/10"
           >
-            <X className="h-6 w-6 text-gray-600" />
+            <X className="h-6 w-6 text-gray-600 dark:text-gray-300" />
           </button>
         </div>
 
@@ -300,16 +300,16 @@ const FilterDialog = ({
           </div>
         </div>
 
-        <div className="absolute bottom-0 left-0 w-full bg-white p-4 border-t flex gap-4">
+        <div className="absolute bottom-0 left-0 w-full bg-white dark:bg-neutral-950 p-4 border-t border-slate-200 dark:border-neutral-800 flex gap-4">
           <button
             onClick={handleReset}
-            className="w-full py-3 rounded-lg border border-gray-300 font-semibold"
+            className="w-full py-3 rounded-lg border border-gray-300 dark:border-neutral-700 font-semibold hover:bg-gray-100 dark:hover:bg-white/10"
           >
             {t.reset}
           </button>
           <button
             onClick={handleApply}
-            className="w-full py-3 rounded-lg bg-blue-600 text-white font-semibold"
+            className="w-full py-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-400 text-white font-semibold"
           >
             {t.applyFilters}
           </button>
@@ -405,7 +405,7 @@ function Page() {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen w-full overflow-x-hidden">
+    <div className="min-h-screen w-full overflow-x-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
       <div className="container mx-auto max-w-7xl p-2 sm:p-4">
         <div className="relative mb-4">
           <Input
@@ -415,27 +415,30 @@ function Page() {
             placeholder={t.searchPlaceholder}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-12 py-2 rounded-lg text-primary-800 shadow focus:ring-2 focus:ring-primary-300 transition"
+            className="w-full pl-10 pr-12 py-2 rounded-lg shadow border border-slate-200/70 dark:border-neutral-800 bg-white/80 dark:bg-white/[0.03] backdrop-blur"
           />
           <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-            <Search className="h-5 w-5 text-primary-500" aria-hidden="true" />
+            <Search
+              className="h-5 w-5 text-primary-500 dark:text-primary-400"
+              aria-hidden="true"
+            />
           </span>
           <button
             type="button"
             onClick={() => setIsFilterOpen(true)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-primary-100 transition"
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-primary-50 dark:hover:bg-white/10 transition"
             tabIndex={-1}
           >
             <SlidersHorizontal
-              className="h-5 w-5 text-primary-500"
+              className="h-5 w-5 text-primary-500 dark:text-primary-400"
               aria-hidden="true"
             />
           </button>
         </div>
 
         {/* --- Promotions Carousel --- */}
-        <h1>{t.featuredProperty}</h1>
-        <div className="relative overflow-hidden rounded-2xl bg-yellow-50 shadow-lg mb-6 h-60">
+        <h1 className="font-semibold text-lg">{t.featuredProperty}</h1>
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-950/30 dark:to-violet-950/30 shadow-lg mb-6 h-60 border border-slate-200/70 dark:border-neutral-800">
           {isLoadingPromotion ? (
             <SkeletonLoader className=" h-full" />
           ) : promotionData && promotionData.length > 0 ? (
@@ -466,15 +469,15 @@ function Page() {
               </div>
               <button
                 onClick={prevSlide}
-                className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-white/60 hover:bg-white/90 rounded-full p-2 z-10"
+                className="absolute top-1/2 left-2 -translate-y-1/2 bg-white/70 dark:bg-neutral-900/60 hover:bg-white/90 dark:hover:bg-neutral-800 rounded-full p-2 z-10 border border-slate-200 dark:border-neutral-700 shadow-sm"
               >
-                <ChevronLeft className="h-6 w-6 text-gray-800" />
+                <ChevronLeft className="h-6 w-6 text-gray-800 dark:text-gray-200" />
               </button>
               <button
                 onClick={nextSlide}
-                className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-white/60 hover:bg-white/90 rounded-full p-2 z-10"
+                className="absolute top-1/2 right-2 -translate-y-1/2 bg-white/70 dark:bg-neutral-900/60 hover:bg-white/90 dark:hover:bg-neutral-800 rounded-full p-2 z-10 border border-slate-200 dark:border-neutral-700 shadow-sm"
               >
-                <ChevronRight className="h-6 w-6 text-gray-800" />
+                <ChevronRight className="h-6 w-6 text-gray-800 dark:text-gray-200" />
               </button>
             </>
           ) : (
@@ -485,12 +488,10 @@ function Page() {
         {/* --- Special Offers Section --- */}
         <div className="mb-6">
           <div className="flex items-center justify-between px-1 mb-3">
-            <h2 className="text-xl font-bold text-gray-800">
-              {t.specialOffers}
-            </h2>
+            <h2 className="text-xl font-bold">{t.specialOffers}</h2>
             <Link
               href={`/${currentLang}/offers`}
-              className="text-sm font-semibold text-blue-600 hover:text-blue-800"
+              className="text-sm font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
             >
               {t.viewAll}
             </Link>
@@ -506,7 +507,7 @@ function Page() {
                   <Link
                     href={`/${currentLang}/property/${item.id}`}
                     key={item.id}
-                    className="flex-shrink-0 w-64 h-80 group relative block overflow-hidden rounded-xl shadow-md"
+                    className="flex-shrink-0 w-64 h-80 group relative block overflow-hidden rounded-xl shadow-md border border-slate-200/70 dark:border-neutral-800 bg-white/80 dark:bg-neutral-900"
                   >
                     <Image
                       src={`/api/filedata/${item.images[0]}`}
@@ -515,7 +516,7 @@ function Page() {
                       height={320}
                       className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
                     <div className="absolute top-0 left-0 p-3">
                       <div className="rounded-lg bg-white/90 p-2 backdrop-blur-sm">
                         <h3 className="font-bold text-gray-800 text-sm">
@@ -537,12 +538,10 @@ function Page() {
         {/* --- Categories Section --- */}
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2 px-1">
-            <h2 className="text-xl font-bold text-gray-800">
-              {t.exploreByType}
-            </h2>
+            <h2 className="text-xl font-bold">{t.exploreByType}</h2>
             <Link
               href={`/${currentLang}/categories`}
-              className="text-sm font-semibold text-primary-600"
+              className="text-sm font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
             >
               {t.viewAll}
             </Link>
@@ -573,9 +572,9 @@ function Page() {
                       alt={cat.name}
                       width={80}
                       height={80}
-                      className="w-20 h-20 object-cover rounded-full shadow-md"
+                      className="w-20 h-20 object-cover rounded-full shadow-md ring-1 ring-slate-200 dark:ring-neutral-800"
                     />
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       {cat.name}
                     </span>
                   </div>
@@ -586,12 +585,10 @@ function Page() {
         {/* --- List of Properties Section --- */}
         <div>
           <div className="flex items-center justify-between px-1 mb-3">
-            <h2 className="text-xl font-bold text-gray-800">
-              {t.listOfProperties}
-            </h2>
+            <h2 className="text-xl font-bold">{t.listOfProperties}</h2>
             <Link
               href={`/${currentLang}/properties`}
-              className="text-sm font-semibold text-blue-600 hover:text-blue-800"
+              className="text-sm font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
             >
               {t.seeAll}
             </Link>
@@ -621,7 +618,7 @@ function Page() {
                 <Link
                   href={`/${currentLang}/property/${item.id}`}
                   key={item.id}
-                  className="block rounded-lg bg-white p-3 shadow-sm transition-all hover:shadow-lg hover:-translate-y-0.5"
+                  className="block rounded-lg p-3 transition-all hover:shadow-lg hover:-translate-y-0.5 bg-white/80 dark:bg-neutral-900 shadow-sm border border-slate-200/70 dark:border-neutral-800"
                 >
                   <div className="flex gap-4">
                     <Image
@@ -640,7 +637,7 @@ function Page() {
                         <span>{item.location}</span>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm text-gray-600 mt-2">
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm text-gray-600 dark:text-gray-400 mt-2">
                         <span className="flex items-center gap-1.5">
                           <BedDouble size={14} /> {item.bedroom} {t.beds}
                         </span>
@@ -657,11 +654,11 @@ function Page() {
 
                       <div className="flex items-end justify-between mt-auto pt-2">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-semibold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full capitalize">
+                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full capitalize bg-primary-500/10 text-primary-700 dark:bg-primary-400/10 dark:text-primary-300">
                             {item.offer_type.toLowerCase()}
                           </span>
                         </div>
-                        <p className="text-lg font-bold text-blue-600">
+                        <p className="text-lg font-bold text-primary-600 dark:text-primary-400">
                           ${item.price.toLocaleString()}
                         </p>
                       </div>
@@ -675,10 +672,12 @@ function Page() {
           </div>
         </div>
 
+        {/* Footer remains */}
         <div className="bottom-0 left-0 w-full z-50">
           <Footer />
         </div>
 
+        {/* FilterDialog usage unchanged */}
         <FilterDialog
           isOpen={isFilterOpen}
           onClose={() => setIsFilterOpen(false)}

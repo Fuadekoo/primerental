@@ -117,20 +117,22 @@ function PropertyRegisterPage() {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="min-h-screen w-full overflow-x-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
       {loading && <Loading />}
       {/* --- Header --- */}
-      <div className="relative h-48 w-full">
+      <div className="relative h-48 w-full overflow-hidden">
         <Image
           src={requestBg}
           alt={t.pageTitle}
-          layout="fill"
-          objectFit="cover"
-          className="brightness-50"
+          fill
+          className="object-cover"
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
         <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center p-4">
-          <h1 className="text-4xl font-bold">{t.pageTitle}</h1>
-          <p className="mt-2 text-lg">{t.pageDescription}</p>
+          <h1 className="text-3xl sm:text-4xl font-bold">{t.pageTitle}</h1>
+          <p className="mt-2 text-base sm:text-lg opacity-90">
+            {t.pageDescription}
+          </p>
         </div>
       </div>
 
@@ -138,19 +140,17 @@ function PropertyRegisterPage() {
       <div className="mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="grid grid-cols-1 gap-y-8 gap-x-6 rounded-2xl bg-white p-6 shadow-lg sm:grid-cols-2 sm:p-8"
+          className="grid grid-cols-1 gap-y-8 gap-x-6 rounded-2xl bg-white/80 dark:bg-neutral-900 border border-slate-200/70 dark:border-neutral-800 p-6 shadow-lg sm:grid-cols-2 sm:p-8"
         >
           {/* --- Contact Information --- */}
           <div className="col-span-1 sm:col-span-2">
-            <h2 className="text-xl font-semibold text-gray-800">
-              {t.contactInfoTitle}
-            </h2>
+            <h2 className="text-xl font-semibold">{t.contactInfoTitle}</h2>
           </div>
 
           <div>
             <label
               htmlFor="fullname"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
             >
               {t.fullNameLabel}
             </label>
@@ -169,7 +169,7 @@ function PropertyRegisterPage() {
           <div className="col-span-1 sm:col-span-2">
             <label
               htmlFor="phone"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
             >
               {t.phoneLabel}
             </label>
@@ -187,10 +187,8 @@ function PropertyRegisterPage() {
           </div>
 
           {/* --- Property Details --- */}
-          <div className="col-span-1 sm:col-span-2 pt-4">
-            <h2 className="text-xl font-semibold text-gray-800">
-              {t.propertyDetailsTitle}
-            </h2>
+          <div className="col-span-1 sm:col-span-2 pt-2 sm:pt-4">
+            <h2 className="text-xl font-semibold">{t.propertyDetailsTitle}</h2>
           </div>
 
           {/* --- Offer Type --- */}
@@ -199,7 +197,7 @@ function PropertyRegisterPage() {
             control={control}
             render={({ field }) => (
               <div className="col-span-1 sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                   {t.registerTypeLabel}
                 </label>
                 <div className="grid grid-cols-2 gap-4">
@@ -207,15 +205,15 @@ function PropertyRegisterPage() {
                     onClick={() => field.onChange("rent")}
                     className={`flex items-center justify-center gap-3 rounded-lg p-4 border-2 cursor-pointer transition-all ${
                       field.value === "rent"
-                        ? "border-blue-500 bg-blue-50"
-                        : "border-gray-300"
+                        ? "border-primary-500 bg-primary-50 dark:bg-primary-500/10"
+                        : "border-slate-300 dark:border-neutral-700"
                     }`}
                   >
                     <KeyRound
                       className={`h-6 w-6 ${
                         field.value === "rent"
-                          ? "text-blue-600"
-                          : "text-gray-500"
+                          ? "text-primary-600"
+                          : "text-gray-500 dark:text-gray-400"
                       }`}
                     />
                     <span className="font-semibold">{t.registerTypeRent}</span>
@@ -224,15 +222,15 @@ function PropertyRegisterPage() {
                     onClick={() => field.onChange("buy")}
                     className={`flex items-center justify-center gap-3 rounded-lg p-4 border-2 cursor-pointer transition-all ${
                       field.value === "buy"
-                        ? "border-blue-500 bg-blue-50"
-                        : "border-gray-300"
+                        ? "border-primary-500 bg-primary-50 dark:bg-primary-500/10"
+                        : "border-slate-300 dark:border-neutral-700"
                     }`}
                   >
                     <Building
                       className={`h-6 w-6 ${
                         field.value === "buy"
-                          ? "text-blue-600"
-                          : "text-gray-500"
+                          ? "text-primary-600"
+                          : "text-gray-500 dark:text-gray-400"
                       }`}
                     />
                     <span className="font-semibold">{t.registerTypeBuy}</span>
@@ -244,7 +242,7 @@ function PropertyRegisterPage() {
 
           {/* --- Property Type --- */}
           <div className="col-span-1 sm:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
               {t.propertyTypeLabel}
             </label>
             <Controller
@@ -263,8 +261,8 @@ function PropertyRegisterPage() {
                         onClick={() => field.onChange(type.id)}
                         className={`rounded-lg px-4 py-2 border-2 cursor-pointer transition-all text-sm font-medium ${
                           field.value === type.id
-                            ? "border-blue-500 bg-blue-50 text-blue-600"
-                            : "border-gray-300 bg-white hover:bg-gray-50"
+                            ? "border-primary-500 bg-primary-50 text-primary-700 dark:bg-primary-500/10 dark:text-primary-300"
+                            : "border-slate-300 bg-white hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-800"
                         }`}
                       >
                         {type.name}
@@ -289,7 +287,7 @@ function PropertyRegisterPage() {
           <div>
             <label
               htmlFor="location"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
             >
               {t.locationLabel}
             </label>
@@ -307,7 +305,7 @@ function PropertyRegisterPage() {
           <div>
             <label
               htmlFor="realLocation"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
             >
               {t.realLocationLabel}
             </label>
@@ -327,7 +325,7 @@ function PropertyRegisterPage() {
           <div className="col-span-1 sm:col-span-2">
             <label
               htmlFor="description"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
             >
               {t.descriptionLabel}
             </label>
