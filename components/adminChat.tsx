@@ -234,40 +234,47 @@ export default function ChatPopup() {
     <div className="fixed bottom-4 right-4 z-50">
       {/* Chat Window */}
       <div
-        className={`w-80 h-96 bg-white rounded-lg shadow-2xl flex flex-col transition-all duration-300 ease-in-out ${
+        className={`rounded-xl shadow-2xl flex flex-col transition-all duration-300 ease-in-out border
+        bg-white/90 dark:bg-neutral-900 border-slate-200 dark:border-neutral-800
+        w-[90vw] sm:w-96 h-[70vh] sm:h-[32rem]
+        ${
           isOpen
             ? "translate-y-0 opacity-100"
             : "hidden translate-y-4 opacity-0 pointer-events-none"
         }`}
       >
         {/* Header */}
-        <div className="flex justify-between items-center p-3 bg-blue-600 text-white rounded-t-lg">
-          {selectGuestId && (
+        <div className="flex items-center justify-between p-3 rounded-t-xl text-white bg-gradient-to-r from-primary-600 to-primary-500 dark:from-primary-500 dark:to-primary-400">
+          {selectGuestId ? (
             <button
               onClick={handleBackToGuestList}
-              className="hover:bg-blue-700 p-1 rounded-full"
+              className="p-1 rounded-full hover:bg-white/20 transition-colors"
+              aria-label="Back to list"
             >
-              <ArrowLeft size={20} />
+              <ArrowLeft size={18} />
             </button>
+          ) : (
+            <span className="w-6" />
           )}
-          <h3 className="font-bold flex-1 text-center">
+          <h3 className="font-bold text-sm sm:text-base">
             {selectGuestId ? "Chat with Guest" : "Select a Guest"}
           </h3>
           <button
             onClick={toggleChat}
-            className="hover:bg-blue-700 p-1 rounded-full"
+            className="p-1 rounded-full hover:bg-white/20 transition-colors"
+            aria-label="Close"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
         {selectGuestId ? (
           <>
             {/* Messages */}
-            <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
+            <div className="flex-1 p-4 overflow-y-auto bg-slate-50 dark:bg-neutral-950/40">
               <div className="space-y-3">
                 {isFetchingChat ? (
-                  <div className="text-center text-gray-500">
+                  <div className="text-center text-slate-500 dark:text-slate-400">
                     Loading chat...
                   </div>
                 ) : (
@@ -279,17 +286,21 @@ export default function ChatPopup() {
                       }`}
                     >
                       <div
-                        className={`max-w-xs px-3 py-2 rounded-lg text-sm shadow ${
-                          msg.self
-                            ? "bg-blue-500 text-white rounded-br-none"
-                            : "bg-white text-gray-800 rounded-bl-none"
-                        }`}
+                        className={`max-w-[75%] px-3 py-2 rounded-lg text-sm shadow
+                          ${
+                            msg.self
+                              ? "bg-primary-600 dark:bg-primary-500 text-white rounded-br-none"
+                              : "bg-white dark:bg-neutral-800 text-slate-900 dark:text-slate-100 rounded-bl-none border border-slate-200 dark:border-neutral-700"
+                          }`}
                       >
                         <p>{msg.msg}</p>
                         <div
-                          className={`flex items-center justify-end gap-1 text-xs mt-1 ${
-                            msg.self ? "text-blue-100" : "text-gray-400"
-                          }`}
+                          className={`flex items-center justify-end gap-1 text-[11px] mt-1
+                            ${
+                              msg.self
+                                ? "text-primary-100"
+                                : "text-slate-400 dark:text-slate-500"
+                            }`}
                         >
                           <span>
                             {new Date(msg.createdAt).toLocaleTimeString([], {
@@ -300,9 +311,9 @@ export default function ChatPopup() {
                           {msg.self && (
                             <span className="flex-shrink-0">
                               {msg.isRead ? (
-                                <CheckCheck size={16} />
+                                <CheckCheck size={14} />
                               ) : (
-                                <Check size={16} />
+                                <Check size={14} />
                               )}
                             </span>
                           )}
@@ -316,8 +327,8 @@ export default function ChatPopup() {
               </div>
             </div>
 
-            {/* Input */}
-            <div className="p-3 border-t bg-white">
+            {/* Composer */}
+            <div className="p-3 border-t border-slate-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-900 rounded-b-xl">
               <form
                 onSubmit={handleSendMessage}
                 className="flex items-center gap-2"
@@ -327,12 +338,12 @@ export default function ChatPopup() {
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   placeholder="Type your message..."
-                  className="flex-1 w-full rounded-md border-gray-300 py-2 px-3 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="flex-1 w-full rounded-md border border-slate-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 py-2 px-3 shadow-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-500/30 outline-none"
                   disabled={!selectGuestId}
                 />
                 <button
                   type="submit"
-                  className="bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition-colors flex-shrink-0 disabled:bg-blue-400 disabled:cursor-not-allowed"
+                  className="p-2 rounded-full text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-400 transition-colors flex-shrink-0 disabled:bg-primary-400/60 disabled:cursor-not-allowed"
                   aria-label="Send Message"
                   disabled={!newMessage.trim() || !selectGuestId}
                 >
@@ -342,9 +353,10 @@ export default function ChatPopup() {
             </div>
           </>
         ) : (
-          <div className="flex-1 overflow-y-auto">
+          // Guest list
+          <div className="flex-1 overflow-y-auto bg-white/60 dark:bg-neutral-900/40">
             {isLoadingGuestList ? (
-              <div className="p-3 text-center text-gray-500">
+              <div className="p-3 text-center text-slate-500 dark:text-slate-400">
                 Loading guests...
               </div>
             ) : (
@@ -352,21 +364,27 @@ export default function ChatPopup() {
                 <div
                   key={guest.id}
                   onClick={() => setSelectGuestId(guest.guestId)}
-                  className="p-3 hover:bg-gray-100 cursor-pointer border-b"
+                  className="p-3 cursor-pointer border-b border-slate-200 dark:border-neutral-800 hover:bg-slate-50 dark:hover:bg-neutral-800 transition-colors"
                 >
                   <div className="flex justify-between items-center">
-                    <p className="font-semibold">{guest.name || "Guest"}</p>
+                    <p className="font-semibold text-slate-800 dark:text-slate-100">
+                      {guest.name || "Guest"}
+                    </p>
                     {onlineGuests.has(guest.guestId) ? (
-                      <span className="text-xs text-green-500 font-medium">
+                      <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-green-500/10 text-green-600 dark:text-green-300 dark:bg-green-500/15">
+                        <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
                         Online
                       </span>
                     ) : (
-                      <span className="text-xs text-red-500 font-medium">
+                      <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-red-500/10 text-red-600 dark:text-red-300 dark:bg-red-500/15">
+                        <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
                         Offline
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-gray-500">{guest.guestId}</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    {guest.guestId}
+                  </p>
                 </div>
               ))
             )}
@@ -377,7 +395,7 @@ export default function ChatPopup() {
       {/* Chat Toggle Button */}
       <button
         onClick={toggleChat}
-        className="mt-4 float-right p-3 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-transform duration-200 hover:scale-110"
+        className="mt-4 float-right p-3 rounded-full text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-400 shadow-lg ring-2 ring-white/60 dark:ring-neutral-800 transition-transform duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-0"
         aria-label="Toggle Chat"
       >
         <MessageSquare size={24} />
