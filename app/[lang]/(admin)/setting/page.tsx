@@ -331,7 +331,7 @@ const InfoAccordion = ({
 };
 
 // --- Main Settings Page ---
-function SettingsPage() {
+function Setting() {
   const params = useParams();
   const currentLang =
     params && Array.isArray(params.lang)
@@ -379,4 +379,4 @@ function SettingsPage() {
   );
 }
 
-export default SettingsPage;
+export default Setting;
