@@ -83,7 +83,9 @@ const translations = {
 type TDict = (typeof translations)[keyof typeof translations];
 
 const SkeletonLoader = ({ className }: { className?: string }) => (
-  <div className={`animate-pulse bg-gray-200 rounded-lg ${className}`} />
+  <div
+    className={`animate-pulse bg-gray-200 dark:bg-neutral-800 rounded-lg ${className}`}
+  />
 );
 
 const DetailRow = ({ label, value }: { label: string; value: string }) => (
@@ -198,15 +200,15 @@ const MediaScroller: React.FC<MediaScrollerProps> = ({
         <>
           <button
             onClick={() => handleScroll("left")}
-            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/70 rounded-full p-1.5 shadow-md hover:bg-white transition"
+            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/70 dark:bg-neutral-900/60 rounded-full p-1.5 shadow-md hover:bg-white/90 dark:hover:bg-neutral-800 transition border border-slate-200 dark:border-neutral-700"
           >
-            <ChevronLeft className="h-6 w-6 text-gray-800" />
+            <ChevronLeft className="h-6 w-6 text-slate-800 dark:text-slate-200" />
           </button>
           <button
             onClick={() => handleScroll("right")}
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/70 rounded-full p-1.5 shadow-md hover:bg-white transition"
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/70 dark:bg-neutral-900/60 rounded-full p-1.5 shadow-md hover:bg-white/90 dark:hover:bg-neutral-800 transition border border-slate-200 dark:border-neutral-700"
           >
-            <ChevronRight className="h-6 w-6 text-gray-800" />
+            <ChevronRight className="h-6 w-6 text-slate-800 dark:text-slate-200" />
           </button>
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
             {mediaItems.map((_, index) => (
@@ -287,7 +289,7 @@ function Page() {
         <h2 className="text-2xl font-bold mb-4">{t.propertyNotFound}</h2>
         <button
           onClick={() => router.back()}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+          className="px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white"
         >
           {t.goBack}
         </button>
@@ -315,7 +317,7 @@ function Page() {
   } = propertyData;
 
   return (
-    <div className="bg-gray-50 min-h-screen pb-40">
+    <div className="min-h-screen pb-40 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
       {/* --- Image and Header --- */}
       <div className="relative">
         <MediaScroller
@@ -326,79 +328,94 @@ function Page() {
         <div className="absolute top-0 left-0 right-0 flex justify-between items-center p-3 bg-gradient-to-b from-black/50 to-transparent pointer-events-none">
           <button
             onClick={() => router.back()}
-            className="bg-white/80 rounded-full p-2 shadow-md pointer-events-auto"
+            className="bg-white/80 dark:bg-neutral-900/70 rounded-full p-2 shadow-md pointer-events-auto border border-slate-200 dark:border-neutral-800"
           >
-            <ArrowLeft className="h-5 w-5 text-gray-800" />
+            <ArrowLeft className="h-5 w-5 text-slate-800 dark:text-slate-200" />
           </button>
           <div className="flex gap-2 pointer-events-auto">
             <button
+              className="bg-white/80 dark:bg-neutral-900/70 rounded-full p-2 shadow-md border border-slate-200 dark:border-neutral-800"
               onClick={handleToggleFavorite}
-              className="bg-white/80 rounded-full p-2 shadow-md"
             >
               <Heart
                 className={`h-5 w-5 transition-colors ${
-                  isFav ? "text-red-500" : "text-gray-800"
+                  isFav ? "text-red-500" : "text-slate-800 dark:text-slate-200"
                 }`}
                 fill={isFav ? "currentColor" : "none"}
               />
             </button>
             <button
+              className="bg-white/80 dark:bg-neutral-900/70 rounded-full p-2 shadow-md border border-slate-200 dark:border-neutral-800"
               onClick={handleShare}
-              className="bg-white/80 rounded-full p-2 shadow-md"
             >
-              <Share2 className="h-5 w-5 text-gray-800" />
+              <Share2 className="h-5 w-5 text-slate-800 dark:text-slate-200" />
             </button>
-            <button className="bg-white/80 rounded-full p-2 shadow-md">
-              <Printer className="h-5 w-5 text-gray-800" />
+            <button className="bg-white/80 dark:bg-neutral-900/70 rounded-full p-2 shadow-md border border-slate-200 dark:border-neutral-800">
+              <Printer className="h-5 w-5 text-slate-800 dark:text-slate-200" />
             </button>
           </div>
         </div>
       </div>
 
       {/* --- Primary Info --- */}
-      <div className="p-4 bg-white rounded-b-xl shadow-sm">
-        <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
-        <p className="text-gray-500 flex items-center gap-1.5 mt-1">
+      <div className="p-4 bg-white/80 dark:bg-neutral-900 rounded-b-xl shadow-sm border border-slate-200/70 dark:border-neutral-800">
+        <h1 className="text-2xl font-bold">{title}</h1>
+        <p className="text-slate-600 dark:text-slate-400 flex items-center gap-1.5 mt-1">
           <MapPin size={14} /> {location}
         </p>
         <div className="flex items-center gap-2 mt-3">
-          <span className="text-sm font-semibold bg-blue-100 text-blue-800 px-3 py-1 rounded-full capitalize">
+          <span className="text-sm font-semibold px-3 py-1 rounded-full capitalize bg-primary-500/10 text-primary-700 dark:bg-primary-400/10 dark:text-primary-300">
             {offer_type === "RENT" ? t.forRent : t.forSale}
           </span>
           {discount > 0 && (
-            <span className="text-sm font-semibold bg-red-100 text-red-800 px-3 py-1 rounded-full">
+            <span className="text-sm font-semibold bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 px-3 py-1 rounded-full">
               {t.hotOffer}
             </span>
           )}
         </div>
-        <p className="text-3xl font-extrabold text-blue-600 mt-4">
+        <p className="text-3xl font-extrabold text-primary-600 dark:text-primary-400 mt-4">
           {currency} {price.toLocaleString()}
         </p>
       </div>
 
       <div className="p-4 space-y-6">
         {/* --- Details Section --- */}
-        <div className="bg-white p-4 rounded-xl shadow-sm">
+        <div className="bg-white/80 dark:bg-neutral-900 p-4 rounded-xl shadow-sm border border-slate-200/70 dark:border-neutral-800">
           <h2 className="text-xl font-bold mb-2">{t.detailsTitle}</h2>
-          <DetailRow
-            label={t.createdDate}
-            value={new Date(createdAt).toLocaleDateString(locale, {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          />
-          <DetailRow label={t.propertyId} value={id.substring(0, 8)} />
-          <DetailRow
-            label={t.price}
-            value={`${currency} ${price.toLocaleString()}`}
-          />
+          <div className="divide-y divide-gray-100 dark:divide-neutral-800">
+            <div className="flex justify-between items-center py-3">
+              <span className="text-sm text-slate-600 dark:text-slate-400">
+                {t.createdDate}
+              </span>
+              <span className="font-semibold">
+                {new Date(createdAt).toLocaleDateString(locale, {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </span>
+            </div>
+            <div className="flex justify-between items-center py-3">
+              <span className="text-sm text-slate-600 dark:text-slate-400">
+                {t.propertyId}
+              </span>
+              <span className="font-semibold">{id.substring(0, 8)}</span>
+            </div>
+            <div className="flex justify-between items-center py-3">
+              <span className="text-sm text-slate-600 dark:text-slate-400">
+                {t.price}
+              </span>
+              <span className="font-semibold">
+                {currency} {price.toLocaleString()}
+              </span>
+            </div>
+          </div>
         </div>
 
         {/* --- Amenities Section --- */}
-        <div className="bg-white p-4 rounded-xl shadow-sm">
+        <div className="bg-white/80 dark:bg-neutral-900 p-4 rounded-xl shadow-sm border border-slate-200/70 dark:border-neutral-800">
           <h2 className="text-xl font-bold mb-3">{t.amenities}</h2>
-          <div className="grid grid-cols-2 gap-4 text-gray-700">
+          <div className="grid grid-cols-2 gap-4 text-slate-800 dark:text-slate-200">
             <span className="flex items-center gap-2">
               <BedDouble size={20} /> {bedroom} {t.bedrooms}
             </span>
@@ -418,18 +435,18 @@ function Page() {
         </div>
 
         {/* --- Description Section --- */}
-        <div className="bg-white p-4 rounded-xl shadow-sm">
+        <div className="bg-white/80 dark:bg-neutral-900 p-4 rounded-xl shadow-sm border border-slate-200/70 dark:border-neutral-800">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-xl font-bold">{t.description}</h2>
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="text-sm font-semibold text-blue-600"
+              className="text-sm font-semibold text-primary-600 dark:text-primary-400"
             >
               {isExpanded ? t.readLess : t.readMore}
             </button>
           </div>
           <p
-            className={`text-gray-600 transition-all duration-300 ${
+            className={`text-slate-700 dark:text-slate-300 transition-all duration-300 ${
               isExpanded ? "max-h-full" : "max-h-20 overflow-hidden"
             }`}
           >
@@ -438,7 +455,7 @@ function Page() {
         </div>
 
         {/* --- Contact Shortcuts --- */}
-        <div className=" bottom-0 left-0 w-full bg-white/90 border-t border-gray-200 p-3 backdrop-blur-sm">
+        <div className="bottom-0 left-0 w-full bg-white/90 dark:bg-neutral-900/90 border-t border-slate-200 dark:border-neutral-800 p-3 backdrop-blur-sm">
           <div className="flex justify-between items-center gap-3">
             <Link
               href="https://wa.me/qr/XFZIVZ2X5SKWF1"

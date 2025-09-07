@@ -94,11 +94,15 @@ type TDict = (typeof translations)[keyof typeof translations];
 // --- Reusable Components ---
 
 const SkeletonLoader = ({ className }: { className?: string }) => (
-  <div className={`animate-pulse bg-gray-200 rounded-lg ${className}`} />
+  <div
+    className={`animate-pulse bg-gray-200 dark:bg-neutral-800 rounded-lg ${className}`}
+  />
 );
 
 const EmptyState = ({ message }: { message: string }) => (
-  <div className="text-center py-10 text-gray-500">{message}</div>
+  <div className="text-center py-10 text-gray-500 dark:text-gray-400">
+    {message}
+  </div>
 );
 
 // --- Filter Dialog Component ---
@@ -191,8 +195,8 @@ const FilterDialog = ({
       }
       className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
         (filters as any)[stateKey] === value
-          ? "bg-indigo-600 text-white border-indigo-600 dark:bg-indigo-500 dark:border-indigo-500"
-          : "bg-gray-100 text-gray-700 border-gray-200 dark:bg-neutral-800 dark:text-gray-300 dark:border-neutral-700"
+          ? "border-primary-500 bg-primary-50 text-primary-700 dark:bg-primary-500/10 dark:text-primary-300"
+          : "border-slate-300 bg-white hover:bg-slate-50 text-slate-700 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:text-slate-300"
       }`}
     >
       {label}
@@ -303,13 +307,13 @@ const FilterDialog = ({
         <div className="absolute bottom-0 left-0 w-full bg-white dark:bg-neutral-950 p-4 border-t border-slate-200 dark:border-neutral-800 flex gap-4">
           <button
             onClick={handleReset}
-            className="w-full py-3 rounded-lg border border-gray-300 dark:border-neutral-700 font-semibold hover:bg-gray-100 dark:hover:bg-white/10"
+            className="w-full py-3 rounded-lg border font-semibold border-slate-300 dark:border-neutral-700 hover:bg-slate-50 dark:hover:bg-neutral-800"
           >
             {t.reset}
           </button>
           <button
             onClick={handleApply}
-            className="w-full py-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-400 text-white font-semibold"
+            className="w-full py-3 rounded-lg bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-400 text-white font-semibold"
           >
             {t.applyFilters}
           </button>
@@ -407,6 +411,7 @@ function Page() {
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
       <div className="container mx-auto max-w-7xl p-2 sm:p-4">
+        {/* --- Search --- */}
         <div className="relative mb-4">
           <Input
             type="text"
@@ -438,7 +443,7 @@ function Page() {
 
         {/* --- Promotions Carousel --- */}
         <h1 className="font-semibold text-lg">{t.featuredProperty}</h1>
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-950/30 dark:to-violet-950/30 shadow-lg mb-6 h-60 border border-slate-200/70 dark:border-neutral-800">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary-50 to-primary-100 dark:from-primary-950/30 dark:to-primary-900/20 shadow-lg mb-6 h-60 border border-slate-200/70 dark:border-neutral-800">
           {isLoadingPromotion ? (
             <SkeletonLoader className=" h-full" />
           ) : promotionData && promotionData.length > 0 ? (
@@ -471,13 +476,13 @@ function Page() {
                 onClick={prevSlide}
                 className="absolute top-1/2 left-2 -translate-y-1/2 bg-white/70 dark:bg-neutral-900/60 hover:bg-white/90 dark:hover:bg-neutral-800 rounded-full p-2 z-10 border border-slate-200 dark:border-neutral-700 shadow-sm"
               >
-                <ChevronLeft className="h-6 w-6 text-gray-800 dark:text-gray-200" />
+                <ChevronLeft className="h-6 w-6 text-slate-800 dark:text-slate-200" />
               </button>
               <button
                 onClick={nextSlide}
                 className="absolute top-1/2 right-2 -translate-y-1/2 bg-white/70 dark:bg-neutral-900/60 hover:bg-white/90 dark:hover:bg-neutral-800 rounded-full p-2 z-10 border border-slate-200 dark:border-neutral-700 shadow-sm"
               >
-                <ChevronRight className="h-6 w-6 text-gray-800 dark:text-gray-200" />
+                <ChevronRight className="h-6 w-6 text-slate-800 dark:text-slate-200" />
               </button>
             </>
           ) : (
@@ -709,11 +714,11 @@ function Page() {
 
         {/* Full-page modal with filtered results */}
         {showFiltered && appliedFilters && (
-          <div className="fixed inset-0 z-[60] bg-white flex flex-col">
-            <div className="sticky top-0 bg-white border-b p-3 flex items-center justify-between">
+          <div className="fixed inset-0 z-[60] bg-white dark:bg-neutral-950 flex flex-col">
+            <div className="sticky top-0 bg-white/90 dark:bg-neutral-950/90 backdrop-blur border-b border-slate-200 dark:border-neutral-800 p-3 flex items-center justify-between">
               <button
                 onClick={() => setShowFiltered(false)}
-                className="px-3 py-1.5 rounded-lg hover:bg-gray-100 flex items-center gap-2"
+                className="px-3 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-neutral-800 flex items-center gap-2"
               >
                 <X size={16} />
                 <span>{t.close}</span>
