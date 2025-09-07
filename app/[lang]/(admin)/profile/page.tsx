@@ -1,14 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
-import { redirect, useParams, useRouter } from "next/navigation";
+import React, { useState } from "react";
+import { useParams } from "next/navigation";
 import {
   changePassword,
   getProfile,
   updateProfile,
 } from "@/actions/admin/profile";
-import Image from "next/image";
 import {
   Mail,
   Phone,
@@ -125,18 +123,10 @@ const ProfileSkeleton = () => (
 
 export default function Page() {
   const params = useParams();
-  const router = useRouter();
-  // const user = {
-  //   id: 1,
-  //   name: "Admin User",
-  //   email: "admin@example.com",
-  //   image: null,
-  // };
-  //   const { data: session, status } = useSession();
 
-  const lang = (
-    Array.isArray(params.lang) ? params.lang[0] : params.lang || "en"
-  ) as "en" | "am";
+  const lang = ((params &&
+    (Array.isArray(params.lang) ? params.lang[0] : params.lang)) ||
+    "en") as "en" | "am";
   const t = translations[lang];
 
   //   useEffect(() => {
@@ -157,17 +147,17 @@ export default function Page() {
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false); // for Edit Profile
+  // const [isSubmitting, setIsSubmitting] = useState(false); // for Edit Profile
 
   // --- actions ---
   const [, updateProfileAction, isLoadingProfileUpdate] = useAction(
     updateProfile,
     [, () => {}]
   );
-  const [res, changePasswordAction, isLoadingChange] = useAction(
-    changePassword,
-    [, () => {}]
-  );
+  const [, changePasswordAction, isLoadingChange] = useAction(changePassword, [
+    ,
+    () => {},
+  ]);
   const [profileData, refreshProfile, isLoading] = useAction(getProfile, [
     true,
     () => {},

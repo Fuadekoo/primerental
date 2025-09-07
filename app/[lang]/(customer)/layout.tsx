@@ -45,7 +45,7 @@ type Lang = keyof typeof translations;
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const params = useParams();
-  const lang = params.lang as Lang;
+  const lang = (params?.lang as Lang) ?? "en";
   const t = translations[lang];
   // Define menu inside the function to access params
   const menu = [

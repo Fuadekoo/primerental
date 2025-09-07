@@ -4,10 +4,7 @@ import UserLayout from "@/components/userLayout";
 import { redirect } from "next/navigation";
 import {
   Home,
-  User,
   CreditCard,
-  Package,
-  ShoppingCart,
   Settings,
   LayoutGrid,
   List,

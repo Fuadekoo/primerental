@@ -9,7 +9,7 @@ type Meeting = {
   color: string;
 };
 
-const Schedules = ({ t }: { t: any }) => {
+const Schedules = ({ t }: { t: Record<string, string> }) => {
   const meetings: Meeting[] = [
     {
       title: "Meeting with Herry",

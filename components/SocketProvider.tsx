@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useMemo } from "react";
 import io, { Socket } from "socket.io-client";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 // import { addToast } from "@heroui/toast";
 
 export const SocketContext = createContext<{ socket: typeof Socket | null }>({
@@ -72,11 +72,11 @@ export function SocketProvider({
     };
 
     // Handler for new order notifications (for Admin)
-    interface TableInfo {
-      name?: string;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      [key: string]: any;
-    }
+    // interface TableInfo {
+    //   name?: string;
+    //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    //   [key: string]: any;
+    // }
 
     // interface OrderNotification {
     //   orderCode?: string;

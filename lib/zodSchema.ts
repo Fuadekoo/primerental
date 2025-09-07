@@ -1,5 +1,3 @@
-import { Bath } from "lucide-react";
-import { off } from "process";
 import { z } from "zod";
 
 export const loginSchema = z.object({

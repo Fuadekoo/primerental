@@ -88,12 +88,12 @@ const SkeletonLoader = ({ className }: { className?: string }) => (
   />
 );
 
-const DetailRow = ({ label, value }: { label: string; value: string }) => (
-  <div className="flex justify-between items-center py-3 border-b border-gray-100">
-    <span className="text-sm text-gray-500">{label}</span>
-    <span className="font-semibold text-gray-800">{value}</span>
-  </div>
-);
+// const DetailRow = ({ label, value }: { label: string; value: string }) => (
+//   <div className="flex justify-between items-center py-3 border-b border-gray-100">
+//     <span className="text-sm text-gray-500">{label}</span>
+//     <span className="font-semibold text-gray-800">{value}</span>
+//   </div>
+// );
 
 // --- Media Scroller Component ---
 type MediaScrollerProps = {
@@ -229,12 +229,16 @@ const MediaScroller: React.FC<MediaScrollerProps> = ({
 function Page() {
   const router = useRouter();
   const params = useParams();
-  const propertyId = Array.isArray((params as any).propertyId)
-    ? ((params as any).propertyId[0] as string)
-    : ((params as any).propertyId as string) || "";
-  const currentLang = Array.isArray((params as any).lang)
-    ? ((params as any).lang[0] as string)
-    : ((params as any).lang as string) || "en";
+
+  const { propertyId = "", lang: currentLang = "en" } = params as {
+    propertyId?: string;
+    lang?: string;
+  };
+
+  // const propertyIdStr = Array.isArray(propertyId) ? propertyId[0] : propertyId;
+  // const currentLangStr = Array.isArray(currentLang)
+  //   ? currentLang[0]
+  //   : currentLang;
   const t = translations[currentLang as "en" | "am"] || translations.en;
   const locale = currentLang === "am" ? "am-ET" : "en-US";
 

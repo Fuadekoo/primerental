@@ -100,7 +100,7 @@ const FontSwitcher = ({
     localStorage.setItem("fontTheme", cls);
     setCurrent(cls);
   };
-
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSelectChange = (keys: any) => {
     const key = Array.from(keys as Set<React.Key>)[0] as
       | "font-theme-1"
@@ -221,9 +221,11 @@ const LanguageSelector = ({
 }) => {
   const router = useRouter();
   const params = useParams();
-  const currentLang = Array.isArray(params.lang)
-    ? (params.lang[0] as string)
-    : (params.lang as string) || "en";
+  const currentLang = params && params.lang
+    ? Array.isArray(params.lang)
+      ? (params.lang[0] as string)
+      : (params.lang as string)
+    : "en";
 
   useEffect(() => {
     if (
@@ -233,7 +235,7 @@ const LanguageSelector = ({
         "NEXT_LOCALE=en; path=/; max-age=31536000; samesite=lax";
     }
   }, []);
-
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSelectChange = (keys: any) => {
     const key = Array.from(keys as Set<React.Key>)[0];
     const newLang = String(key || "en");
@@ -332,9 +334,12 @@ const InfoAccordion = ({
 // --- Main Settings Page ---
 function SettingsPage() {
   const params = useParams();
-  const currentLang = Array.isArray(params.lang)
-    ? (params.lang[0] as string)
-    : (params.lang as string) || "en";
+  const currentLang =
+    params && params.lang
+      ? Array.isArray(params.lang)
+        ? (params.lang[0] as string)
+        : (params.lang as string)
+      : "en";
   const t = translations[currentLang as "en" | "am"] || translations.en;
 
   return (

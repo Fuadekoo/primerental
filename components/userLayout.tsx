@@ -8,13 +8,7 @@ import {
   DropdownTrigger,
 } from "@heroui/react";
 import { LogOutIcon, UserIcon } from "lucide-react";
-import {
-  AlignLeft,
-  ChevronLeft,
-  ChevronRight,
-  Wifi,
-  WifiOff,
-} from "lucide-react";
+import { AlignLeft, ChevronLeft, ChevronRight, WifiOff } from "lucide-react";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";

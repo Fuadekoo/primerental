@@ -31,10 +31,7 @@ type ChatMessage = {
 
 export default function ChatPopup() {
   //   const guestId = useGuestSession();
-  const [user, isUserRefresh, isLoading] = useAction(getLoginUserId, [
-    true,
-    () => {},
-  ]);
+  const [user, ,] = useAction(getLoginUserId, [true, () => {}]);
   const [userId, setUserId] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   // Update state to use the new ChatMessage type
@@ -53,10 +50,10 @@ export default function ChatPopup() {
   }, [user]);
 
   // Action to get the admin user to message
-  const [guestList, isRefreshList, isLoadingGuestList] = useAction(
-    getGuestList,
-    [true, () => {}]
-  );
+  const [guestList, , isLoadingGuestList] = useAction(getGuestList, [
+    true,
+    () => {},
+  ]);
 
   // Action to get existing chat messages
   const [chatHistory, fetchChat, isFetchingChat] = useAction(getAdminChat, [
@@ -65,21 +62,18 @@ export default function ChatPopup() {
   ]);
 
   // action to mark messages as read
-  const [markRead, readAction, isMarkingReadLoading] = useAction(
-    readAdminMessages,
-    [, () => {}]
-  );
+  const [, readAction] = useAction(readAdminMessages, [, () => {}]);
 
   useEffect(() => {
     if (chatHistory && userId) {
-      const formattedMessages = chatHistory.map((msg: any) => ({
+      const formattedMessages = chatHistory.map((msg) => ({
         id: msg.id,
-        fromUserId: msg.fromUserId ?? msg.fromGuestId, // Keep original IDs
-        toUserId: msg.toUserId ?? msg.toGuestId,
+        fromUserId: (msg.fromUserId ?? msg.fromGuestId) || "", // Ensure string
+        toUserId: (msg.toUserId ?? msg.toGuestId) || "", // Ensure string
         msg: msg.msg,
         createdAt: new Date(msg.createdAt),
         isRead: msg.isRead,
-        self: msg.fromUserId === userId, // Message is "self" if from admin
+        self: (msg.fromUserId ?? msg.fromGuestId) === userId, // Compare with fallback
       }));
       setMessages(formattedMessages);
     } else {
@@ -133,6 +127,7 @@ export default function ChatPopup() {
     };
 
     // Handle incoming messages for the admin
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleAdminMessage = (message: any) => {
       // These are the session/DB IDs from the server payload
       const fromId = message.fromGuestId ?? message.fromUserId;
@@ -360,7 +355,7 @@ export default function ChatPopup() {
                 Loading guests...
               </div>
             ) : (
-              guestList?.map((guest: any) => (
+              guestList?.map((guest) => (
                 <div
                   key={guest.id}
                   onClick={() => setSelectGuestId(guest.guestId)}
@@ -368,7 +363,7 @@ export default function ChatPopup() {
                 >
                   <div className="flex justify-between items-center">
                     <p className="font-semibold text-slate-800 dark:text-slate-100">
-                      {guest.name || "Guest"}
+                      {"Guest"}
                     </p>
                     {onlineGuests.has(guest.guestId) ? (
                       <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-green-500/10 text-green-600 dark:text-green-300 dark:bg-green-500/15">

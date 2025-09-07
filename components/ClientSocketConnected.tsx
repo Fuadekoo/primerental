@@ -4,7 +4,6 @@ import React from "react";
 import { RefreshCcw, CheckCheck } from "lucide-react";
 import { customerConnected } from "@/actions/common/socketChecker";
 import useAction from "@/hooks/useActions";
-import { useParams } from "next/navigation";
 import useGuestSession from "@/hooks/useGuestSession";
 
 /**

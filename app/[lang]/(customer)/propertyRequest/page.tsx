@@ -11,15 +11,7 @@ import { propertyRequestSchema } from "@/lib/zodSchema";
 import { Input, Button, Textarea } from "@heroui/react";
 import { addToast } from "@heroui/toast";
 import { useRouter, useParams } from "next/navigation";
-import {
-  BedDouble,
-  Bath,
-  Send,
-  KeyRound,
-  Handshake,
-  Minus,
-  Plus,
-} from "lucide-react";
+import { Send, KeyRound, Handshake } from "lucide-react";
 import requestBg from "@/public/cover.jpg";
 import Loading from "@/components/loading";
 
@@ -92,15 +84,13 @@ type RequestFormValues = z.infer<typeof propertyRequestSchema>;
 function PropertyRequestPage() {
   const router = useRouter();
   const params = useParams();
-  const lang = (params.lang || "en") as "en" | "am";
+  const lang = ((params?.lang as string) || "en") as "en" | "am";
   const t = translations[lang];
 
   const {
     register,
     handleSubmit,
     control,
-    watch,
-    setValue,
     formState: { errors },
   } = useForm<RequestFormValues>({
     resolver: zodResolver(propertyRequestSchema),
@@ -119,8 +109,8 @@ function PropertyRequestPage() {
   const propertyTypes = propertyTypesResult;
 
   const [, action, loading] = useAction(propertyRequest, [
-    undefined,
-    (res) => {
+    ,
+    () => {
       addToast({ description: t.successMessage });
       router.push(`/${lang}/home`);
     },
@@ -314,7 +304,7 @@ function PropertyRequestPage() {
                     <p className="text-sm text-gray-500">{t.loadingTypes}</p>
                   ) : Array.isArray(propertyTypes) &&
                     propertyTypes.length > 0 ? (
-                    propertyTypes.map((type: any) => (
+                    propertyTypes.map((type) => (
                       <button
                         type="button"
                         key={type.id}

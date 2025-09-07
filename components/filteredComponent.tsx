@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { Search, Save, Check } from "lucide-react";
 import useAction from "@/hooks/useActions";
@@ -26,11 +26,7 @@ function FilteredComponent({
   filters,
   title = "Filtered Properties",
 }: FilteredComponentProps) {
-  const [results, , isLoading] = useAction(
-    filterProperty,
-    [true, () => {}],
-    filters
-  );
+  const [results, ,] = useAction(filterProperty, [true, () => {}], filters);
 
   const [search, setSearch] = useState("");
   const [saved, setSaved] = useState(false);
@@ -46,16 +42,16 @@ function FilteredComponent({
 
   const hasResults = Array.isArray(results) && results.length > 0;
 
-  const filteredResults = useMemo(() => {
-    if (!hasResults) return [];
-    const q = search.trim().toLowerCase();
-    if (!q) return results!;
-    return results!.filter((item) =>
-      [item.title, item.location, item.propertyType?.name, item.offer_type]
-        .filter(Boolean)
-        .some((v) => String(v).toLowerCase().includes(q))
-    );
-  }, [results, hasResults, search]);
+  // const filteredResults = useMemo(() => {
+  //   if (!hasResults) return [];
+  //   const q = search.trim().toLowerCase();
+  //   if (!q) return results!;
+  //   return results!.filter((item) =>
+  //     [item.title, item.location, item.propertyType?.name, item.offer_type]
+  //       .filter(Boolean)
+  //       .some((v) => String(v).toLowerCase().includes(q))
+  //   );
+  // }, [results, hasResults, search]);
 
   const handleSaveSearch = () => {
     // Save via zustand store (persisted with name: "savedsearch")

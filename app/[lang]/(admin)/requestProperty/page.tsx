@@ -28,10 +28,10 @@ function RequestPropertyPage() {
     pageSize
   );
 
-  const [dashboardData, refreshDashboard, isLoadingDashboard] = useAction(
-    requestDashboard,
-    [true, () => {}]
-  );
+  const [dashboardData, , isLoadingDashboard] = useAction(requestDashboard, [
+    true,
+    () => {},
+  ]);
 
   useEffect(() => {
     refresh();
@@ -76,6 +76,7 @@ function RequestPropertyPage() {
     {
       key: "isVisited",
       label: "Visited",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       renderCell: (row: any) => (
         <span
           className={`px-2 py-1 rounded text-xs font-bold ${
@@ -91,6 +92,7 @@ function RequestPropertyPage() {
     {
       key: "action",
       label: "Action",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       renderCell: (row: any) => (
         <div className="flex gap-2">
           {!row.isVisited && (

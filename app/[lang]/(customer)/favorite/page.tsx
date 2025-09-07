@@ -84,7 +84,7 @@ const EmptyState = ({
 
 function Page() {
   const params = useParams();
-  const lang = (params.lang || "en") as "en" | "am";
+  const lang = ((params?.lang as string) || "en") as "en" | "am";
   const t = translations[lang];
 
   const [search, setSearch] = useState("");
@@ -156,7 +156,7 @@ function Page() {
               </div>
             ))
           ) : allFavoriteData && allFavoriteData.length > 0 ? (
-            allFavoriteData.map((item: any) => (
+            allFavoriteData.map((item) => (
               <Link
                 href={`/${lang}/property/${item.id}`}
                 key={item.id}

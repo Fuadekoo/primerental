@@ -77,7 +77,7 @@ type RegisterFormValues = z.infer<typeof propertyRegisterSchema>;
 function PropertyRegisterPage() {
   const router = useRouter();
   const params = useParams();
-  const lang = (params.lang || "en") as "en" | "am";
+  const lang = ((params?.lang as string) || "en") as "en" | "am";
   const t = translations[lang];
 
   const {
@@ -103,7 +103,7 @@ function PropertyRegisterPage() {
 
   const [, action, loading] = useAction(propertyRegister, [
     undefined,
-    (res: any) => {
+    () => {
       addToast({
         description: t.successMessage,
       });
@@ -254,7 +254,7 @@ function PropertyRegisterPage() {
                     <p className="text-sm text-gray-500">{t.loadingTypes}</p>
                   ) : Array.isArray(propertyTypes) &&
                     propertyTypes.length > 0 ? (
-                    propertyTypes.map((type: any) => (
+                    propertyTypes.map((type) => (
                       <button
                         type="button"
                         key={type.id}

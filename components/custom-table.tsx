@@ -20,8 +20,10 @@ export interface ColumnDef<T> {
 
 interface CustomTableProps {
   rows: Array<
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Record<string, any> & { key?: string | number; id?: string | number }
   >;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   columns: Array<ColumnDef<Record<string, any>>>;
   totalRows: number;
   page: number;

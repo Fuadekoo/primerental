@@ -5,7 +5,7 @@ import useAction from "@/hooks/useActions";
 // import MiniCart from "@/components/mini-cart";
 import { ArrowLeft } from "lucide-react";
 // import { useCart, CartItem } from "@/hooks/useCart";
-import { Minus, Plus, PlusCircle } from "lucide-react";
+// import { Minus, Plus, PlusCircle } from "lucide-react";
 import Image from "next/image";
 const SkeletonLoader = ({ className }: { className?: string }) => (
   <div className={`animate-pulse bg-gray-200 rounded-lg ${className}`} />

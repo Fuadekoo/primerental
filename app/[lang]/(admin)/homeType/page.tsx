@@ -35,11 +35,11 @@ interface HomeTypeItem {
   description?: string;
   createdAt?: string;
 }
-
-interface ColumnDef {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+interface ColumnDef<T = Record<string, any>> {
   key: string;
   label: string;
-  renderCell?: (item: Record<string, any>) => React.ReactNode;
+  renderCell?: (item: T) => React.ReactNode;
 }
 
 function HomeTypePage() {
@@ -223,8 +223,8 @@ function HomeTypePage() {
     ...item,
     key: item.id,
   }));
-
-  const columns: ColumnDef[] = [
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const columns: ColumnDef<Record<string, any>>[] = [
     {
       key: "autoId",
       label: "#",
@@ -254,7 +254,8 @@ function HomeTypePage() {
     {
       key: "createdAt",
       label: "Created At",
-      renderCell: (item) => new Date(item.createdAt).toLocaleDateString(),
+      renderCell: (item) =>
+        item.createdAt ? new Date(item.createdAt).toLocaleDateString() : "",
     },
     {
       key: "actions",
@@ -265,7 +266,7 @@ function HomeTypePage() {
             size="sm"
             color="primary"
             variant="flat"
-            onPress={() => handleEdit(item)}
+            onPress={() => handleEdit(item as HomeTypeItem)}
           >
             Edit
           </Button>

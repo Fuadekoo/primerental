@@ -63,7 +63,7 @@ export const CustomCard: React.FC<CustomCardProps> = ({
   patientHistory,
   onDelete,
 }) => {
-  const { generalCaseId } = useParams<{ generalCaseId: string }>();
+  // const { generalCaseId } = useParams<{ generalCaseId: string }>();
   const router = useRouter();
   const [perPage, setPerPage] = useState(PER_PAGE_OPTIONS[1]);
   const [page, setPage] = useState(1);
@@ -267,7 +267,7 @@ export const CustomCard: React.FC<CustomCardProps> = ({
                   {patient.status ? "Solved" : "Pending"}
                 </span>
                 <div className="flex items-center gap-2">
-                  <Button
+                  {/* <Button
                     className="bg-sky-400 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700 shadow flex items-center gap-1"
                     onClick={() =>
                       router.push(
@@ -278,7 +278,7 @@ export const CustomCard: React.FC<CustomCardProps> = ({
                   >
                     <FolderOpen size={16} />
                     Details
-                  </Button>
+                  </Button> */}
                   {onDelete && (
                     <Button
                       className="bg-red-100 text-red-700 p-2 rounded-lg hover:bg-red-200"

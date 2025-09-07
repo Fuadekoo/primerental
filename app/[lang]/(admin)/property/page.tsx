@@ -19,18 +19,19 @@ import CustomAlert from "@/components/custom-alert";
 import Select from "react-select";
 import { propertySchema } from "@/lib/zodSchema";
 import Image from "next/image";
-import { on } from "events";
+// import { on } from "events";
 
 // Type definitions
 interface PropertyItem {
   id: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any; // Allow other properties
 }
-
-interface ColumnDef {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+interface ColumnDef<T = Record<string, any>> {
   key: string;
   label: string;
-  renderCell?: (item: PropertyItem) => React.ReactNode;
+  renderCell?: (item: T) => React.ReactNode;
 }
 
 interface PropertyTypeOption {
@@ -176,7 +177,7 @@ function PropertyPage() {
 
   useEffect(() => {
     if (propertyTypeResponse?.data) {
-      const options = propertyTypeResponse.data.map((pt: any) => ({
+      const options = propertyTypeResponse.data.map((pt) => ({
         value: pt.id,
         label: pt.name,
       }));
@@ -302,7 +303,7 @@ function PropertyPage() {
       // Remove data URL prefix for backend (if needed)
       const base64Strings = results.map((r) => r.split(",")[1]);
       setValue("images", base64Strings, { shouldValidate: true });
-    } catch (error) {
+    } catch {
       addToast({
         title: "Image Error",
         description: "Could not process one or more files.",
@@ -325,12 +326,13 @@ function PropertyPage() {
     ...item,
     key: item.id,
   }));
-
-  const columns: ColumnDef[] = [
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const columns: ColumnDef<Record<string, any>>[] = [
     {
       key: "images",
       label: "Image",
-      renderCell: (item) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      renderCell: (item: Record<string, any>) => {
         const imageUrl = formatImageUrl(item.images?.[0]);
         return (
           <div className="w-16 h-10 relative rounded overflow-hidden">
@@ -356,20 +358,23 @@ function PropertyPage() {
     {
       key: "price",
       label: "Price",
-      renderCell: (item) => `${item.price} ${item.currency}`,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      renderCell: (item: Record<string, any>) =>
+        `${item.price} ${item.currency}`,
     },
     { key: "location", label: "Location" },
     { key: "quantity", label: "Quantity" },
     {
       key: "actions",
       label: "Actions",
-      renderCell: (item) => (
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      renderCell: (item: Record<string, any>) => (
         <div className="flex items-center gap-2">
           <Button
             size="sm"
             color="primary"
             variant="flat"
-            onPress={() => handleEdit(item)}
+            onPress={() => handleEdit(item as PropertyItem)}
           >
             Edit
           </Button>
@@ -587,10 +592,12 @@ function PropertyPage() {
               {imagesPreview.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-2">
                   {imagesPreview.map((src, idx) => (
-                    <img
+                    <Image
                       key={idx}
                       src={src}
                       alt={`Preview ${idx + 1}`}
+                      width={80}
+                      height={80}
                       className="w-20 h-20 object-cover rounded border"
                     />
                   ))}
@@ -658,7 +665,8 @@ const InputField = ({
   placeholder,
   isTextArea = false,
   ...props
-}: any) => (
+}: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+any) => (
   <div>
     <label htmlFor={props.name} className="block mb-1 text-sm font-medium">
       {label}
@@ -695,7 +703,8 @@ const SelectField = ({
   errors,
   disabled,
   isLoading,
-}: any) => (
+}: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+any) => (
   <div>
     <label className="block mb-1 text-sm font-medium">{label}</label>
     <Controller
@@ -707,8 +716,9 @@ const SelectField = ({
           options={options}
           isDisabled={disabled}
           isLoading={isLoading}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           value={options.find((c: any) => c.value === field.value) || null}
-          onChange={(val: any) => field.onChange(val ? val.value : null)}
+          onChange={(val) => field.onChange(val ? val.value : null)}
           styles={{
             control: (base) => ({
               ...base,

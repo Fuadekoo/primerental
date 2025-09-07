@@ -27,10 +27,10 @@ function RegisterPropertyPage() {
     page,
     pageSize
   );
-  const [dashboardData, refreshDashboard, isLoadingDashboard] = useAction(
-    registerDashboard,
-    [true, () => {}]
-  );
+  const [dashboardData, , isLoadingDashboard] = useAction(registerDashboard, [
+    true,
+    () => {},
+  ]);
 
   useEffect(() => {
     refresh();
@@ -61,6 +61,7 @@ function RegisterPropertyPage() {
     {
       key: "isVisit",
       label: "Is Visit",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       renderCell: (row: any) => (
         <span
           className={`px-2 py-1 rounded text-xs font-bold ${
@@ -76,6 +77,7 @@ function RegisterPropertyPage() {
     {
       key: "action",
       label: "Action",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       renderCell: (row: any) =>
         !row.isVisit && (
           <button

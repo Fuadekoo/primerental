@@ -13,22 +13,29 @@ import {
 } from "recharts";
 import { getDashboardGraphData } from "@/actions/admin/dashboard";
 
-const months = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
+// const months = [
+//   "Jan",
+//   "Feb",
+//   "Mar",
+//   "Apr",
+//   "May",
+//   "Jun",
+//   "Jul",
+//   "Aug",
+//   "Sep",
+//   "Oct",
+//   "Nov",
+//   "Dec",
+// ];
 
-const RevenueChart = ({ data, t }: { data: any[]; t: any }) => (
+const RevenueChart = ({
+  data,
+  t,
+}: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: any[];
+  t: { revenueOverview: string };
+}) => (
   <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
     <h3 className="font-bold text-lg text-gray-800 dark:text-white">
       {t.revenueOverview}
@@ -75,6 +82,7 @@ const RevenueChart = ({ data, t }: { data: any[]; t: any }) => (
 function Chart() {
   const t = { revenueOverview: "Requests & Registered Overview" };
   const [year, setYear] = useState(new Date().getFullYear());
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [graphData, setGraphData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 

@@ -1,16 +1,6 @@
 "use client";
 import React from "react";
-import {
-  ArrowRight,
-  BarChart2,
-  Briefcase,
-  DollarSign,
-  Home,
-  MoreVertical,
-  Plus,
-  User,
-  Users,
-} from "lucide-react";
+import { Briefcase, DollarSign, Home, User } from "lucide-react";
 import useAction from "@/hooks/useActions";
 import { getDashboardRecentActivity } from "@/actions/admin/dashboard";
 type ActivityItem = {
@@ -39,8 +29,8 @@ const RecentActivities = ({
   activities,
   isLoading,
 }: {
-  t: any;
-  activities: any[];
+  t: Record<string, string>;
+  activities: ActivityItem[];
   isLoading: boolean;
 }) => (
   <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
@@ -55,6 +45,7 @@ const RecentActivities = ({
           No recent activity.
         </div>
       ) : (
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         activities.map((item: any, index: number) => (
           <div key={index} className="flex items-start gap-3">
             <div
@@ -93,7 +84,7 @@ const RecentActivities = ({
 );
 
 function RecentActivity() {
-  const [activityData, refreshActivity, isLoadingActivity] = useAction(
+  const [activityData, , isLoadingActivity] = useAction(
     getDashboardRecentActivity,
     [true, () => {}]
   );
@@ -104,11 +95,29 @@ function RecentActivity() {
     viewAllActivity: "View All Activity",
   };
 
+  // Map raw activity data to ActivityItem[]
+  const mappedActivities: ActivityItem[] =
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (activityData || []).map((item: any) => ({
+      icon: iconMap[item.type || "property"],
+      text:
+        item.firstName && item.lastName
+          ? `${item.firstName} ${item.lastName}`
+          : item.fullname
+          ? item.fullname
+          : item.text || item.title || item.propertyType || "Activity",
+      time: item.createdAt
+        ? new Date(item.createdAt).toLocaleString()
+        : item.time || "",
+      iconColor: colorMap[item.type || "property"],
+      ...item, // preserve other fields if needed
+    }));
+
   return (
     <div>
       <RecentActivities
         t={t}
-        activities={activityData || []}
+        activities={mappedActivities}
         isLoading={isLoadingActivity}
       />
     </div>

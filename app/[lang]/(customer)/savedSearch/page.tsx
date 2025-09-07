@@ -57,7 +57,7 @@ const Pill = ({ children }: { children: React.ReactNode }) => (
 
 function Page() {
   const params = useParams();
-  const lang = (params.lang || "en") as "en" | "am";
+  const lang = ((params && (params).lang) || "en") as "en" | "am";
   const t = translations[lang];
 
   // Saved searches from persisted zustand store
@@ -70,7 +70,7 @@ function Page() {
   const typeNameById = useMemo(() => {
     const map = new Map<string, string>();
     if (Array.isArray(categoryData)) {
-      for (const c of categoryData as any[]) {
+      for (const c of categoryData as { id: string; name: string }[]) {
         if (c?.id) map.set(String(c.id), c?.name || String(c.id));
       }
     }

@@ -194,7 +194,7 @@ const FilterDialog = ({
         }))
       }
       className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
-        (filters as any)[stateKey] === value
+        filters[stateKey] === value
           ? "border-primary-500 bg-primary-50 text-primary-700 dark:bg-primary-500/10 dark:text-primary-300"
           : "border-slate-300 bg-white hover:bg-slate-50 text-slate-700 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:text-slate-300"
       }`}
@@ -221,7 +221,7 @@ const FilterDialog = ({
           <div>
             <h3 className="font-semibold mb-2">{t.propertyType}</h3>
             <div className="flex flex-wrap gap-2">
-              {categories.map((cat: any) => (
+              {categories.map((cat) => (
                 <FilterButton
                   key={cat.id}
                   value={String(cat.id)}
@@ -452,7 +452,7 @@ function Page() {
                 className="flex transition-transform duration-500 ease-in-out h-full"
                 style={{ transform: `translateX(-${activeIndex * 100}%)` }}
               >
-                {promotionData.map((item: any) => (
+                {promotionData.map((item) => (
                   <div
                     key={item.id}
                     className="flex-shrink-0 h-full relative w-full"
@@ -508,7 +508,7 @@ function Page() {
                     <SkeletonLoader className="h-full w-full" />
                   </div>
                 ))
-              : specialOfferData?.map((item: any) => (
+              : specialOfferData?.map((item) => (
                   <Link
                     href={`/${currentLang}/property/${item.id}`}
                     key={item.id}
@@ -562,7 +562,7 @@ function Page() {
                     <SkeletonLoader className="w-16 h-4" />
                   </div>
                 ))
-              : categoryData?.map((cat: any) => (
+              : categoryData?.map((cat) => (
                   <div
                     key={cat.id}
                     onClick={() => setSelectedCategoryId(cat.id)}

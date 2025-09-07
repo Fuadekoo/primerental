@@ -60,7 +60,7 @@ const translations = {
 
 function Page() {
   const params = useParams();
-  const lang = (params.lang || "en") as "en" | "am";
+  const lang = ((params?.lang as string) || "en") as "en" | "am";
   const t = translations[lang];
 
   return (

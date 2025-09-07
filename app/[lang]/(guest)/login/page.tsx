@@ -1,6 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
-import Link from "next/link";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { loginSchema } from "@/lib/zodSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,7 +12,7 @@ import Loading from "@/components/loading";
 import { addToast } from "@heroui/toast";
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
-import { ArrowRight, Globe } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 // i18n translations
 const translations = {
@@ -60,9 +59,10 @@ const translations = {
 // --- Language Selector ---
 const LanguageSelector = () => {
   const router = useRouter();
-  const params = useParams();
+  const params = useParams() || {};
   const currentLang = (params.lang || "en") as "en" | "am";
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSelectChange = (keys: any) => {
     const key = Array.from(keys as Set<React.Key>)[0];
     const newLang = String(key || "en");
@@ -115,7 +115,7 @@ const LanguageSelector = () => {
 
 function Page() {
   const router = useRouter();
-  const params = useParams();
+  const params = useParams() || {};
   const lang = (params.lang || "en") as "en" | "am";
   const t = translations[lang];
 

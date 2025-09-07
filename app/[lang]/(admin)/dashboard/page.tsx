@@ -53,7 +53,7 @@ const translations = {
 // --- MAIN PAGE COMPONENT ---
 export default function DashboardPage() {
   const params = useParams();
-  const lang = (params.lang || "en") as "en" | "am";
+  const lang = ((params?.lang) || "en") as "en" | "am";
   const t = translations[lang];
 
   return (

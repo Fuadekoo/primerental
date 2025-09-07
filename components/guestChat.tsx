@@ -23,10 +23,7 @@ type ChatMessage = {
 export default function GuestChatPopup() {
   const guestId = useGuestSession();
   console.log("Guest ID in GuestChatPopup:", guestId);
-  const [admin, isAdminRefresh, isAdminLoading] = useAction(getAdmin, [
-    true,
-    () => {},
-  ]);
+  const [admin, , isAdminLoading] = useAction(getAdmin, [true, () => {}]);
   const [adminId, setAdminId] = useState<string | null>(null);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -47,14 +44,11 @@ export default function GuestChatPopup() {
   ]);
 
   // action when guest read a message from admin
-  const [markRead, readAction, isMarkingReadLoading] = useAction(
-    readGuestMessages,
-    [, () => {}]
-  );
+  const [, readAction] = useAction(readGuestMessages, [, () => {}]);
 
   useEffect(() => {
     if (chatHistory && guestId) {
-      const formattedMessages = chatHistory.map((msg: any) => ({
+      const formattedMessages = chatHistory.map((msg) => ({
         id: msg.id,
         fromUserId: msg.fromUserId ?? msg.fromGuestId ?? "",
         toUserId: msg.toUserId ?? msg.toGuestId ?? "",
@@ -130,9 +124,9 @@ export default function GuestChatPopup() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const toggleChat = () => {
-    setIsOpen(!isOpen);
-  };
+  // const toggleChat = () => {
+  //   setIsOpen(!isOpen);
+  // };
 
   const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
