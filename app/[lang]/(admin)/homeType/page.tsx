@@ -247,7 +247,7 @@ function HomeTypePage() {
             className="rounded object-cover"
           />
         ) : (
-          <span className="text-gray-400">No photo</span>
+          <span className="text-gray-500 dark:text-slate-300">No photo</span>
         ),
     },
     { key: "description", label: "Description" },
@@ -288,12 +288,15 @@ function HomeTypePage() {
   return (
     <div className="p-4 md:p-6">
       <header className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold">Manage Home Types</h1>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+          Manage Home Types
+        </h1>
         <Button color="primary" onPress={handleAdd}>
           <Plus size={20} className="mr-2" />
           Add Home Type
         </Button>
       </header>
+
       <CustomTable
         columns={columns}
         rows={rows}
@@ -307,24 +310,24 @@ function HomeTypePage() {
         isLoading={isLoadingData}
       />
       {showModal && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-black bg-opacity-50 flex justify-center items-center p-4 z-50">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 backdrop-blur-sm bg-black/60 flex justify-center items-center p-4 z-50">
+          <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-lg shadow-xl border border-slate-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-900 text-slate-900 dark:text-white p-6">
             <h2 className="text-xl font-semibold mb-4">
               {editHomeType ? "Edit Home Type" : "Add Home Type"}
             </h2>
             <form onSubmit={handleSubmit(onSubmit)}>
-              {/* <p className="">{JSON.stringify(errors)}</p> */}
               <div className="flex flex-col gap-4">
+                {/* Name */}
                 <div>
                   <label
                     htmlFor="name"
-                    className="block mb-1 text-sm font-medium"
+                    className="block mb-1 text-sm font-medium text-slate-700 dark:text-slate-200"
                   >
                     Name
                   </label>
                   <input
                     id="name"
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-2 rounded-md border border-slate-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/30 outline-none"
                     placeholder="e.g., Apartment, Villa"
                     {...register("name")}
                     disabled={disableSubmit}
@@ -335,26 +338,30 @@ function HomeTypePage() {
                     </span>
                   )}
                 </div>
+
+                {/* Description */}
                 <div>
                   <label
                     htmlFor="description"
-                    className="block mb-1 text-sm font-medium"
+                    className="block mb-1 text-sm font-medium text-slate-700 dark:text-slate-200"
                   >
                     Description (Optional)
                   </label>
                   <textarea
                     id="description"
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-2 rounded-md border border-slate-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/30 outline-none"
                     placeholder="A short description of the home type"
                     {...register("description")}
                     rows={3}
                     disabled={disableSubmit}
                   />
                 </div>
+
+                {/* Photo */}
                 <div>
                   <label
                     htmlFor="photo"
-                    className="block mb-1 text-sm font-medium"
+                    className="block mb-1 text-sm font-medium text-slate-700 dark:text-slate-200"
                   >
                     Photo
                   </label>
@@ -362,12 +369,16 @@ function HomeTypePage() {
                     type="file"
                     accept="image/*"
                     {...register("photo", { onChange: handleImageChange })}
-                    className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                    className="
+                      w-full text-sm
+                      file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold
+                      file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100
+                      dark:file:bg-primary-500/10 dark:file:text-primary-300 dark:hover:file:bg-primary-500/20
+                    "
                     disabled={isConvertingImage}
                   />
-
                   {isConvertingImage && (
-                    <div className="flex items-center text-xs text-gray-500 mt-1">
+                    <div className="flex items-center text-xs text-slate-500 dark:text-slate-400 mt-1">
                       <Loader2 className="h-4 w-4 animate-spin mr-1" />
                       Processing image...
                     </div>
@@ -379,11 +390,12 @@ function HomeTypePage() {
                   )}
                 </div>
 
+                {/* Preview (if any) */}
                 {photoValue &&
                   typeof photoValue === "string" &&
                   !isConvertingImage && (
-                    <div className="mt-2 border rounded-md p-2">
-                      <span className="text-xs text-gray-500 block text-center mb-1">
+                    <div className="mt-2 border border-slate-200 dark:border-neutral-800 rounded-md p-2 bg-white/70 dark:bg-neutral-900">
+                      <span className="text-xs text-slate-500 dark:text-slate-400 block text-center mb-1">
                         Preview
                       </span>
                       <Image
@@ -398,6 +410,7 @@ function HomeTypePage() {
                     </div>
                   )}
 
+                {/* Current photo (edit mode) */}
                 {editHomeType && !selectedPhoto && editHomeType.photo && (
                   <div className="mt-2">
                     <Image
@@ -410,12 +423,14 @@ function HomeTypePage() {
                   </div>
                 )}
               </div>
+
               <div className="flex justify-end gap-3 mt-6">
                 <Button
                   variant="ghost"
                   type="button"
                   onPress={() => setShowModal(false)}
                   disabled={disableSubmit}
+                  className="dark:text-white dark:hover:bg-primary-500/10"
                 >
                   Cancel
                 </Button>
@@ -438,6 +453,8 @@ function HomeTypePage() {
           </div>
         </div>
       )}
+
+      {/* Delete modal remains unchanged */}
       {deleteId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="w-full max-w-sm">

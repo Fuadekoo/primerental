@@ -523,11 +523,11 @@ function Page() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
                     <div className="absolute top-0 left-0 p-3">
-                      <div className="rounded-lg bg-white/90 p-2 backdrop-blur-sm">
-                        <h3 className="font-bold text-gray-800 text-sm">
+                      <div className="rounded-lg bg-white/90 dark:bg-neutral-900/80 p-2 backdrop-blur-sm border border-slate-200/70 dark:border-neutral-800">
+                        <h3 className="font-bold text-gray-800 dark:text-slate-100 text-sm">
                           {item.title}
                         </h3>
-                        <p className="text-xs text-red-600 font-semibold">
+                        <p className="text-xs text-red-600 dark:text-red-300 font-semibold">
                           {item.discount}% OFF
                         </p>
                       </div>
@@ -634,7 +634,7 @@ function Page() {
                       className="h-32 w-28 flex-shrink-0 rounded-md object-cover"
                     />
                     <div className="flex flex-col flex-grow">
-                      <h3 className="font-bold text-gray-800 truncate">
+                      <h3 className="font-bold text-gray-800 dark:text-slate-100 truncate">
                         {item.title}
                       </h3>
                       <div className="flex items-center gap-1.5 text-sm text-gray-500 mt-1">

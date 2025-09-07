@@ -80,8 +80,8 @@ function RequestPropertyPage() {
         <span
           className={`px-2 py-1 rounded text-xs font-bold ${
             row.isVisited
-              ? "bg-green-100 text-green-700"
-              : "bg-yellow-100 text-yellow-700"
+              ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+              : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
           }`}
         >
           {row.isVisited ? "Visited" : "Not Visited"}
@@ -95,14 +95,14 @@ function RequestPropertyPage() {
         <div className="flex gap-2">
           {!row.isVisited && (
             <button
-              className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded transition"
+              className="px-3 py-1 rounded text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-400 transition"
               onClick={() => handleMarkVisited(row.id)}
             >
               Mark as Visited
             </button>
           )}
           <button
-            className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded transition"
+            className="px-3 py-1 rounded text-white bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-400 transition"
             onClick={() => handleDelete(row.id)}
           >
             Delete
@@ -114,39 +114,47 @@ function RequestPropertyPage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold mb-8 text-blue-700">
+      <h1 className="text-3xl font-bold mb-8 text-slate-900 dark:text-slate-100">
         Property Requests
       </h1>
+
       {/* --- Analysis Cards --- */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div className="flex items-center bg-blue-50 border border-blue-200 rounded-lg p-4 shadow">
-          <ListChecks className="h-8 w-8 text-blue-600 mr-3" />
+        <div className="flex items-center rounded-xl p-4 border border-slate-200/70 dark:border-neutral-800 bg-white/80 dark:bg-neutral-900 shadow-sm">
+          <ListChecks className="h-8 w-8 text-primary-600 dark:text-primary-400 mr-3" />
           <div>
-            <div className="text-lg font-bold text-blue-700">
+            <div className="text-lg font-bold text-slate-900 dark:text-slate-100">
               {isLoadingDashboard ? "..." : stats.total}
             </div>
-            <div className="text-sm text-blue-600">Total Requests</div>
+            <div className="text-sm text-slate-600 dark:text-slate-400">
+              Total Requests
+            </div>
           </div>
         </div>
-        <div className="flex items-center bg-green-50 border border-green-200 rounded-lg p-4 shadow">
-          <Eye className="h-8 w-8 text-green-600 mr-3" />
+        <div className="flex items-center rounded-xl p-4 border border-slate-200/70 dark:border-neutral-800 bg-white/80 dark:bg-neutral-900 shadow-sm">
+          <Eye className="h-8 w-8 text-green-600 dark:text-green-400 mr-3" />
           <div>
-            <div className="text-lg font-bold text-green-700">
+            <div className="text-lg font-bold text-slate-900 dark:text-slate-100">
               {isLoadingDashboard ? "..." : stats.visited}
             </div>
-            <div className="text-sm text-green-600">Visited Requests</div>
+            <div className="text-sm text-slate-600 dark:text-slate-400">
+              Visited Requests
+            </div>
           </div>
         </div>
-        <div className="flex items-center bg-yellow-50 border border-yellow-200 rounded-lg p-4 shadow">
-          <EyeOff className="h-8 w-8 text-yellow-600 mr-3" />
+        <div className="flex items-center rounded-xl p-4 border border-slate-200/70 dark:border-neutral-800 bg-white/80 dark:bg-neutral-900 shadow-sm">
+          <EyeOff className="h-8 w-8 text-yellow-600 dark:text-yellow-400 mr-3" />
           <div>
-            <div className="text-lg font-bold text-yellow-700">
+            <div className="text-lg font-bold text-slate-900 dark:text-slate-100">
               {isLoadingDashboard ? "..." : stats.notVisited}
             </div>
-            <div className="text-sm text-yellow-600">Not Visited Requests</div>
+            <div className="text-sm text-slate-600 dark:text-slate-400">
+              Not Visited Requests
+            </div>
           </div>
         </div>
       </div>
+
       {/* --- Alert --- */}
       {alert && (
         <CustomAlert
@@ -155,6 +163,7 @@ function RequestPropertyPage() {
           className="mb-4"
         />
       )}
+
       {/* --- Table --- */}
       <div className="overflow-x-auto">
         <CustomTable
