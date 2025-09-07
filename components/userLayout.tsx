@@ -65,8 +65,26 @@ export default function UserLayout({
     };
   }, []);
 
+  // Lock body scroll on mobile when sidebar is open
+  useEffect(() => {
+    const lock = () => {
+      if (typeof window === "undefined") return;
+      if (sidebar && window.innerWidth < 1024) {
+        document.body.style.overflow = "hidden";
+      } else {
+        document.body.style.overflow = "";
+      }
+    };
+    lock();
+    window.addEventListener("resize", lock);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("resize", lock);
+    };
+  }, [sidebar]);
+
   return (
-    <div className="min-h-dvh w-full grid lg:grid-cols-[auto_1fr] overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+    <div className="h-dvh w-dvw grid lg:grid-cols-[auto_1fr] overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
       {/* --- Offline Popup --- */}
       {showOfflinePopup && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
@@ -109,13 +127,13 @@ export default function UserLayout({
       )}
       {/* --- End Offline Popup --- */}
       <Sidebar {...{ sidebar, setSidebar, menu, isManager }} />
-      <div className="grid grid-rows-[auto_1fr] gap-2 overflow-hidden">
+      <div className="grid grid-rows-[auto_1fr] h-full min-h-0 gap-2 overflow-hidden">
         <Header
           sidebar={sidebar}
           setSidebar={setSidebar}
           isManager={isManager}
         />
-        <div className="m-0 rounded-xl overflow-y-auto p-2 sm:p-4 grid">
+        <div className="m-0 rounded-xl overflow-y-auto min-h-0 h-full p-2 sm:p-4 grid">
           {children}
         </div>
       </div>
@@ -149,13 +167,13 @@ function Sidebar({
   return (
     <aside
       className={cn(
-        "z-50 relative accent3 grid grid-cols-[auto_1fr] overflow-hidden",
+        "z-50 relative accent3 grid grid-cols-[auto_1fr] h-full overflow-hidden",
         sidebar ? "max-lg:absolute max-lg:inset-0" : "max-lg:hidden"
       )}
     >
       <div
         className={cn(
-          "relative grid grid-rows-[auto_1fr_auto] overflow-hidden bg-white/80 dark:bg-neutral-900 backdrop-blur supports-[backdrop-filter]:bg-white/70 border-r border-slate-200 dark:border-neutral-800",
+          "relative grid grid-rows-[auto_1fr_auto] h-full overflow-hidden bg-white/80 dark:bg-neutral-900 backdrop-blur supports-[backdrop-filter]:bg-white/70 border-r border-slate-200 dark:border-neutral-800",
           sidebar ? "max-xl:lg:w-64 w-72" : "max-xl:lg:w-14 w-20"
         )}
       >
