@@ -5,7 +5,16 @@ import { useTheme } from "next-themes";
 import { useRouter, useParams } from "next/navigation";
 import { Accordion, AccordionItem } from "@heroui/react";
 import { Select, SelectItem, Avatar } from "@heroui/react";
-import { Sun, Moon, Laptop, Globe, FileText, Shield, Info } from "lucide-react";
+import {
+  Sun,
+  Moon,
+  Laptop,
+  Globe,
+  FileText,
+  Shield,
+  Info,
+  Type,
+} from "lucide-react";
 
 // Simple i18n copy
 const translations = {
@@ -27,6 +36,10 @@ const translations = {
       "By using our services, you agree to our terms and conditions. This includes respecting property listings, providing accurate information, and adhering to the rental agreements established through our platform. All users must comply with local laws and regulations.",
     privacyContent:
       "We are committed to protecting your privacy. Your personal information is collected to facilitate rental transactions and improve our services. We do not sell your data to third parties. Please review our full privacy policy for detailed information on data handling.",
+    fontStyle: "Font style",
+    fontTheme1: "Theme 1 (Dancing Script)",
+    fontTheme2: "Theme 2 (Times New Roman)",
+    fontTheme3: "Theme 3 (Arial)",
   },
   am: {
     settings: "ማቀናበሪያ",
@@ -46,11 +59,111 @@ const translations = {
       "አገልግሎታችንን በመጠቀም ውሎቻችንን እና መመሪያዎቻችንን ትፈቅዳለህ። ይህ የማስታወቂያ ዝርዝሮችን መከበር፣ ትክክለኛ መረጃ መስጠት እና በመድረካችን ላይ የተደረጉ የኪራይ ቃል ኪዳኖችን መከተል ይጠቀማል። ሁሉም ተጠቃሚዎች ከአካባቢ ሕጎች ጋር መጣጣም አለባቸው።",
     privacyContent:
       "ግላዊነትዎን ለመጠበቅ ታማኝ ነን። የእርስዎ መረጃ የኪራይ ግብዣዎችን ለማስቻል እና አገልግሎታችንን ለማሻሻል እንሰበስባለን። መረጃዎን ለሶስተኛ ወገን አንሸጥም። ስለ ውሂብ አያያዝ ዝርዝር መረጃ ለማግኘት ፖሊሲያችንን ይመልከቱ።",
+    fontStyle: "የፊደል ዓይነት",
+    fontTheme1: "Theme 1 (Dancing Script)",
+    fontTheme2: "Theme 2 (Times New Roman)",
+    fontTheme3: "Theme 3 (Arial)",
   },
 } as const;
 
+// --- Font Switcher Component ---
+const FontSwitcher = ({
+  t,
+}: {
+  t: (typeof translations)[keyof typeof translations];
+}) => {
+  const [mounted, setMounted] = useState(false);
+  const [current, setCurrent] = useState<
+    "font-theme-1" | "font-theme-2" | "font-theme-3"
+  >("font-theme-1");
+
+  const FONT_CLASSES = [
+    "font-theme-1",
+    "font-theme-2",
+    "font-theme-3",
+  ] as const;
+
+  useEffect(() => {
+    setMounted(true);
+    const saved =
+      (typeof window !== "undefined" &&
+        (localStorage.getItem("fontTheme") as typeof current)) ||
+      "font-theme-1";
+    setCurrent(saved);
+  }, []);
+
+  const applyFont = (cls: typeof current) => {
+    if (typeof document === "undefined") return;
+    const html = document.documentElement;
+    FONT_CLASSES.forEach((c) => html.classList.remove(c));
+    html.classList.add(cls);
+    localStorage.setItem("fontTheme", cls);
+    setCurrent(cls);
+  };
+
+  const handleSelectChange = (keys: any) => {
+    const key = Array.from(keys as Set<React.Key>)[0] as
+      | "font-theme-1"
+      | "font-theme-2"
+      | "font-theme-3"
+      | undefined;
+    if (key) applyFont(key);
+  };
+
+  if (!mounted) {
+    return (
+      <div className="flex items-center justify-between p-4">
+        <div className="h-6 w-28 animate-pulse rounded-md bg-gray-200 dark:bg-gray-700" />
+        <div className="h-8 w-60 animate-pulse rounded-md bg-gray-200 dark:bg-gray-700" />
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="flex flex-col items-start gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <Type className="h-6 w-6 text-gray-500" />
+          <span className="font-medium text-gray-700 dark:text-gray-300">
+            {t.fontStyle}
+          </span>
+        </div>
+
+        <Select
+          aria-label={t.fontStyle}
+          className="w-full sm:w-72"
+          variant="flat"
+          label={t.fontStyle}
+          labelPlacement="outside-left"
+          selectedKeys={new Set([current])}
+          onSelectionChange={handleSelectChange}
+          disallowEmptySelection
+        >
+          <SelectItem key="font-theme-1">{t.fontTheme1}</SelectItem>
+          <SelectItem key="font-theme-2">{t.fontTheme2}</SelectItem>
+          <SelectItem key="font-theme-3">{t.fontTheme3}</SelectItem>
+        </Select>
+      </div>
+
+      {/* Live preview */}
+      <div className="px-4 pb-4">
+        <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-800/70 p-4">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+            Preview
+          </p>
+          <p className="text-xl sm:text-2xl">Aa Bb 123 – Prime Rental</p>
+        </div>
+      </div>
+    </>
+  );
+};
+
 // --- Theme Switcher Component ---
-const ThemeSwitcher = ({ t }: { t: typeof translations[keyof typeof translations] }) => {
+const ThemeSwitcher = ({
+  t,
+}: {
+  t: (typeof translations)[keyof typeof translations];
+}) => {
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
 
@@ -101,7 +214,11 @@ const ThemeSwitcher = ({ t }: { t: typeof translations[keyof typeof translations
 };
 
 // --- Language Selector ---
-const LanguageSelector = ({ t }: { t: typeof translations[keyof typeof translations] }) => {
+const LanguageSelector = ({
+  t,
+}: {
+  t: (typeof translations)[keyof typeof translations];
+}) => {
   const router = useRouter();
   const params = useParams();
   const currentLang = Array.isArray(params.lang)
@@ -173,7 +290,11 @@ const LanguageSelector = ({ t }: { t: typeof translations[keyof typeof translati
 };
 
 // --- Info Accordion Component ---
-const InfoAccordion = ({ t }: { t: typeof translations[keyof typeof translations] }) => {
+const InfoAccordion = ({
+  t,
+}: {
+  t: (typeof translations)[keyof typeof translations];
+}) => {
   return (
     <Accordion
       selectionMode="multiple"
@@ -232,6 +353,11 @@ function SettingsPage() {
           {/* Appearance Section */}
           <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
             <ThemeSwitcher t={t} />
+          </div>
+
+          {/* Font Style Section (now dropdown-based) */}
+          <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+            <FontSwitcher t={t} />
           </div>
 
           {/* General Section */}
