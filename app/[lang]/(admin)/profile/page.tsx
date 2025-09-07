@@ -367,11 +367,35 @@ export default function Page() {
                     className="w-full p-2 rounded-md border border-slate-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/30 outline-none"
                     placeholder="+251 9XXXXXXXX"
                     {...registerEdit("phone")}
+                    value={profileData?.phone || ""}
                     disabled={isEditSubmitting || isLoadingProfileUpdate}
                   />
                   {editErrors.phone && (
                     <p className="text-sm text-red-500 mt-1">
                       {editErrors.phone.message as string}
+                    </p>
+                  )}
+                </div>
+                {/* email */}
+                <div>
+                  <label
+                    htmlFor="edit-email"
+                    className="block mb-1 text-sm font-medium text-slate-700 dark:text-slate-200"
+                  >
+                    {t.emailLabel}
+                  </label>
+                  <input
+                    id="edit-email"
+                    type="email"
+                    className="w-full p-2 rounded-md border border-slate-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/30 outline-none"
+                    placeholder="admin@example.com"
+                    {...registerEdit("email")}
+                    disabled
+                    value={profileData?.email || ""}
+                  />
+                  {editErrors.email && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {editErrors.email.message as string}
                     </p>
                   )}
                 </div>
