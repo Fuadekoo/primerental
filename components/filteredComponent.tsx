@@ -1,10 +1,10 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import Image from "next/image";
 
 import { Search, Save, Check } from "lucide-react";
 import useAction from "@/hooks/useActions";
 import { filterProperties } from "@/actions/customer/filter";
-// import { filterProperty } from "@/actions/customer/property";
 import { useSavedSearch } from "@/hooks/useSavedSearch";
 
 // Shape of the filters you pass into this component
@@ -38,7 +38,11 @@ const FilteredComponent: React.FC<FilteredComponentProps> = ({
     bathroom: filters.bathroom ?? null,
   };
 
-  const [results, , isLoading] = useAction(filterProperties, [request, () => {}]);
+  const [results, , isLoading] = useAction(
+    filterProperties,
+    [true, () => {}],
+    JSON.stringify(request)
+  );
   const [search, setSearch] = useState("");
   const [saved, setSaved] = useState(false);
 
@@ -47,13 +51,43 @@ const FilteredComponent: React.FC<FilteredComponentProps> = ({
   const exists = useSavedSearch((s) => s.exists);
 
   useEffect(() => {
-    setSaved(exists(filters));
+    const normalized = {
+      property_type: filters.property_type || undefined,
+      offer_type: filters.offer_type || undefined,
+      minPrice: filters.minPrice ?? undefined,
+      maxPrice: filters.maxPrice ?? undefined,
+      bedroom: filters.bedroom ?? undefined,
+      bathroom: filters.bathroom ?? undefined,
+    } as const;
+    setSaved(exists(normalized as any));
   }, [filters, exists]);
 
-  const hasResults = Array.isArray(results) && results.length > 0;
+  const list = Array.isArray(results) ? results : [];
+  const filtered = list.filter((item: any) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    const title = String(item?.title || "").toLowerCase();
+    const location = String(item?.location || "").toLowerCase();
+    return title.includes(q) || location.includes(q);
+  });
+  const hasResults = filtered.length > 0;
+
+  const formatImageUrl = (url: string | null | undefined): string => {
+    if (!url) return "/placeholder.png";
+    if (url.startsWith("http") || url.startsWith("/")) return url;
+    return `/api/filedata/${encodeURIComponent(url)}`;
+  };
 
   const handleSaveSearch = () => {
-    saveSearch(filters);
+    const normalized = {
+      property_type: filters.property_type || undefined,
+      offer_type: filters.offer_type || undefined,
+      minPrice: filters.minPrice ?? undefined,
+      maxPrice: filters.maxPrice ?? undefined,
+      bedroom: filters.bedroom ?? undefined,
+      bathroom: filters.bathroom ?? undefined,
+    } as const;
+    saveSearch(normalized as any);
     setSaved(true);
   };
 
@@ -105,7 +139,63 @@ const FilteredComponent: React.FC<FilteredComponentProps> = ({
 
         {/* List */}
         <div className="space-y-4">
-          {/* ...existing code for skeletons, results, empty states... */}
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex gap-4 rounded-lg bg-white p-3 shadow-sm"
+                >
+                  <div className="h-24 w-28 bg-gray-200 rounded-md animate-pulse" />
+                  <div className="flex-grow space-y-2">
+                    <div className="h-5 w-3/4 bg-gray-200 rounded animate-pulse" />
+                    <div className="h-4 w-1/2 bg-gray-200 rounded animate-pulse" />
+                    <div className="h-4 w-full bg-gray-200 rounded animate-pulse" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : hasResults ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {filtered.map((item: any) => (
+                <div
+                  key={item.id}
+                  className="flex gap-4 rounded-lg bg-white p-3 shadow-sm border border-slate-200/70"
+                >
+                  <div className="h-24 w-28 flex-shrink-0 rounded-md overflow-hidden bg-gray-100">
+                    {Array.isArray(item.images) && item.images[0] ? (
+                      <Image
+                        src={formatImageUrl(item.images[0])}
+                        alt={item.title || "Property"}
+                        width={112}
+                        height={96}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : null}
+                  </div>
+                  <div className="flex flex-col flex-grow">
+                    <h3 className="font-bold text-gray-800 truncate">
+                      {item.title || "Untitled"}
+                    </h3>
+                    <div className="text-sm text-gray-500 mt-1">
+                      {item.location || "Unknown location"}
+                    </div>
+                    <div className="text-sm text-gray-600 mt-2">
+                      {(item.currency || "$") +
+                        " " +
+                        (Number(item.price)
+                          ? Number(item.price).toLocaleString()
+                          : "-")}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-10 text-gray-500">
+              No properties match your filters.
+            </div>
+          )}
         </div>
       </div>
     </div>
