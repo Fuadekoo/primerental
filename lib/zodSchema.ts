@@ -86,3 +86,11 @@ export const filterSchema = z.object({
   bathroom: z.number().min(0).optional(),
 });
 export type FilterType = z.infer<typeof filterSchema>;
+
+export const promotionSchema = z.object({
+  title: z.string().min(2).max(100),
+  description: z.string().min(2).max(500),
+  image: z.any(),
+});
+
+export type PromotionType = z.infer<typeof promotionSchema>;

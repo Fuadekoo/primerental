@@ -158,10 +158,10 @@ const MediaScroller: React.FC<MediaScrollerProps> = ({
   }, [mediaItems.length]);
 
   return (
-    <div className="relative w-full h-60 bg-black">
+    <div className="relative w-full h-60 sm:h-72 md:h-80 lg:h-[28rem] xl:h-[32rem] bg-black">
       <div
         ref={scrollContainerRef}
-        className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth h-full"
+        className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth h-full [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
       >
         {images.map((img, index) => (
           <div
@@ -321,7 +321,7 @@ function Page() {
   } = propertyData;
 
   return (
-    <div className="h-full pb-40 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+    <div className="h-full pb-8 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
       {/* --- Image and Header --- */}
       <div className="relative">
         <MediaScroller

@@ -510,7 +510,7 @@ function Page() {
         </div>
 
         {/* --- Special Offers Section --- */}
-        <div className="mb-6">
+        <div className="mb-6 ">
           <div className="flex items-center justify-between px-1 mb-3">
             <h2 className="text-xl font-bold">{t.specialOffers}</h2>
             <Link
@@ -520,7 +520,7 @@ function Page() {
               {t.viewAll}
             </Link>
           </div>
-          <div className="flex gap-4 overflow-x-auto pb-2">
+          <div className="flex gap-4 overflow-x-auto pb-2  [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {isLoadingSpecialOffers
               ? Array.from({ length: 4 }).map((_, i) => (
                   <div key={i} className="flex-shrink-0 w-64 h-80">
@@ -570,7 +570,7 @@ function Page() {
               {t.viewAll}
             </Link>
           </div>
-          <div className="flex gap-4 overflow-x-auto pb-2">
+          <div className="flex gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {isLoadingCategory
               ? Array.from({ length: 5 }).map((_, i) => (
                   <div

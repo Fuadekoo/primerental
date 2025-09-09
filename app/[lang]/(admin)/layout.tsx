@@ -22,6 +22,7 @@ const translations = {
     property: "Property",
     register: "Register Property",
     request: "Request Property",
+    promotion: "Promotion",
     profile: "Profile",
     setting: "Setting",
   },
@@ -32,6 +33,7 @@ const translations = {
     register: "የንብረት መዝግብ",
     request: "የንብረት ጥያቄ",
     profile: "መገለጫ",
+    promotion: "ማስታወቂያ",
     setting: "ቅንብሮች",
   },
 } as const;
@@ -60,6 +62,7 @@ export default async function Layout({
       icon: <CreditCard size={18} />,
     },
     { label: t.request, url: "requestProperty", icon: <Users size={18} /> },
+    { label: t.promotion, url: "promotion", icon: <CreditCard size={18} /> },
     { label: t.profile, url: "profile", icon: <ClipboardList size={18} /> },
     { label: t.setting, url: "setting", icon: <Settings size={18} /> },
   ];
