@@ -104,39 +104,6 @@ export async function getProperty(
 
 export async function createProperty(data: z.infer<typeof propertySchema>) {
   try {
-    // This will hold the public URLs of the saved images.
-    const imageUrls: string[] = [];
-
-    if (Array.isArray(data.images)) {
-      for (const image of data.images) {
-        // Generate a unique filename for each image.
-        const ext = ".jpg"; // or parse from data.photo if you have mime info
-        const uniqueName = `${randomUUID()}${ext}`;
-        const filePath = path.join(process.cwd(), "filedata", uniqueName);
-
-        // Ensure the upload directory exists.
-        await fs.mkdir(path.dirname(filePath), { recursive: true });
-
-        // Decode the base64 string into a buffer.
-        let buffer: Buffer;
-        if (typeof image === "string" && image.startsWith("data:")) {
-          const base64 = image.split(",")[1];
-          buffer = Buffer.from(base64, "base64");
-        } else if (typeof image === "string") {
-          // Handle raw base64 string without data URI prefix.
-          buffer = Buffer.from(image, "base64");
-        } else {
-          // If it's already a buffer.
-          buffer = image;
-        }
-
-        // Write the file to the public directory.
-        await fs.writeFile(filePath, buffer);
-        // help me plase save the image fime name in database in aray
-        imageUrls.push(`${uniqueName}`);
-      }
-    }
-
     await prisma.property.create({
       data: {
         title: data.title,
@@ -152,7 +119,7 @@ export async function createProperty(data: z.infer<typeof propertySchema>) {
         kitchen: data.kitchen,
         parking: data.parking,
         squareMeter: data.squareMeter,
-        images: imageUrls,
+        images: data.images,
         propertyType: {
           connect: { id: data.propertyTypeId },
         },
@@ -169,40 +136,6 @@ export async function updateProperty(
   data: z.infer<typeof propertySchema>
 ) {
   try {
-    const imageUrls: string[] = [];
-
-    if (Array.isArray(data.images)) {
-      for (const image of data.images) {
-        // Generate a unique filename for each image.
-        const ext = ".jpg"; // You can parse the extension from the mime type if available.
-        const uniqueName = `${randomUUID()}${ext}`;
-        const uploadDir = path.join(process.cwd(), "public", "uploads");
-        const filePath = path.join(uploadDir, uniqueName);
-
-        // Ensure the upload directory exists.
-        await fs.mkdir(uploadDir, { recursive: true });
-
-        // Decode the base64 string into a buffer.
-        let buffer: Buffer;
-        if (typeof image === "string" && image.startsWith("data:")) {
-          const base64 = image.split(",")[1];
-          buffer = Buffer.from(base64, "base64");
-        } else if (typeof image === "string") {
-          // Handle raw base64 string without data URI prefix.
-          buffer = Buffer.from(image, "base64");
-        } else {
-          // If it's already a buffer.
-          buffer = image;
-        }
-
-        // Write the file to the public directory.
-        await fs.writeFile(filePath, buffer);
-
-        // Add the public URL to the array.
-        imageUrls.push(`${uniqueName}`);
-      }
-    }
-
     await prisma.property.update({
       where: { id },
       data: {
@@ -219,7 +152,7 @@ export async function updateProperty(
         kitchen: data.kitchen,
         parking: data.parking,
         squareMeter: data.squareMeter,
-        images: imageUrls,
+        images: data.images,
         propertyType: {
           connect: { id: data.propertyTypeId },
         },

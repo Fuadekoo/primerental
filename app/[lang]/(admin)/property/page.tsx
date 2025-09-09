@@ -4,7 +4,7 @@ import useAction from "@/hooks/useActions";
 import {
   createProperty,
   deleteProperty,
-  getProperty, // Corrected: was getProperty
+  getProperty,
   updateProperty,
 } from "@/actions/admin/property";
 import { getPropertyType } from "@/actions/admin/propertyType";
@@ -14,20 +14,18 @@ import { addToast } from "@heroui/toast";
 import { z } from "zod";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Plus, Trash2, List, Grid, ImageOff } from "lucide-react";
+import { Loader2, Plus, Trash2, List, Grid, ImageOff, X } from "lucide-react";
 import CustomAlert from "@/components/custom-alert";
 import Select from "react-select";
 import { propertySchema } from "@/lib/zodSchema";
 import Image from "next/image";
-// import { on } from "events";
 
 // Type definitions
 interface PropertyItem {
   id: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any; // Allow other properties
+  [key: string]: any;
 }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 interface ColumnDef<T = Record<string, any>> {
   key: string;
   label: string;
@@ -39,15 +37,26 @@ interface PropertyTypeOption {
   label: string;
 }
 
+interface UploadProgress {
+  file: File;
+  progress: number;
+  uuid: string;
+  serverFilename?: string;
+}
+
+const CHUNK_SIZE = 512 * 1024; // 512KB
+
+function getTimestampUUID(ext: string) {
+  return `${Date.now()}-${Math.floor(Math.random() * 100000)}.${ext}`;
+}
+
 const formatImageUrl = (url: string | null | undefined): string => {
   if (!url) return "/placeholder.png";
-  // If already an absolute URL or starts with /, use as is
   if (url.startsWith("http") || url.startsWith("/")) return url;
-  // Otherwise, fetch from local API endpoint
   return `/api/filedata/${encodeURIComponent(url)}`;
 };
 
-// New PropertyCard Component
+// PropertyCard Component
 const PropertyCard = ({
   item,
   onEdit,
@@ -72,7 +81,6 @@ const PropertyCard = ({
             objectFit="cover"
             className="bg-gray-200"
             loading="lazy"
-            // placeholder="blur"
           />
         ) : (
           <div className="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
@@ -131,6 +139,10 @@ function PropertyPage() {
   const [pageSize, setPageSize] = useState(10);
 
   const [propertyTypes, setPropertyTypes] = useState<PropertyTypeOption[]>([]);
+  const [uploadProgresses, setUploadProgresses] = useState<UploadProgress[]>(
+    []
+  );
+  const [isUploading, setIsUploading] = useState(false);
 
   type PropertyFormType = {
     title: string;
@@ -156,6 +168,7 @@ function PropertyPage() {
     reset,
     setValue,
     control,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<PropertyFormType>({
     resolver: zodResolver(propertySchema),
@@ -163,7 +176,7 @@ function PropertyPage() {
   });
 
   const [propertiesData, refreshProperties, isLoadingData] = useAction(
-    getProperty, // Corrected: was getProperty
+    getProperty,
     [true, () => {}],
     search,
     page,
@@ -189,7 +202,7 @@ function PropertyPage() {
     addToast({
       title,
       description,
-      color: "secondary", // Use a primary color for text
+      color: "secondary",
       variant: "flat",
     });
 
@@ -197,7 +210,7 @@ function PropertyPage() {
     addToast({
       title,
       description,
-      color: "primary", // Use a primary color for text
+      color: "primary",
       variant: "flat",
     });
 
@@ -209,7 +222,6 @@ function PropertyPage() {
     if (response && !response.error) {
       toastSuccess(response?.message || successMessage);
       onSuccess?.();
-      // close the open modal
       setShowModal(false);
     } else {
       toastError(
@@ -264,54 +276,124 @@ function PropertyPage() {
     setValue("bedroom", item.bedroom);
     setValue("squareMeter", item.squareMeter);
     setValue("parking", item.parking);
+    setValue("images", item.images || []);
     setShowModal(true);
   };
 
   const handleAdd = () => {
     setEditProperty(null);
     reset();
+    setUploadProgresses([]);
     setShowModal(true);
   };
 
-  const [isConvertingImages, setIsConvertingImages] = useState(false);
-  const [imagesPreview, setImagesPreview] = useState<string[]>([]);
+  const uploadFile = async (file: File, uuid: string): Promise<string> => {
+    const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+    const uuidName = uuid || getTimestampUUID(ext);
+
+    const chunkSize = CHUNK_SIZE;
+    const total = Math.ceil(file.size / chunkSize);
+    let finalReturnedName: string | null = null;
+
+    for (let i = 0; i < total; i++) {
+      const start = i * chunkSize;
+      const end = Math.min(file.size, start + chunkSize);
+      const chunk = file.slice(start, end);
+
+      const formData = new FormData();
+      formData.append("chunk", chunk);
+      formData.append("filename", uuidName);
+      formData.append("chunkIndex", i.toString());
+      formData.append("totalChunks", total.toString());
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        throw new Error("Upload failed");
+      }
+
+      const json = await res.json();
+      if (json?.filename) finalReturnedName = json.filename;
+
+      // Update progress for this file
+      setUploadProgresses((prev) =>
+        prev.map((item) =>
+          item.uuid === uuid
+            ? { ...item, progress: Math.round(((i + 1) / total) * 100) }
+            : item
+        )
+      );
+    }
+
+    if (!finalReturnedName) {
+      throw new Error("Upload failed: no filename returned");
+    }
+
+    return finalReturnedName;
+  };
 
   const handleImagesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files ? Array.from(e.target.files) : [];
-    if (files.length === 0) {
-      setValue("images", [], { shouldValidate: true });
-      setImagesPreview([]);
-      setIsConvertingImages(false);
-      return;
-    }
-    setIsConvertingImages(true);
-    const base64Promises = files.map(
-      (file) =>
-        new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const result = reader.result as string;
-            resolve(result); // keep full data URL for preview
-          };
-          reader.onerror = () => reject(new Error("Could not process file"));
-          reader.readAsDataURL(file);
-        })
-    );
+    if (files.length === 0) return;
+
+    setIsUploading(true);
+
+    // Add files to progress tracking
+    const newUploads = files.map((file) => ({
+      file,
+      progress: 0,
+      uuid: getTimestampUUID(file.name.split(".").pop() || "jpg"),
+    }));
+
+    setUploadProgresses((prev) => [...prev, ...newUploads]);
+
+    const uploadedImages: string[] = [];
+
     try {
-      const results = await Promise.all(base64Promises);
-      setImagesPreview(results);
-      // Remove data URL prefix for backend (if needed)
-      const base64Strings = results.map((r) => r.split(",")[1]);
-      setValue("images", base64Strings, { shouldValidate: true });
-    } catch {
-      addToast({
-        title: "Image Error",
-        description: "Could not process one or more files.",
+      for (const upload of newUploads) {
+        try {
+          const serverFilename = await uploadFile(upload.file, upload.uuid);
+          uploadedImages.push(serverFilename);
+
+          // Mark as completed
+          setUploadProgresses((prev) =>
+            prev.map((item) =>
+              item.uuid === upload.uuid
+                ? { ...item, serverFilename, progress: 100 }
+                : item
+            )
+          );
+        } catch (error) {
+          console.error("Failed to upload file:", upload.file.name, error);
+          // Remove failed upload from progress tracking
+          setUploadProgresses((prev) =>
+            prev.filter((item) => item.uuid !== upload.uuid)
+          );
+        }
+      }
+
+      // Update form with all uploaded images
+      const currentImages = watch("images") || [];
+      setValue("images", [...currentImages, ...uploadedImages], {
+        shouldValidate: true,
       });
-      setValue("images", [], { shouldValidate: true });
-      setImagesPreview([]);
+    } finally {
+      setIsUploading(false);
     }
-    setIsConvertingImages(false);
+  };
+
+  const removeImage = (index: number) => {
+    const currentImages = watch("images") || [];
+    const newImages = [...currentImages];
+    newImages.splice(index, 1);
+    setValue("images", newImages, { shouldValidate: true });
+  };
+
+  const removeUploadingFile = (uuid: string) => {
+    setUploadProgresses((prev) => prev.filter((item) => item.uuid !== uuid));
   };
 
   const onSubmit = async (data: z.infer<typeof propertySchema>) => {
@@ -326,12 +408,11 @@ function PropertyPage() {
     ...item,
     key: item.id,
   }));
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const columns: ColumnDef<Record<string, any>>[] = [
     {
       key: "images",
       label: "Image",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       renderCell: (item: Record<string, any>) => {
         const imageUrl = formatImageUrl(item.images?.[0]);
         return (
@@ -358,7 +439,6 @@ function PropertyPage() {
     {
       key: "price",
       label: "Price",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       renderCell: (item: Record<string, any>) =>
         `${item.price} ${item.currency}`,
     },
@@ -367,7 +447,6 @@ function PropertyPage() {
     {
       key: "actions",
       label: "Actions",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       renderCell: (item: Record<string, any>) => (
         <div className="flex items-center gap-2">
           <Button
@@ -392,7 +471,9 @@ function PropertyPage() {
     },
   ];
 
-  const disableSubmit = isLoadingCreate || isLoadingUpdate || isSubmitting;
+  const disableSubmit =
+    isLoadingCreate || isLoadingUpdate || isSubmitting || isUploading;
+  const currentImages = watch("images") || [];
 
   return (
     <div className="p-4 md:p-6">
@@ -466,16 +547,9 @@ function PropertyPage() {
               {editProperty ? "Edit Property" : "Add Property"}
             </h2>
             <Form
-              // onSubmit={handleSubmit((value) => {
-              //   console.log(value);
-              // })}
               onSubmit={handleSubmit(onSubmit)}
               className="grid grid-cols-1 md:grid-cols-2 gap-4"
             >
-              {/* <p className="">
-                {JSON.stringify(Object.values(errors).map((v) => v.message))}
-              </p> */}
-              {/* Form fields */}
               <InputField
                 label="Title"
                 {...register("title")}
@@ -581,33 +655,87 @@ function PropertyPage() {
                 errors={errors}
                 disabled={disableSubmit}
               />
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleImagesChange}
-                className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
-                disabled={isConvertingImages}
-              />
-              {imagesPreview.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {imagesPreview.map((src, idx) => (
-                    <Image
-                      key={idx}
-                      src={src}
-                      alt={`Preview ${idx + 1}`}
-                      width={80}
-                      height={80}
-                      className="w-20 h-20 object-cover rounded border"
-                    />
-                  ))}
-                </div>
-              )}
-              {errors.images && (
-                <span className="text-red-500 text-xs">
-                  {errors.images.message as string}
-                </span>
-              )}
+
+              {/* Image Upload Section */}
+              <div className="md:col-span-2">
+                <label className="block mb-1 text-sm font-medium">Images</label>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleImagesChange}
+                  className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                  disabled={isUploading || disableSubmit}
+                />
+
+                {/* Upload Progress */}
+                {uploadProgresses.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    {uploadProgresses.map((upload, index) => (
+                      <div
+                        key={upload.uuid}
+                        className="flex items-center gap-2"
+                      >
+                        <div className="flex-1">
+                          <div className="flex justify-between text-xs mb-1">
+                            <span>{upload.file.name}</span>
+                            <span>{upload.progress}%</span>
+                          </div>
+                          <progress
+                            value={upload.progress}
+                            max={100}
+                            className="w-full h-2"
+                          />
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onPress={() => removeUploadingFile(upload.uuid)}
+                          disabled={upload.progress === 100}
+                        >
+                          <X size={16} />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Image Previews */}
+                {currentImages.length > 0 && (
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium mb-2">
+                      Uploaded Images:
+                    </h4>
+                    <div className="grid grid-cols-3 gap-2">
+                      {currentImages.map((image, index) => (
+                        <div key={index} className="relative group">
+                          <Image
+                            src={formatImageUrl(image)}
+                            alt={`Preview ${index + 1}`}
+                            width={100}
+                            height={100}
+                            className="w-full h-24 object-cover rounded border"
+                          />
+                          <Button
+                            size="sm"
+                            color="danger"
+                            className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onPress={() => removeImage(index)}
+                          >
+                            <X size={14} />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {errors.images && (
+                  <span className="text-red-500 text-xs">
+                    {errors.images.message as string}
+                  </span>
+                )}
+              </div>
 
               <div className="md:col-span-2 flex justify-end gap-3 mt-6">
                 <Button
@@ -657,7 +785,7 @@ function PropertyPage() {
   );
 }
 
-// Helper components for form fields to reduce repetition
+// Helper components for form fields
 const InputField = ({
   label,
   errors,
@@ -665,8 +793,7 @@ const InputField = ({
   placeholder,
   isTextArea = false,
   ...props
-}: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-any) => (
+}: any) => (
   <div>
     <label htmlFor={props.name} className="block mb-1 text-sm font-medium">
       {label}
@@ -703,8 +830,7 @@ const SelectField = ({
   errors,
   disabled,
   isLoading,
-}: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-any) => (
+}: any) => (
   <div>
     <label className="block mb-1 text-sm font-medium">{label}</label>
     <Controller
@@ -716,7 +842,6 @@ any) => (
           options={options}
           isDisabled={disabled}
           isLoading={isLoading}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           value={options.find((c: any) => c.value === field.value) || null}
           onChange={(val) => field.onChange(val ? val.value : null)}
           styles={{
