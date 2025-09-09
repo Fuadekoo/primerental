@@ -49,7 +49,6 @@ export async function createPromotion(data: z.infer<typeof promotionSchema>) {
       title: (data as any).title,
       description: (data as any).description ?? null,
       image: (data as any).image,
-      isActive: (data as any).isActive ?? true,
     },
   });
   return created;
@@ -66,7 +65,6 @@ export async function updatePromotion(data: z.infer<typeof promotionSchema>) {
       title: (data as any).title,
       description: (data as any).description ?? null,
       image: (data as any).image,
-      isActive: (data as any).isActive,
     },
   });
   return updated;
