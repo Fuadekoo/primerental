@@ -1,7 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import CustomTable from "@/components/custom-table";
-import CustomAlert from "@/components/custom-alert";
+import React, { useState, useEffect } from "react";
 import useAction from "@/hooks/useActions";
 import {
   createPromotion,
@@ -10,6 +8,38 @@ import {
   deletePromotion,
   changeStatusPromotion,
 } from "@/actions/admin/promotion";
+import CustomTable from "@/components/custom-table";
+import { Button, Input } from "@heroui/react";
+import { addToast } from "@heroui/toast";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2, Plus, Trash2, Edit, Eye, EyeOff } from "lucide-react";
+import CustomAlert from "@/components/custom-alert";
+import Image from "next/image";
+
+// Schema for validation
+const promotionSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().optional(),
+  image: z.string().min(1, "Image is required"),
+});
+
+// Type definitions
+interface PromotionItem {
+  id: string;
+  image: string;
+  title: string;
+  description?: string;
+  isActive: boolean;
+  createdAt?: string;
+}
+
+interface ColumnDef<T = Record<string, any>> {
+  key: string;
+  label: string;
+  renderCell?: (item: T) => React.ReactNode;
+}
 
 const CHUNK_SIZE = 512 * 1024; // 512KB
 
@@ -18,68 +48,167 @@ function getTimestampUUID(ext: string) {
 }
 
 function Page() {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [editPromotion, setEditPromotion] = useState<PromotionItem | null>(
+    null
+  );
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
+  // Upload state
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [currentChunk, setCurrentChunk] = useState(0);
   const [totalChunks, setTotalChunks] = useState(0);
   const [uuidFilename, setUuidFilename] = useState<string | null>(null);
   const [serverFilename, setServerFilename] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
-  // Editing state
-  const [editing, setEditing] = useState<any | null>(null);
+  const {
+    handleSubmit,
+    register,
+    reset,
+    setValue,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<z.infer<typeof promotionSchema>>({
+    resolver: zodResolver(promotionSchema),
+    mode: "onChange",
+    defaultValues: {
+      title: "",
+      description: "",
+      image: "",
+    },
+  });
 
-  // List via server action (with simple paging defaults)
-  const [promotionData, refreshPromotions, isLoadingPromotions] = useAction(
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  const handleActionCompletion = (
+    response: unknown,
+    successMessage: string,
+    errorMessage: string
+  ) => {
+    if (response) {
+      addToast({ title: "Success", description: successMessage });
+      refreshPromotions();
+      if (showModal) {
+        setShowModal(false);
+        resetForm();
+      }
+    } else {
+      addToast({
+        title: "Error",
+        description: errorMessage,
+      });
+    }
+  };
+
+  const [promotionData, refreshPromotions, isLoadingData] = useAction(
     getPromotions,
     [true, () => {}],
-    "",
-    1,
-    50
+    search,
+    page,
+    pageSize
   );
 
-  const [, doCreate, isCreating] = useAction(createPromotion, [
+  const [, executeDelete, isLoadingDelete] = useAction(deletePromotion, [
     ,
-    () => {
-      refreshPromotions();
-    },
+    (res) =>
+      handleActionCompletion(
+        res,
+        "Promotion deleted successfully.",
+        "Failed to delete promotion."
+      ),
   ]);
-  const [, doUpdate, isUpdating] = useAction(updatePromotion, [
+
+  const [, executeCreate, isLoadingCreate] = useAction(createPromotion, [
     ,
-    () => {
-      refreshPromotions();
-    },
+    (res) =>
+      handleActionCompletion(
+        res,
+        "Promotion created successfully.",
+        "Failed to create promotion."
+      ),
   ]);
-  const [, doDelete, isDeleting] = useAction(deletePromotion, [
+
+  const [, executeUpdate, isLoadingUpdate] = useAction(updatePromotion, [
     ,
-    () => {
-      refreshPromotions();
-    },
+    (res) =>
+      handleActionCompletion(
+        res,
+        "Promotion updated successfully.",
+        "Failed to update promotion."
+      ),
   ]);
-  const [, doChangeStatus] = useAction(changeStatusPromotion, [
+
+  const [, executeChangeStatus] = useAction(changeStatusPromotion, [
     ,
-    () => {
-      refreshPromotions();
+    (res) => {
+      if (res) {
+        addToast({
+          title: "Success",
+          description: "Promotion status updated successfully.",
+        });
+        refreshPromotions();
+      } else {
+        addToast({
+          title: "Error",
+          description: "Failed to update promotion status.",
+        });
+      }
     },
   ]);
 
   const resetForm = () => {
-    setTitle("");
-    setDescription("");
+    reset();
+    setEditPromotion(null);
     setUuidFilename(null);
     setServerFilename(null);
-    setEditing(null);
-    setError(null);
+    setUploadProgress(0);
+    setIsUploading(false);
+    setCurrentChunk(0);
+    setTotalChunks(0);
+  };
+
+  const handleDelete = (id: string) => {
+    setDeleteId(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteId) return;
+    try {
+      setPendingDeleteId(deleteId);
+      await executeDelete(deleteId);
+      setDeleteId(null);
+    } finally {
+      setPendingDeleteId(null);
+    }
+  };
+
+  const handleEdit = (item: PromotionItem) => {
+    setEditPromotion(item);
+    setValue("title", item.title);
+    setValue("description", item.description || "");
+    setValue("image", item.image);
+    setServerFilename(item.image);
+    setShowModal(true);
+  };
+
+  const handleAdd = () => {
+    resetForm();
+    setShowModal(true);
+  };
+
+  const handleToggleActive = async (item: PromotionItem) => {
+    await executeChangeStatus(item.id, !item.isActive);
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setError(null);
+    setValue("image", "", { shouldValidate: false });
     setServerFilename(null);
 
     const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
@@ -110,7 +239,10 @@ function Page() {
       });
 
       if (!res.ok) {
-        setError("Upload failed. Try again.");
+        addToast({
+          title: "Upload Error",
+          description: "Upload failed. Try again.",
+        });
         setIsUploading(false);
         return;
       }
@@ -126,194 +258,311 @@ function Page() {
     setCurrentChunk(0);
     setTotalChunks(0);
 
-    if (finalReturnedName) setServerFilename(finalReturnedName);
+    if (finalReturnedName) {
+      setServerFilename(finalReturnedName);
+      setValue("image", finalReturnedName, { shouldValidate: true });
+    }
   };
 
-  const handleSave = async () => {
-    setError(null);
-    if (!title.trim()) {
-      setError("Title is required");
-      return;
-    }
+  const onSubmit = async (data: z.infer<typeof promotionSchema>) => {
+    const payload = {
+      title: data.title,
+      description: data.description || "",
+      image: data.image,
+      isActive: editPromotion?.isActive ?? true,
+    };
 
-    // For new create, an upload is required
-    if (!editing && !serverFilename) {
-      setError("Please upload an image first");
-      return;
-    }
-
-    if (editing) {
-      await doUpdate({
-        id: editing.id,
-        title,
-        description,
-        image: serverFilename ?? editing.image,
-      } as any);
+    if (editPromotion?.id) {
+      executeUpdate({ id: editPromotion.id, ...payload });
     } else {
-      await doCreate({
-        title,
-        description,
-        image: serverFilename!,
-      } as any);
+      executeCreate(payload);
     }
-
-    resetForm();
   };
 
-  const handleEdit = (p: any) => {
-    setEditing(p);
-    setTitle(p.title || "");
-    setDescription(p.description || "");
-    setServerFilename(p.image || null);
-    setUuidFilename(null);
+  const formatImageUrl = (url: string | null | undefined): string => {
+    if (!url) return "/placeholder.png";
+    if (url.startsWith("http") || url.startsWith("/")) return url;
+    return `/api/filedata/${encodeURIComponent(url)}`;
   };
 
-  const handleRemove = async (id: string) => {
-    await doDelete(id);
-  };
+  const rows = (promotionData?.data || []).map((item: any) => ({
+    ...item,
+    description: item.description ?? undefined,
+    key: item.id,
+  }));
 
-  const handleToggleActive = async (p: any) => {
-    await doChangeStatus(p.id, !p.isActive);
-  };
+  const columns: ColumnDef<PromotionItem>[] = [
+    {
+      key: "autoId",
+      label: "#",
+      renderCell: (item) => {
+        const index = rows.findIndex((r) => r.id === item.id);
+        return (page - 1) * pageSize + index + 1;
+      },
+    },
+    { key: "title", label: "Title" },
+    {
+      key: "image",
+      label: "Image",
+      renderCell: (item) =>
+        item.image ? (
+          <Image
+            src={formatImageUrl(item.image)}
+            alt={item.title}
+            width={80}
+            height={60}
+            className="rounded object-cover"
+          />
+        ) : (
+          <span className="text-gray-500 dark:text-slate-300">No image</span>
+        ),
+    },
+    { key: "description", label: "Description" },
+    {
+      key: "isActive",
+      label: "Status",
+      renderCell: (item) => (
+        <span className={item.isActive ? "text-green-600" : "text-red-600"}>
+          {item.isActive ? "Active" : "Inactive"}
+        </span>
+      ),
+    },
+    {
+      key: "createdAt",
+      label: "Created At",
+      renderCell: (item) =>
+        item.createdAt ? new Date(item.createdAt).toLocaleDateString() : "",
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      renderCell: (item) => (
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            color="primary"
+            variant="flat"
+            onPress={() => handleEdit(item)}
+          >
+            <Edit size={16} />
+          </Button>
+          <Button
+            size="sm"
+            color={item.isActive ? "default" : "primary"}
+            variant="flat"
+            onPress={() => handleToggleActive(item)}
+          >
+            {item.isActive ? <EyeOff size={16} /> : <Eye size={16} />}
+          </Button>
+          <Button
+            size="sm"
+            color="danger"
+            variant="flat"
+            onPress={() => handleDelete(item.id)}
+            isLoading={pendingDeleteId === item.id && isLoadingDelete}
+          >
+            <Trash2 size={16} />
+          </Button>
+        </div>
+      ),
+    },
+  ];
 
-  const isSaving = isCreating || isUpdating;
+  const disableSubmit = isLoadingCreate || isLoadingUpdate || isSubmitting;
+  const imageValue = watch("image");
 
   return (
-    <div className="max-w-3xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">
-        {editing ? "Edit Promotion" : "Create Promotion"}
-      </h1>
+    <div className="p-4 md:p-6">
+      <header className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+          Manage Promotions
+        </h1>
+        <Button color="primary" onPress={handleAdd}>
+          <Plus size={20} className="mr-2" />
+          Add Promotion
+        </Button>
+      </header>
 
-      <div className="grid gap-4 bg-white dark:bg-neutral-900 p-4 rounded-lg border border-slate-200 dark:border-neutral-800">
-        <label className="grid gap-1">
-          <span className="text-sm font-medium">Title</span>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="rounded-md border px-3 py-2 bg-white dark:bg-neutral-900 border-slate-300 dark:border-neutral-700"
-            placeholder="Promotion title"
-          />
-        </label>
-        <label className="grid gap-1">
-          <span className="text-sm font-medium">Description (optional)</span>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="rounded-md border px-3 py-2 bg-white dark:bg-neutral-900 border-slate-300 dark:border-neutral-700"
-            placeholder="Short description"
-            rows={3}
-          />
-        </label>
+      <CustomTable
+        columns={columns}
+        rows={rows}
+        totalRows={promotionData?.meta?.total || 0}
+        page={page}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onPageSizeChange={setPageSize}
+        searchValue={search}
+        onSearch={setSearch}
+        isLoading={isLoadingData}
+      />
 
-        <div className="grid gap-2">
-          <span className="text-sm font-medium">Image</span>
-          <input
-            type="file"
-            accept="image/*,video/*"
-            onChange={handleFileChange}
-            disabled={isUploading}
-          />
-          {uuidFilename && (
-            <div className="text-sm text-slate-600 dark:text-slate-300">
-              <strong>Upload filename:</strong> {uuidFilename}
-            </div>
-          )}
-          {isUploading && (
-            <div className="text-sm">
-              <p>
-                Uploading: {uploadProgress}% ({currentChunk}/{totalChunks}{" "}
-                chunks)
-              </p>
-              <progress value={uploadProgress} max={100} />
-            </div>
-          )}
-          {serverFilename && (
-            <div className="text-sm text-green-600">
-              Stored as: {serverFilename}
-            </div>
-          )}
-        </div>
-
-        {error && <p className="text-sm text-red-600">{error}</p>}
-
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={isUploading || isSaving}
-            className="px-4 py-2 rounded-md bg-primary-600 text-white disabled:opacity-60"
-          >
-            {isSaving
-              ? "Saving..."
-              : editing
-              ? "Update Promotion"
-              : "Create Promotion"}
-          </button>
-          {editing && (
-            <button
-              type="button"
-              onClick={resetForm}
-              className="px-4 py-2 rounded-md border"
-            >
-              Cancel
-            </button>
-          )}
-        </div>
-      </div>
-
-      <div className="mt-8">
-        <h2 className="text-xl font-semibold mb-3">Existing Promotions</h2>
-        <div className="grid gap-3">
-          {isLoadingPromotions ? (
-            <p className="text-sm text-slate-500">Loading...</p>
-          ) : promotionData?.data?.length ? (
-            promotionData.data.map((p: any) => (
-              <div
-                key={p.id}
-                className="flex items-center gap-3 rounded-md border p-3 bg-white dark:bg-neutral-900 border-slate-200 dark:border-neutral-800"
-              >
-                <img
-                  src={`/api/filedata/${p.image}`}
-                  alt={p.title}
-                  className="w-14 h-14 object-cover rounded"
-                />
-                <div className="flex-1">
-                  <div className="font-medium">{p.title}</div>
-                  <div className="text-xs text-slate-500">
-                    {p.description || "No description"}
-                  </div>
-                  <label className="flex items-center gap-2 text-xs mt-1">
-                    <input
-                      type="checkbox"
-                      checked={!!p.isActive}
-                      onChange={() => handleToggleActive(p)}
-                    />
-                    <span>{p.isActive ? "Active" : "Inactive"}</span>
+      {showModal && (
+        <div className="fixed inset-0 backdrop-blur-sm bg-black/60 flex justify-center items-center p-4 z-50">
+          <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-lg shadow-xl border border-slate-200/70 dark:border-neutral-800 bg-white/90 dark:bg-neutral-900 text-slate-900 dark:text-white p-6">
+            <h2 className="text-xl font-semibold mb-4">
+              {editPromotion ? "Edit Promotion" : "Add Promotion"}
+            </h2>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <div className="flex flex-col gap-4">
+                {/* Title */}
+                <div>
+                  <label
+                    htmlFor="title"
+                    className="block mb-1 text-sm font-medium text-slate-700 dark:text-slate-200"
+                  >
+                    Title
                   </label>
+                  <input
+                    id="title"
+                    className="w-full p-2 rounded-md border border-slate-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/30 outline-none"
+                    placeholder="Promotion title"
+                    {...register("title")}
+                    disabled={disableSubmit}
+                  />
+                  {errors.title && (
+                    <span className="text-red-500 text-xs">
+                      {errors.title.message}
+                    </span>
+                  )}
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    className="px-2 py-1 rounded border"
-                    onClick={() => handleEdit(p)}
+
+                {/* Description */}
+                <div>
+                  <label
+                    htmlFor="description"
+                    className="block mb-1 text-sm font-medium text-slate-700 dark:text-slate-200"
                   >
-                    Edit
-                  </button>
-                  <button
-                    className="px-2 py-1 rounded border text-red-600"
-                    onClick={() => handleRemove(p.id)}
-                    disabled={isDeleting}
-                  >
-                    Delete
-                  </button>
+                    Description (Optional)
+                  </label>
+                  <textarea
+                    id="description"
+                    className="w-full p-2 rounded-md border border-slate-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/30 outline-none"
+                    placeholder="Short description"
+                    rows={3}
+                    {...register("description")}
+                    disabled={disableSubmit}
+                  />
                 </div>
+
+                {/* Image Upload */}
+                <div>
+                  <label
+                    htmlFor="image"
+                    className="block mb-1 text-sm font-medium text-slate-700 dark:text-slate-200"
+                  >
+                    Image
+                  </label>
+                  <Input
+                    type="file"
+                    accept="image/*,video/*"
+                    onChange={handleFileChange}
+                    disabled={isUploading || disableSubmit}
+                    className="
+                      w-full text-sm
+                      file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold
+                      file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100
+                      dark:file:bg-primary-500/10 dark:file:text-primary-300 dark:hover:file:bg-primary-500/20
+                    "
+                  />
+
+                  {uuidFilename && (
+                    <div className="text-sm text-slate-600 dark:text-slate-300 mt-1">
+                      <strong>Upload filename:</strong> {uuidFilename}
+                    </div>
+                  )}
+
+                  {isUploading && (
+                    <div className="text-sm mt-2">
+                      <p>
+                        Uploading: {uploadProgress}% ({currentChunk}/
+                        {totalChunks} chunks)
+                      </p>
+                      <progress
+                        value={uploadProgress}
+                        max={100}
+                        className="w-full h-2"
+                      />
+                    </div>
+                  )}
+
+                  {serverFilename && !isUploading && (
+                    <div className="text-sm text-green-600 mt-1">
+                      Stored as: {serverFilename}
+                    </div>
+                  )}
+
+                  {errors.image && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.image.message as string}
+                    </p>
+                  )}
+                </div>
+
+                {/* Preview */}
+                {(imageValue || (editPromotion && editPromotion.image)) && (
+                  <div className="mt-2 border border-slate-200 dark:border-neutral-800 rounded-md p-2 bg-white/70 dark:bg-neutral-900">
+                    <span className="text-xs text-slate-500 dark:text-slate-400 block text-center mb-1">
+                      Preview
+                    </span>
+                    <Image
+                      src={formatImageUrl(imageValue || editPromotion?.image)}
+                      alt="Promotion preview"
+                      className="max-h-40 rounded mx-auto"
+                      width={240}
+                      height={160}
+                      style={{ objectFit: "contain" }}
+                    />
+                  </div>
+                )}
               </div>
-            ))
-          ) : (
-            <p className="text-sm text-slate-500">No promotions yet</p>
-          )}
+
+              <div className="flex justify-end gap-3 mt-6">
+                <Button
+                  variant="ghost"
+                  type="button"
+                  onPress={() => setShowModal(false)}
+                  disabled={disableSubmit || isUploading}
+                  className="dark:text-white dark:hover:bg-primary-500/10"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  color="primary"
+                  type="submit"
+                  isLoading={disableSubmit || isUploading}
+                  disabled={disableSubmit || isUploading}
+                >
+                  {disableSubmit || isUploading ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : editPromotion ? (
+                    "Update"
+                  ) : (
+                    "Create"
+                  )}
+                </Button>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-sm">
+            <CustomAlert
+              color="danger"
+              title="Delete Promotion?"
+              description="Are you sure you want to delete this promotion? This action cannot be undone."
+              confirmText="Delete"
+              cancelText="Cancel"
+              onConfirm={handleConfirmDelete}
+              onCancel={() => setDeleteId(null)}
+              isConfirmLoading={pendingDeleteId === deleteId && isLoadingDelete}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
