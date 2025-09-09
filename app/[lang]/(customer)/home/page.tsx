@@ -1,7 +1,10 @@
 "use client";
 import Footer from "@/components/Footer";
 import React, { useState, useEffect } from "react";
-import { Input } from "@heroui/react";
+import { useForm } from "react-hook-form";
+import { Input, Button, ButtonGroup } from "@heroui/react";
+import z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   SlidersHorizontal,
   ChevronLeft,
@@ -13,7 +16,9 @@ import {
   Car,
   Building2,
   X,
+  Loader2,
 } from "lucide-react";
+import { addToast } from "@heroui/toast";
 import useAction from "@/hooks/useActions";
 import {
   getPromotion,
@@ -21,11 +26,13 @@ import {
   categoryListHouse,
   specialOffers,
 } from "@/actions/customer/home";
+import { filterProperties } from "@/actions/customer/filter";
 import Link from "next/link";
 import ProductPerCategoryId from "@/components/productper-catagoryid";
 import FilteredComponent, { FilterInput } from "@/components/filteredComponent";
 import Image from "next/image";
 import { useParams } from "next/navigation";
+import { filterSchema } from "@/lib/zodSchema";
 
 // i18n strings
 const translations = {
@@ -121,22 +128,34 @@ type FilterDialogProps = {
   }) => void;
   t: TDict;
 };
-
-const FilterDialog = ({
+function FilterDialog({
   isOpen,
   onClose,
   categories,
   onApply,
   t,
-}: FilterDialogProps) => {
-  const [filters, setFilters] = useState({
-    propertyType: "",
-    offerType: "",
-    minPrice: "",
-    maxPrice: "",
-    bedrooms: "",
-    bathrooms: "",
+}: FilterDialogProps) {
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      propertyType: "",
+      offerType: "",
+      minPrice: "",
+      maxPrice: "",
+      bedrooms: "",
+      bathrooms: "",
+    },
+    mode: "onChange",
   });
+
+  // Watch all fields for button highlighting
+  const filters = watch();
 
   useEffect(() => {
     if (isOpen) {
@@ -151,20 +170,13 @@ const FilterDialog = ({
 
   if (!isOpen) return null;
 
-  const handleApply = () => {
-    onApply(filters);
+  const handleApply = handleSubmit((data) => {
+    onApply(data);
     onClose();
-  };
+  });
 
   const handleReset = () => {
-    setFilters({
-      propertyType: "",
-      offerType: "",
-      minPrice: "",
-      maxPrice: "",
-      bedrooms: "",
-      bathrooms: "",
-    });
+    reset();
   };
 
   type FilterKey =
@@ -187,11 +199,11 @@ const FilterDialog = ({
     stateKey,
   }) => (
     <button
+      type="button"
       onClick={() =>
-        setFilters((prev) => ({
-          ...prev,
-          [stateKey]: prev[stateKey] === value ? "" : value,
-        }))
+        setValue(stateKey, filters[stateKey] === value ? "" : value, {
+          shouldValidate: true,
+        })
       }
       className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
         filters[stateKey] === value
@@ -205,10 +217,14 @@ const FilterDialog = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end">
-      <div className="bg-white dark:bg-neutral-950 w-full max-h-[90dvh] rounded-t-2xl p-4 flex flex-col border-t border-slate-200 dark:border-neutral-800">
+      <form
+        className="bg-white dark:bg-neutral-950 w-full max-h-[90dvh] rounded-t-2xl p-4 flex flex-col border-t border-slate-200 dark:border-neutral-800"
+        onSubmit={handleApply}
+      >
         <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-200 dark:border-neutral-800">
           <h2 className="text-xl font-bold">{t.filtersTitle}</h2>
           <button
+            type="button"
             onClick={onClose}
             className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-white/10"
           >
@@ -256,18 +272,20 @@ const FilterDialog = ({
               <Input
                 type="number"
                 placeholder={t.minPrice}
+                {...register("minPrice")}
                 value={filters.minPrice}
                 onChange={(e) =>
-                  setFilters({ ...filters, minPrice: e.target.value })
+                  setValue("minPrice", e.target.value, { shouldValidate: true })
                 }
               />
               <span className="text-gray-400">-</span>
               <Input
                 type="number"
                 placeholder={t.maxPrice}
+                {...register("maxPrice")}
                 value={filters.maxPrice}
                 onChange={(e) =>
-                  setFilters({ ...filters, maxPrice: e.target.value })
+                  setValue("maxPrice", e.target.value, { shouldValidate: true })
                 }
               />
             </div>
@@ -306,22 +324,23 @@ const FilterDialog = ({
 
         <div className="absolute bottom-0 left-0 w-full bg-white dark:bg-neutral-950 p-4 border-t border-slate-200 dark:border-neutral-800 flex gap-4">
           <button
+            type="button"
             onClick={handleReset}
             className="w-full py-3 rounded-lg border font-semibold border-slate-300 dark:border-neutral-700 hover:bg-slate-50 dark:hover:bg-neutral-800"
           >
             {t.reset}
           </button>
           <button
-            onClick={handleApply}
+            type="submit"
             className="w-full py-3 rounded-lg bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-400 text-white font-semibold"
           >
             {t.applyFilters}
           </button>
         </div>
-      </div>
+      </form>
     </div>
   );
-};
+}
 
 // --- Main Page Component ---
 
@@ -409,7 +428,7 @@ function Page() {
   }
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+    <div className="h-full w-full overflow-x-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
       <div className="container mx-auto max-w-7xl p-2 sm:p-4">
         {/* --- Search --- */}
         <div className="relative mb-4">
@@ -726,12 +745,12 @@ function Page() {
               <h2 className="text-lg font-bold">{t.filteredResults}</h2>
               <div className="w-16" />
             </div>
-            <div className="flex-1 overflow-y-auto">
+            {/* <div className="flex-1 overflow-y-auto">
               <FilteredComponent
                 filters={appliedFilters}
                 title={t.filteredResults}
               />
-            </div>
+            </div> */}
           </div>
         )}
       </div>

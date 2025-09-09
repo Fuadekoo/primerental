@@ -3,18 +3,20 @@ import React, { useEffect, useState } from "react";
 
 import { Search, Save, Check } from "lucide-react";
 import useAction from "@/hooks/useActions";
-import { filterProperty } from "@/actions/customer/property";
+import { filterProperties } from "@/actions/customer/filter";
+// import { filterProperty } from "@/actions/customer/property";
 import { useSavedSearch } from "@/hooks/useSavedSearch";
 
 // Shape of the filters you pass into this component
 export interface FilterInput {
-  property_type?: string;
-  offer_type?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  bedroom?: number;
-  bathroom?: number;
-  // add more filters if needed (e.g., location, parking, etc.)
+  // preferred (matches backend/actions and current usage in page.tsx)
+  property_type?: string | null;
+  offer_type?: string | null;
+  minPrice?: number | null;
+  maxPrice?: number | null;
+  bedroom?: number | null;
+  bathroom?: number | null;
+  // optional camelCase aliases for flexibility
 }
 
 interface FilteredComponentProps {
@@ -22,15 +24,23 @@ interface FilteredComponentProps {
   title?: string; // optional heading
 }
 
-function FilteredComponent({
+const FilteredComponent: React.FC<FilteredComponentProps> = ({
   filters,
   title = "Filtered Properties",
-}: FilteredComponentProps) {
-  const [results, ,] = useAction(filterProperty, [true, () => {}], filters);
+}) => {
+  // Normalize keys so the action gets what it expects
+  const request = {
+    property_type: filters.property_type ?? null,
+    offer_type: filters.offer_type ?? null,
+    minPrice: filters.minPrice ?? null,
+    maxPrice: filters.maxPrice ?? null,
+    bedroom: filters.bedroom ?? null,
+    bathroom: filters.bathroom ?? null,
+  };
 
+  const [results, , isLoading] = useAction(filterProperties, [request, () => {}]);
   const [search, setSearch] = useState("");
   const [saved, setSaved] = useState(false);
-  // ...existing code...
 
   // useSavedSearch store
   const saveSearch = useSavedSearch((s) => s.save);
@@ -42,19 +52,7 @@ function FilteredComponent({
 
   const hasResults = Array.isArray(results) && results.length > 0;
 
-  // const filteredResults = useMemo(() => {
-  //   if (!hasResults) return [];
-  //   const q = search.trim().toLowerCase();
-  //   if (!q) return results!;
-  //   return results!.filter((item) =>
-  //     [item.title, item.location, item.propertyType?.name, item.offer_type]
-  //       .filter(Boolean)
-  //       .some((v) => String(v).toLowerCase().includes(q))
-  //   );
-  // }, [results, hasResults, search]);
-
   const handleSaveSearch = () => {
-    // Save via zustand store (persisted with name: "savedsearch")
     saveSearch(filters);
     setSaved(true);
   };
@@ -112,6 +110,6 @@ function FilteredComponent({
       </div>
     </div>
   );
-}
+};
 
 export default FilteredComponent;

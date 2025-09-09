@@ -76,3 +76,13 @@ export const updateUserSchema = z.object({
   email: z.string().email(),
 });
 export type updateUserType = z.infer<typeof updateUserSchema>;
+
+export const filterSchema = z.object({
+  propertyType: z.string().optional(),
+  offerType: z.enum(["RENT", "SALE"]).optional(),
+  minPrice: z.number().min(0).optional(),
+  maxPrice: z.number().min(0).optional(),
+  bedroom: z.number().min(0).optional(),
+  bathroom: z.number().min(0).optional(),
+});
+export type FilterType = z.infer<typeof filterSchema>;

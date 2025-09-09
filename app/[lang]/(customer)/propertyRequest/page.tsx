@@ -121,7 +121,7 @@ function PropertyRequestPage() {
   };
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+    <div className="h-full w-full overflow-x-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
       {loading && <Loading />}
       {/* --- Header --- */}
       <div className="relative h-48 w-full overflow-hidden">

@@ -57,7 +57,7 @@ const Pill = ({ children }: { children: React.ReactNode }) => (
 
 function Page() {
   const params = useParams();
-  const lang = ((params && (params).lang) || "en") as "en" | "am";
+  const lang = ((params && params.lang) || "en") as "en" | "am";
   const t = translations[lang];
 
   // Saved searches from persisted zustand store
@@ -110,7 +110,7 @@ function Page() {
     id ? typeNameById.get(String(id)) || id : t.anyType;
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-4 sm:p-6 lg:p-8">
+    <div className="h-full w-full overflow-x-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-4 sm:p-6 lg:p-8">
       <div className="mx-auto max-w-4xl">
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">

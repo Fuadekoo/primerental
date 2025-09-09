@@ -23,38 +23,38 @@ export async function getProperty(id: string) {
   }
 }
 
-export async function filterProperty(filters: Partial<Item>) {
-  try {
-    const where: any = {};
-    if (filters.property_type) {
-      where.propertyType = { name: filters.property_type };
-    }
-    if (filters.offer_type) {
-      where.offer_type = filters.offer_type as any; // Cast to enum type if needed
-    }
-    if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
-      where.price = {};
-      if (filters.minPrice !== undefined) {
-        where.price.gte = filters.minPrice;
-      }
-      if (filters.maxPrice !== undefined) {
-        where.price.lte = filters.maxPrice;
-      }
-    }
-    if (filters.bedroom !== undefined) {
-      where.bedroom = filters.bedroom;
-    }
-    if (filters.bathroom !== undefined) {
-      where.bathroom = filters.bathroom;
-    }
+// export async function filterProperty(filters: Partial<Item>) {
+//   try {
+//     const where: any = {};
+//     if (filters.property_type) {
+//       where.propertyType = { name: filters.property_type };
+//     }
+//     if (filters.offer_type) {
+//       where.offer_type = filters.offer_type as any; // Cast to enum type if needed
+//     }
+//     if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
+//       where.price = {};
+//       if (filters.minPrice !== undefined) {
+//         where.price.gte = filters.minPrice;
+//       }
+//       if (filters.maxPrice !== undefined) {
+//         where.price.lte = filters.maxPrice;
+//       }
+//     }
+//     if (filters.bedroom !== undefined) {
+//       where.bedroom = filters.bedroom;
+//     }
+//     if (filters.bathroom !== undefined) {
+//       where.bathroom = filters.bathroom;
+//     }
 
-    const properties = await prisma.property.findMany({
-      where,
-      include: { propertyType: { select: { name: true } } },
-    });
-    return properties;
-  } catch (error) {
-    console.error("Error filtering properties:", error);
-    return [];
-  }
-}
+//     const properties = await prisma.property.findMany({
+//       where,
+//       include: { propertyType: { select: { name: true } } },
+//     });
+//     return properties;
+//   } catch (error) {
+//     console.error("Error filtering properties:", error);
+//     return [];
+//   }
+// }

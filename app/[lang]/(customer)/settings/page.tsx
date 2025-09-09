@@ -221,11 +221,12 @@ const LanguageSelector = ({
 }) => {
   const router = useRouter();
   const params = useParams();
-  const currentLang = params && params.lang
-    ? Array.isArray(params.lang)
-      ? (params.lang[0] as string)
-      : (params.lang as string)
-    : "en";
+  const currentLang =
+    params && params.lang
+      ? Array.isArray(params.lang)
+        ? (params.lang[0] as string)
+        : (params.lang as string)
+      : "en";
 
   useEffect(() => {
     if (
@@ -343,7 +344,7 @@ function SettingsPage() {
   const t = translations[currentLang as "en" | "am"] || translations.en;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 dark:bg-gray-900 sm:p-6 lg:p-8">
+    <div className="h-full bg-gray-50 p-4 dark:bg-gray-900 sm:p-6 lg:p-8">
       <div className="mx-auto max-w-2xl">
         <header className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">

@@ -321,7 +321,7 @@ function Page() {
   } = propertyData;
 
   return (
-    <div className="min-h-screen pb-40 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+    <div className="h-full pb-40 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
       {/* --- Image and Header --- */}
       <div className="relative">
         <MediaScroller
