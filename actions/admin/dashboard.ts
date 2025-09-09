@@ -121,3 +121,134 @@ export async function getDashboardApplicationStatus() {
     notVisitedPercent: total ? Math.round((notVisited / total) * 100) : 0,
   };
 }
+
+// Types for dashboard sample data
+export type TopTenant = {
+  id: string;
+  name: string;
+  unit: string;
+  paidUntil: string; // ISO date
+  avatar?: string | null;
+};
+
+export type Appointment = {
+  id: string;
+  title: string;
+  time: string; // ISO date
+  with?: string;
+  location?: string;
+};
+
+export type ApplicationStats = {
+  jobApplications: number;
+  interviews: number;
+  hired: number;
+};
+
+export type ActivityItem = {
+  id: string;
+  title: string;
+  description?: string;
+  createdAt: string; // ISO date
+  type?: "payment" | "maintenance" | "lease" | "system";
+};
+
+// Sample data (replace with Prisma queries later)
+const sampleTopTenants: TopTenant[] = [
+  {
+    id: "t1",
+    name: "Abel T.",
+    unit: "A-302",
+    paidUntil: new Date().toISOString(),
+    avatar: null,
+  },
+  {
+    id: "t2",
+    name: "Saron K.",
+    unit: "B-114",
+    paidUntil: new Date().toISOString(),
+    avatar: null,
+  },
+  {
+    id: "t3",
+    name: "Yosef H.",
+    unit: "C-210",
+    paidUntil: new Date().toISOString(),
+    avatar: null,
+  },
+];
+
+const sampleAppointments: Appointment[] = [
+  {
+    id: "a1",
+    title: "Lease Renewal",
+    time: new Date(Date.now() + 86400000).toISOString(),
+    with: "Daniel M.",
+    location: "Office",
+  },
+  {
+    id: "a2",
+    title: "Maintenance Visit",
+    time: new Date(Date.now() + 2 * 86400000).toISOString(),
+    with: "Unit B-114",
+    location: "On-site",
+  },
+];
+
+const sampleApplicationStats: ApplicationStats = {
+  jobApplications: 12,
+  interviews: 4,
+  hired: 2,
+};
+
+const sampleActivity: ActivityItem[] = [
+  {
+    id: "r1",
+    title: "Rent payment received",
+    description: "Unit A-302",
+    createdAt: new Date().toISOString(),
+    type: "payment",
+  },
+  {
+    id: "r2",
+    title: "Maintenance request closed",
+    description: "Leaking sink fixed (B-114)",
+    createdAt: new Date().toISOString(),
+    type: "maintenance",
+  },
+  {
+    id: "r3",
+    title: "New lease signed",
+    description: "C-210 - 12 months",
+    createdAt: new Date().toISOString(),
+    type: "lease",
+  },
+];
+
+// Server actions
+export async function getTopTenants(search?: string) {
+  // TODO: replace with Prisma query using `search`
+  const data = search
+    ? sampleTopTenants.filter((t) =>
+        [t.name, t.unit].some((v) =>
+          v.toLowerCase().includes(search.toLowerCase())
+        )
+      )
+    : sampleTopTenants;
+  return { data };
+}
+
+export async function getUpcomingAppointments() {
+  // TODO: replace with Prisma query ordering by time asc
+  return { data: sampleAppointments };
+}
+
+export async function getApplicationStats() {
+  // TODO: replace with Prisma aggregate query
+  return { data: sampleApplicationStats };
+}
+
+export async function getRecentActivity() {
+  // TODO: replace with Prisma query ordering by createdAt desc
+  return { data: sampleActivity };
+}

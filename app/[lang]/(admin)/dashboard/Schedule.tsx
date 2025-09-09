@@ -1,82 +1,40 @@
 "use client";
 import React from "react";
-import Image from "next/image";
+import type { Appointment } from "@/actions/admin/dashboard";
 
-type Meeting = {
-  title: string;
-  time: string;
-  attendees: string[];
-  color: string;
-};
-
-const Schedules = ({ t }: { t: Record<string, string> }) => {
-  const meetings: Meeting[] = [
-    {
-      title: "Meeting with Herry",
-      time: "12:00 - 01:00 PM",
-      attendees: ["/avatars/01.png", "/avatars/02.png", "/avatars/03.png"],
-      color: "border-green-500",
-    },
-    {
-      title: "Meeting with Salah",
-      time: "02:00 - 03:00 PM",
-      attendees: ["/avatars/04.png", "/avatars/05.png", "/avatars/01.png"],
-      color: "border-blue-500",
-    },
-  ];
-  return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-      <h3 className="font-bold text-lg text-gray-800 dark:text-white">
-        {t.upcomingAppointments}
-      </h3>
-      <div className="mt-4 space-y-4">
-        <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">
-          {t.today}
-        </p>
-        {meetings.map((meeting) => (
-          <div
-            key={meeting.title}
-            className={`flex items-start gap-3 p-3 rounded-lg border-l-4 ${meeting.color} bg-gray-50 dark:bg-gray-700/50`}
-          >
-            <div className="flex-1">
-              <p className="font-semibold text-sm text-gray-800 dark:text-gray-200">
-                {meeting.title}
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                {meeting.time}
-              </p>
-            </div>
-            <div className="flex -space-x-2">
-              {meeting.attendees.map((att, i) => (
-                <Image
-                  key={i}
-                  src={att}
-                  alt="attendee"
-                  width={24}
-                  height={24}
-                  className="rounded-full border-2 border-white dark:border-gray-800"
-                />
-              ))}
-            </div>
-          </div>
-        ))}
+export default function Schedule({ data }: { data?: Appointment[] }) {
+  if (data && data.length > 0) {
+    return (
+      <div className="bg-white dark:bg-neutral-900 rounded-lg shadow p-4 border border-slate-200 dark:border-neutral-800">
+        <h3 className="text-lg font-semibold mb-3">Upcoming Appointments</h3>
+        <ul className="space-y-2">
+          {data.map((a) => (
+            <li
+              key={a.id}
+              className="flex items-center justify-between text-sm"
+            >
+              <div>
+                <div className="font-medium text-slate-800 dark:text-slate-200">
+                  {a.title}
+                </div>
+                <div className="text-xs text-slate-500">
+                  {new Date(a.time).toLocaleString()}{" "}
+                  {a.with ? `• ${a.with}` : ""}
+                </div>
+              </div>
+              {a.location && (
+                <span className="text-xs text-slate-500">{a.location}</span>
+              )}
+            </li>
+          ))}
+        </ul>
       </div>
-    </div>
-  );
-};
-
-export default function Schedule() {
-  // Example translation object
-  const t = {
-    upcomingAppointments: "Upcoming Appointments",
-    today: "Today",
-  };
-
+    );
+  }
   return (
-    <div>
-      <Schedules t={t} />
+    <div className="bg-white dark:bg-neutral-900 rounded-lg shadow p-4 border border-slate-200 dark:border-neutral-800">
+      <h3 className="text-lg font-semibold mb-3">Upcoming Appointments</h3>
+      <p className="text-sm text-slate-500">No data</p>
     </div>
   );
 }
-
-// export default Schedule;

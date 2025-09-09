@@ -1,127 +1,50 @@
 "use client";
 import React from "react";
-import { Briefcase, DollarSign, Home, User } from "lucide-react";
-import useAction from "@/hooks/useActions";
-import { getDashboardRecentActivity } from "@/actions/admin/dashboard";
-type ActivityItem = {
-  icon: React.ReactNode;
-  text: string;
-  time: string;
-  iconColor: string;
+import type { ActivityItem } from "@/actions/admin/dashboard";
+
+type Props = {
+  data?: ActivityItem[];
+  isLoading?: boolean;
 };
 
-const iconMap: Record<string, React.ReactNode> = {
-  property: <Home size={16} />,
-  payment: <DollarSign size={16} />,
-  maintenance: <Briefcase size={16} />,
-  user: <User size={16} />,
-};
-
-const colorMap: Record<string, string> = {
-  property: "text-green-500 bg-green-100 dark:bg-green-900/50",
-  payment: "text-blue-500 bg-blue-100 dark:bg-blue-900/50",
-  maintenance: "text-orange-500 bg-orange-100 dark:bg-orange-900/50",
-  user: "text-purple-500 bg-purple-100 dark:bg-purple-900/50",
-};
-
-const RecentActivities = ({
-  t,
-  activities,
-  isLoading,
-}: {
-  t: Record<string, string>;
-  activities: ActivityItem[];
-  isLoading: boolean;
-}) => (
-  <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-    <h3 className="font-bold text-lg text-gray-800 dark:text-white">
-      {t.recentActivity}
-    </h3>
-    <div className="mt-4 space-y-4">
-      {isLoading ? (
-        <div className="text-gray-400 text-center py-8">Loading...</div>
-      ) : activities.length === 0 ? (
-        <div className="text-gray-400 text-center py-8">
-          No recent activity.
+export default function RecentActivity({ data, isLoading }: Props) {
+  if (isLoading) {
+    return (
+      <div className="bg-white dark:bg-neutral-900 rounded-lg shadow p-4 border border-slate-200 dark:border-neutral-800">
+        <h3 className="text-lg font-semibold mb-3">Recent Activity</h3>
+        <div className="space-y-3">
+          <div className="h-4 rounded bg-slate-200 dark:bg-neutral-800 animate-pulse" />
+          <div className="h-4 rounded bg-slate-200 dark:bg-neutral-800 animate-pulse" />
+          <div className="h-4 rounded bg-slate-200 dark:bg-neutral-800 animate-pulse" />
         </div>
-      ) : (
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        activities.map((item: any, index: number) => (
-          <div key={index} className="flex items-start gap-3">
-            <div
-              className={`flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center ${
-                colorMap[item.type || "property"]
-              }`}
-            >
-              {iconMap[item.type || "property"]}
-            </div>
-            <div className="flex-1">
-              <p className="text-sm text-gray-700 dark:text-gray-300">
-                {/* Show full name if available, else fallback */}
-                {item.firstName && item.lastName
-                  ? `${item.firstName} ${item.lastName}`
-                  : item.fullname
-                  ? item.fullname
-                  : item.text || item.title || item.propertyType || "Activity"}
-              </p>
-              <p className="text-xs text-gray-400 dark:text-gray-500">
-                {item.createdAt
-                  ? new Date(item.createdAt).toLocaleString()
-                  : item.time || ""}
-              </p>
-            </div>
-          </div>
-        ))
-      )}
-    </div>
-    <a
-      href="#"
-      className="mt-4 block text-center text-sm font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-    >
-      {t.viewAllActivity}
-    </a>
-  </div>
-);
+      </div>
+    );
+  }
 
-function RecentActivity() {
-  const [activityData, , isLoadingActivity] = useAction(
-    getDashboardRecentActivity,
-    [true, () => {}]
-  );
-
-  // Example translation object, replace with your actual i18n implementation
-  const t = {
-    recentActivity: "Recent Activity",
-    viewAllActivity: "View All Activity",
-  };
-
-  // Map raw activity data to ActivityItem[]
-  const mappedActivities: ActivityItem[] =
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (activityData || []).map((item: any) => ({
-      icon: iconMap[item.type || "property"],
-      text:
-        item.firstName && item.lastName
-          ? `${item.firstName} ${item.lastName}`
-          : item.fullname
-          ? item.fullname
-          : item.text || item.title || item.propertyType || "Activity",
-      time: item.createdAt
-        ? new Date(item.createdAt).toLocaleString()
-        : item.time || "",
-      iconColor: colorMap[item.type || "property"],
-      ...item, // preserve other fields if needed
-    }));
+  const items = data ?? [];
 
   return (
-    <div>
-      <RecentActivities
-        t={t}
-        activities={mappedActivities}
-        isLoading={isLoadingActivity}
-      />
+    <div className="bg-white dark:bg-neutral-900 rounded-lg shadow p-4 border border-slate-200 dark:border-neutral-800">
+      <h3 className="text-lg font-semibold mb-3">Recent Activity</h3>
+      {items.length === 0 ? (
+        <p className="text-sm text-slate-500">No activity</p>
+      ) : (
+        <ul className="divide-y divide-slate-200 dark:divide-neutral-800">
+          {items.map((a) => (
+            <li key={a.id} className="py-3">
+              <div className="font-medium text-slate-800 dark:text-slate-200">
+                {a.title}
+              </div>
+              {a.description && (
+                <div className="text-xs text-slate-500">{a.description}</div>
+              )}
+              <div className="text-[10px] text-slate-400 mt-1">
+                {new Date(a.createdAt).toLocaleString()}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
-
-export default RecentActivity;

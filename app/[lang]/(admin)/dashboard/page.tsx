@@ -7,6 +7,13 @@ import Top from "./top";
 import ApplicationStats from "./ApplicationStats";
 import Schedule from "./Schedule";
 import RecentActivity from "./RecentActivity";
+import useAction from "@/hooks/useActions";
+import {
+  getTopTenants,
+  getUpcomingAppointments,
+  getApplicationStats,
+  getRecentActivity,
+} from "@/actions/admin/dashboard";
 
 // --- TRANSLATIONS ---
 const translations = {
@@ -53,8 +60,14 @@ const translations = {
 // --- MAIN PAGE COMPONENT ---
 export default function DashboardPage() {
   const params = useParams();
-  const lang = ((params?.lang) || "en") as "en" | "am";
+  const lang = (params?.lang || "en") as "en" | "am";
   const t = translations[lang];
+
+  // Load sample-backed server actions (replace inside components or pass as props)
+  const [topTenants] = useAction(getTopTenants, [true, () => {}]);
+  const [appointments] = useAction(getUpcomingAppointments, [true, () => {}]);
+  const [stats] = useAction(getApplicationStats, [true, () => {}]);
+  const [activity] = useAction(getRecentActivity, [true, () => {}]);
 
   return (
     <div className="bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8 min-h-full">
@@ -73,12 +86,12 @@ export default function DashboardPage() {
         <div className="lg:col-span-2 space-y-8">
           <Card />
           <Chart />
-          <Top />
+          <Top data={topTenants?.data} />
         </div>
         <div className="space-y-8">
-          <Schedule />
-          <ApplicationStats />
-          <RecentActivity />
+          <Schedule data={appointments?.data} />
+          <ApplicationStats data={stats?.data} />
+          <RecentActivity data={activity?.data} />
         </div>
       </div>
     </div>

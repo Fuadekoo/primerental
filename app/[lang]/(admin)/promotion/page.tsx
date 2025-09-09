@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import useAction from "@/hooks/useActions";
 import {
   createPromotion,
@@ -264,6 +264,14 @@ function Page() {
     }
   };
 
+  type PromotionUpdatePayload = {
+    id: string;
+    title: string;
+    description: string;
+    image: string;
+    isActive: boolean;
+  };
+
   const onSubmit = async (data: z.infer<typeof promotionSchema>) => {
     const payload = {
       title: data.title,
@@ -273,7 +281,11 @@ function Page() {
     };
 
     if (editPromotion?.id) {
-      executeUpdate({ id: editPromotion.id, ...payload });
+      const updatePayload: PromotionUpdatePayload = {
+        id: editPromotion.id,
+        ...payload,
+      };
+      executeUpdate(updatePayload);
     } else {
       executeCreate(payload);
     }
@@ -291,7 +303,7 @@ function Page() {
     key: item.id,
   }));
 
-  const columns: ColumnDef<PromotionItem>[] = [
+  const columns: ColumnDef<Record<string, any>>[] = [
     {
       key: "autoId",
       label: "#",
@@ -342,7 +354,7 @@ function Page() {
             size="sm"
             color="primary"
             variant="flat"
-            onPress={() => handleEdit(item)}
+            onPress={() => handleEdit(item as PromotionItem)}
           >
             <Edit size={16} />
           </Button>
@@ -350,7 +362,7 @@ function Page() {
             size="sm"
             color={item.isActive ? "default" : "primary"}
             variant="flat"
-            onPress={() => handleToggleActive(item)}
+            onPress={() => handleToggleActive(item as PromotionItem)}
           >
             {item.isActive ? <EyeOff size={16} /> : <Eye size={16} />}
           </Button>
@@ -505,7 +517,9 @@ function Page() {
                       Preview
                     </span>
                     <Image
-                      src={formatImageUrl(imageValue || editPromotion?.image)}
+                      src={formatImageUrl(
+                        (imageValue || editPromotion?.image) ?? ""
+                      )}
                       alt="Promotion preview"
                       className="max-h-40 rounded mx-auto"
                       width={240}

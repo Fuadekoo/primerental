@@ -13,33 +13,44 @@ import { addToast } from "@heroui/toast";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import { Loader2, Plus, Trash2, X } from "lucide-react";
 import CustomAlert from "@/components/custom-alert";
 import { propertyTypeSchema } from "@/lib/zodSchema";
 import Image from "next/image";
 
 const formatImageUrl = (url: string | null | undefined): string => {
   if (!url) return "/placeholder.png";
-  // If already an absolute URL or starts with /, use as is
   if (url.startsWith("http") || url.startsWith("/")) return url;
-  // Otherwise, fetch from local API endpoint
   return `/api/filedata/${encodeURIComponent(url)}`;
 };
 
 // Type definitions
 interface HomeTypeItem {
   id: string;
-  photo: string;
+  photo: string | null;
   key?: string | number;
   name: string;
   description?: string;
   createdAt?: string;
 }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 interface ColumnDef<T = Record<string, any>> {
   key: string;
   label: string;
   renderCell?: (item: T) => React.ReactNode;
+}
+
+interface UploadProgress {
+  file: File;
+  progress: number;
+  uuid: string;
+  serverFilename?: string;
+}
+
+const CHUNK_SIZE = 512 * 1024; // 512KB
+
+function getTimestampUUID(ext: string) {
+  return `${Date.now()}-${Math.floor(Math.random() * 100000)}.${ext}`;
 }
 
 function HomeTypePage() {
@@ -47,20 +58,25 @@ function HomeTypePage() {
   const [editHomeType, setEditHomeType] = useState<HomeTypeItem | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
-  const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
-  const [isConvertingImage, setIsConvertingImage] = useState(false); // Loading state
-  const [photoValue, setPhotoValue] = useState<string | null>(null); // Base64 or URL
+  const [uploadProgresses, setUploadProgresses] = useState<UploadProgress[]>(
+    []
+  );
+  const [isUploading, setIsUploading] = useState(false);
 
+  // Update the schema to use single photo instead of array
   const {
     handleSubmit,
     register,
     reset,
     setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<z.infer<typeof propertyTypeSchema>>({
     resolver: zodResolver(propertyTypeSchema),
     mode: "onChange",
-    defaultValues: {},
+    defaultValues: {
+      photo: "",
+    },
   });
 
   const [search, setSearch] = useState("");
@@ -77,9 +93,7 @@ function HomeTypePage() {
       refreshPropertyTypes();
       if (showModal) {
         setShowModal(false);
-        reset();
-        setEditHomeType(null);
-        setSelectedPhoto(null);
+        resetForm();
       }
     } else {
       addToast({
@@ -146,59 +160,112 @@ function HomeTypePage() {
     setEditHomeType(item);
     setValue("name", item.name);
     setValue("description", item.description || "");
-    setSelectedPhoto(null); // reset photo selection
+    setValue("photo", item.photo || "");
     setShowModal(true);
   };
 
   const handleAdd = () => {
     setEditHomeType(null);
     reset();
-    setSelectedPhoto(null);
+    setUploadProgresses([]);
     setShowModal(true);
   };
 
-  // FIXED: Use FileReader for base64 conversion
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setIsConvertingImage(true);
-      setValue("photo", "", { shouldValidate: false }); // Clear previous photo immediately
-      setPhotoValue(null); // Clear preview
+  const resetForm = () => {
+    reset();
+    setEditHomeType(null);
+    setUploadProgresses([]);
+  };
 
-      try {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const result = reader.result as string;
-          const base64String = result.split(",")[1]; // Remove data URL prefix
-          setValue("photo", base64String, { shouldValidate: true });
-          setPhotoValue(result); // Set preview with data URL
-          setIsConvertingImage(false);
-        };
-        reader.onerror = () => {
-          addToast({
-            title: "Image Error",
-            description: "Could not process the file.",
-          });
-          setValue("photo", "", { shouldValidate: true });
-          setPhotoValue(null);
-          setIsConvertingImage(false);
-        };
-        reader.readAsDataURL(file);
-      } catch (error) {
-        console.error("Error converting file to base64:", error);
-        addToast({
-          title: "Image Error",
-          description: "Could not process the file.",
-        });
-        setValue("photo", "", { shouldValidate: true });
-        setPhotoValue(null);
-        setIsConvertingImage(false);
+  const uploadFile = async (file: File, uuid: string): Promise<string> => {
+    const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+    const uuidName = uuid || getTimestampUUID(ext);
+
+    const chunkSize = CHUNK_SIZE;
+    const total = Math.ceil(file.size / chunkSize);
+    let finalReturnedName: string | null = null;
+
+    for (let i = 0; i < total; i++) {
+      const start = i * chunkSize;
+      const end = Math.min(file.size, start + chunkSize);
+      const chunk = file.slice(start, end);
+
+      const formData = new FormData();
+      formData.append("chunk", chunk);
+      formData.append("filename", uuidName);
+      formData.append("chunkIndex", i.toString());
+      formData.append("totalChunks", total.toString());
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        throw new Error("Upload failed");
       }
-    } else {
-      setValue("photo", "", { shouldValidate: true }); // Clear if no file selected
-      setPhotoValue(null); // Clear preview
-      setIsConvertingImage(false);
+
+      const json = await res.json();
+      if (json?.filename) finalReturnedName = json.filename;
+
+      // Update progress for this file
+      setUploadProgresses((prev) =>
+        prev.map((item) =>
+          item.uuid === uuid
+            ? { ...item, progress: Math.round(((i + 1) / total) * 100) }
+            : item
+        )
+      );
     }
+
+    if (!finalReturnedName) {
+      throw new Error("Upload failed: no filename returned");
+    }
+
+    return finalReturnedName;
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploading(true);
+
+    // Clear any existing uploads and add new file
+    const newUpload = {
+      file: files[0],
+      progress: 0,
+      uuid: getTimestampUUID(files[0].name.split(".").pop() || "jpg"),
+    };
+
+    setUploadProgresses([newUpload]);
+
+    try {
+      const serverFilename = await uploadFile(newUpload.file, newUpload.uuid);
+
+      // Mark as completed
+      setUploadProgresses((prev) =>
+        prev.map((item) =>
+          item.uuid === newUpload.uuid
+            ? { ...item, serverFilename, progress: 100 }
+            : item
+        )
+      );
+
+      // Update form with uploaded photo
+      setValue("photo", serverFilename, { shouldValidate: true });
+    } catch (error) {
+      console.error("Failed to upload file:", newUpload.file.name, error);
+      // Remove failed upload from progress tracking
+      setUploadProgresses([]);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const removePhoto = () => {
+    setValue("photo", "", { shouldValidate: true });
+    setUploadProgresses([]);
   };
 
   const onSubmit = async (data: z.infer<typeof propertyTypeSchema>) => {
@@ -223,7 +290,7 @@ function HomeTypePage() {
     ...item,
     key: item.id,
   }));
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const columns: ColumnDef<Record<string, any>>[] = [
     {
       key: "autoId",
@@ -237,18 +304,21 @@ function HomeTypePage() {
     {
       key: "photo",
       label: "Photo",
-      renderCell: (item) =>
-        item.photo ? (
-          <Image
-            src={formatImageUrl(item.photo)}
-            alt={item.name}
-            width={60}
-            height={40}
-            className="rounded object-cover"
-          />
-        ) : (
-          <span className="text-gray-500 dark:text-slate-300">No photo</span>
-        ),
+      renderCell: (item) => (
+        <div className="flex gap-1">
+          {item.photo ? (
+            <Image
+              src={formatImageUrl(item.photo)}
+              alt={item.name}
+              width={60}
+              height={40}
+              className="rounded object-cover"
+            />
+          ) : (
+            <span className="text-gray-500 dark:text-slate-300">No photo</span>
+          )}
+        </div>
+      ),
     },
     { key: "description", label: "Description" },
     {
@@ -284,7 +354,9 @@ function HomeTypePage() {
     },
   ];
 
-  const disableSubmit = isLoadingCreate || isLoadingUpdate || isSubmitting;
+  const disableSubmit =
+    isLoadingCreate || isLoadingUpdate || isSubmitting || isUploading;
+  const currentPhoto = watch("photo");
 
   return (
     <div className="p-4 md:p-6">
@@ -358,7 +430,7 @@ function HomeTypePage() {
                   />
                 </div>
 
-                {/* Photo */}
+                {/* Photo Upload */}
                 <div>
                   <label
                     htmlFor="photo"
@@ -369,21 +441,48 @@ function HomeTypePage() {
                   <Input
                     type="file"
                     accept="image/*"
-                    {...register("photo", { onChange: handleImageChange })}
+                    onChange={handleImageChange}
+                    disabled={isUploading || disableSubmit}
                     className="
                       w-full text-sm
                       file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold
                       file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100
                       dark:file:bg-primary-500/10 dark:file:text-primary-300 dark:hover:file:bg-primary-500/20
                     "
-                    disabled={isConvertingImage}
                   />
-                  {isConvertingImage && (
-                    <div className="flex items-center text-xs text-slate-500 dark:text-slate-400 mt-1">
-                      <Loader2 className="h-4 w-4 animate-spin mr-1" />
-                      Processing image...
+
+                  {/* Upload Progress */}
+                  {uploadProgresses.length > 0 && (
+                    <div className="mt-4 space-y-2">
+                      {uploadProgresses.map((upload) => (
+                        <div
+                          key={upload.uuid}
+                          className="flex items-center gap-2"
+                        >
+                          <div className="flex-1">
+                            <div className="flex justify-between text-xs mb-1">
+                              <span>{upload.file.name}</span>
+                              <span>{upload.progress}%</span>
+                            </div>
+                            <progress
+                              value={upload.progress}
+                              max={100}
+                              className="w-full h-2"
+                            />
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onPress={() => removePhoto()}
+                            disabled={upload.progress === 100}
+                          >
+                            <X size={16} />
+                          </Button>
+                        </div>
+                      ))}
                     </div>
                   )}
+
                   {errors.photo && (
                     <p className="text-red-500 text-sm mt-1">
                       {errors.photo.message as string}
@@ -391,35 +490,42 @@ function HomeTypePage() {
                   )}
                 </div>
 
-                {/* Preview (if any) */}
-                {photoValue &&
-                  typeof photoValue === "string" &&
-                  !isConvertingImage && (
-                    <div className="mt-2 border border-slate-200 dark:border-neutral-800 rounded-md p-2 bg-white/70 dark:bg-neutral-900">
-                      <span className="text-xs text-slate-500 dark:text-slate-400 block text-center mb-1">
-                        Preview
-                      </span>
+                {/* Preview of uploaded photo */}
+                {currentPhoto && (
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium mb-2">
+                      Uploaded Photo:
+                    </h4>
+                    <div className="relative group">
                       <Image
-                        src={photoValue}
-                        alt="Product preview"
-                        className="max-h-40 rounded mx-auto"
-                        width={160}
-                        height={160}
-                        style={{ objectFit: "contain" }}
-                        unoptimized
+                        src={formatImageUrl(currentPhoto)}
+                        alt="Preview"
+                        width={200}
+                        height={150}
+                        className="w-full h-40 object-cover rounded border"
                       />
+                      <Button
+                        size="sm"
+                        color="danger"
+                        className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onPress={() => removePhoto()}
+                      >
+                        <X size={14} />
+                      </Button>
                     </div>
-                  )}
+                  </div>
+                )}
 
                 {/* Current photo (edit mode) */}
-                {editHomeType && !selectedPhoto && editHomeType.photo && (
-                  <div className="mt-2">
+                {editHomeType && editHomeType.photo && (
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium mb-2">Current Photo:</h4>
                     <Image
                       src={formatImageUrl(editHomeType.photo)}
                       alt="Current"
-                      width={120}
-                      height={80}
-                      className="rounded object-cover"
+                      width={200}
+                      height={150}
+                      className="w-full h-40 object-cover rounded"
                     />
                   </div>
                 )}
@@ -455,7 +561,7 @@ function HomeTypePage() {
         </div>
       )}
 
-      {/* Delete modal remains unchanged */}
+      {/* Delete modal */}
       {deleteId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="w-full max-w-sm">

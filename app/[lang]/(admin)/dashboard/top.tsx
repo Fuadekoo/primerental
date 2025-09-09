@@ -1,7 +1,9 @@
+"use client";
 import React from "react";
 import Image from "next/image";
 import { Button } from "@heroui/react";
 import { MoreVertical } from "lucide-react";
+import type { TopTenant } from "@/actions/admin/dashboard";
 
 type Performer = { name: string; email: string; avatar: string };
 
@@ -72,17 +74,41 @@ const TopPerformers = ({ t }: { t: Record<string, string> }) => (
   </div>
 );
 
-function Top() {
-  // Example translation object
-  const t = {
-    topTenants: "Top Tenants",
-  };
+// Accept data from server actions; fallback to existing UI when not provided
+export default function Top({ data }: { data?: TopTenant[] }) {
+  if (data && data.length > 0) {
+    return (
+      <div className="bg-white dark:bg-neutral-900 rounded-lg shadow p-4 border border-slate-200 dark:border-neutral-800">
+        <h3 className="text-lg font-semibold mb-3">Top Tenants</h3>
+        <ul className="divide-y divide-slate-200 dark:divide-neutral-800">
+          {data.map((t) => (
+            <li key={t.id} className="py-3 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/40 grid place-items-center text-primary-700 dark:text-primary-300 text-sm">
+                  {t.name?.[0] ?? "T"}
+                </div>
+                <div>
+                  <div className="font-medium text-slate-800 dark:text-slate-200">
+                    {t.name}
+                  </div>
+                  <div className="text-xs text-slate-500">Unit {t.unit}</div>
+                </div>
+              </div>
+              <div className="text-xs text-slate-500">
+                Paid until {new Date(t.paidUntil).toLocaleDateString()}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
 
+  // Fallback to existing component UI if props not passed
   return (
-    <div>
-      <TopPerformers t={t} />
+    <div className="bg-white dark:bg-neutral-900 rounded-lg shadow p-4 border border-slate-200 dark:border-neutral-800">
+      <h3 className="text-lg font-semibold mb-3">Top Tenants</h3>
+      <p className="text-sm text-slate-500">No data</p>
     </div>
   );
 }
-
-export default Top;
