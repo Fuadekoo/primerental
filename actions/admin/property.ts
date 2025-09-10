@@ -174,3 +174,25 @@ export async function deleteProperty(id: string) {
     return { message: `error` };
   }
 }
+
+export async function changeAvailabilityProperty(
+  propertyId: string,
+  status: boolean
+) {
+  try {
+    const property = await prisma.property.findUnique({
+      where: { id: propertyId },
+    });
+    if (!property) {
+      return { message: "Property not found." };
+    }
+
+    await prisma.property.update({
+      where: { id: propertyId },
+      data: { isAvailable: status },
+    });
+    return { message: "Property availability updated successfully." };
+  } catch (error) {
+    return { message: `error` };
+  }
+}
