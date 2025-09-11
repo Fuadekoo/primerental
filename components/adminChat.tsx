@@ -7,7 +7,7 @@ import {
   getLoginUserId,
   readAdminMessages,
 } from "@/actions/common/chat";
-import io, { Socket } from "socket.io-client";
+import io from "socket.io-client";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   MessageSquare,
@@ -37,10 +37,18 @@ export default function ChatPopup() {
   // Update state to use the new ChatMessage type
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
-  const [socket, setSocket] = useState<typeof Socket | null>(null);
+  const [socket, setSocket] = useState<ReturnType<typeof io> | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [selectGuestId, setSelectGuestId] = useState<string | null>(null);
   const [onlineGuests, setOnlineGuests] = useState<Set<string>>(new Set());
+  // Real-time guest summaries: newest first with unread counts
+  type GuestSummary = {
+    guestId: string;
+    unread: number;
+    lastMsg?: string;
+    lastAt?: string;
+  };
+  const [guests, setGuests] = useState<GuestSummary[]>([]);
   console.log("Selected Guest ID in AdminChatPopup:", selectGuestId);
 
   useEffect(() => {
@@ -54,6 +62,12 @@ export default function ChatPopup() {
     true,
     () => {},
   ]);
+  // Seed from API initially (unread = 0)
+  useEffect(() => {
+    if (guestList?.length) {
+      setGuests(guestList.map((g: any) => ({ guestId: g.guestId, unread: 0 })));
+    }
+  }, [guestList]);
 
   // Action to get existing chat messages
   const [chatHistory, fetchChat, isFetchingChat] = useAction(getAdminChat, [
@@ -88,6 +102,9 @@ export default function ChatPopup() {
     if (selectGuestId) {
       fetchChat(selectGuestId);
       readAction(selectGuestId); // Mark messages as read when fetching
+      // Clear unread locally and inform server
+      upsertGuest({ guestId: selectGuestId, unread: 0 });
+      socket?.emit?.("admin_read", { guestId: selectGuestId });
     }
   }, [selectGuestId, stableFetchChat]);
 
@@ -115,8 +132,8 @@ export default function ChatPopup() {
 
     const onConnect = () => {
       console.log("Socket connected for user with ID:", userId);
-      // Fetch chat history once connected
-      //   fetchChat(userId);
+      // Request server to send latest guest summaries
+      newSocket.emit("request_admin_guest_list");
     };
 
     const onDisconnect = (reason: string) => {
@@ -146,9 +163,45 @@ export default function ChatPopup() {
         (fromId === userId && toId === selectGuestId) // Message from me to selected guest (echo)
       ) {
         setMessages((prev) => [...prev, message]);
+        const preview = String(message.msg || "").slice(0, 80);
+        upsertGuest({
+          guestId: fromId === userId ? toId : fromId,
+          lastMsg: preview,
+          lastAt: new Date().toISOString(),
+          unread: 0,
+        });
       } else {
-        console.log("ELSE : ", message);
+        // Bump unread for that guest and move to top by recency
+        if (toId === userId && fromId) {
+          const preview = String(message.msg || "").slice(0, 80);
+          setGuests((prev) => {
+            const idx = prev.findIndex((g) => g.guestId === fromId);
+            const nowIso = new Date().toISOString();
+            if (idx === -1)
+              return sortGuests([
+                ...prev,
+                {
+                  guestId: fromId,
+                  unread: 1,
+                  lastMsg: preview,
+                  lastAt: nowIso,
+                },
+              ]);
+            const next = [...prev];
+            const current = next[idx];
+            next[idx] = {
+              ...current,
+              unread: (current.unread || 0) + 1,
+              lastMsg: preview,
+              lastAt: nowIso,
+            };
+            return sortGuests(next);
+          });
+        }
       }
+    };
+    const handleAdminGuestList = (items: GuestSummary[]) => {
+      setGuests(sortGuests(items || []));
     };
 
     const handleOnlineGuests = (onlineGuestIds: string[]) => {
@@ -171,6 +224,7 @@ export default function ChatPopup() {
     newSocket.on("disconnect", onDisconnect);
     newSocket.on("chat_to_admin", handleAdminMessage);
     newSocket.on("online_guests_list", handleOnlineGuests);
+    newSocket.on("admin_guest_list", handleAdminGuestList);
     newSocket.on("guest_online", handleGuestOnline);
     newSocket.on("guest_offline", handleGuestOffline);
 
@@ -179,6 +233,7 @@ export default function ChatPopup() {
       newSocket.off("disconnect", onDisconnect);
       newSocket.off("chat_to_admin", handleAdminMessage);
       newSocket.off("online_guests_list", handleOnlineGuests);
+      newSocket.off("admin_guest_list", handleAdminGuestList);
       newSocket.off("guest_online", handleGuestOnline);
       newSocket.off("guest_offline", handleGuestOffline);
       newSocket.disconnect();
@@ -223,6 +278,28 @@ export default function ChatPopup() {
 
   const handleBackToGuestList = () => {
     setSelectGuestId(null);
+  };
+
+  // Helpers to maintain sorted guest list and unread counts
+  const sortGuests = (arr: GuestSummary[]) =>
+    [...arr].sort((a, b) => {
+      const at = a.lastAt ? new Date(a.lastAt).getTime() : 0;
+      const bt = b.lastAt ? new Date(b.lastAt).getTime() : 0;
+      if (bt !== at) return bt - at; // latest first
+      return (b.unread || 0) - (a.unread || 0); // then unread desc
+    });
+
+  const upsertGuest = (
+    partial: Partial<GuestSummary> & { guestId: string }
+  ) => {
+    setGuests((prev) => {
+      const idx = prev.findIndex((g) => g.guestId === partial.guestId);
+      if (idx === -1)
+        return sortGuests([...prev, { unread: 0, ...partial } as GuestSummary]);
+      const next = [...prev];
+      next[idx] = { ...next[idx], ...partial } as GuestSummary;
+      return sortGuests(next);
+    });
   };
 
   return (
@@ -355,15 +432,15 @@ export default function ChatPopup() {
                 Loading guests...
               </div>
             ) : (
-              guestList?.map((guest) => (
+              guests?.map((guest) => (
                 <div
-                  key={guest.id}
+                  key={guest.guestId}
                   onClick={() => setSelectGuestId(guest.guestId)}
                   className="p-3 cursor-pointer border-b border-slate-200 dark:border-neutral-800 hover:bg-slate-50 dark:hover:bg-neutral-800 transition-colors"
                 >
                   <div className="flex justify-between items-center">
                     <p className="font-semibold text-slate-800 dark:text-slate-100">
-                      {"Guest"}
+                      Guest
                     </p>
                     {onlineGuests.has(guest.guestId) ? (
                       <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-green-500/10 text-green-600 dark:text-green-300 dark:bg-green-500/15">
@@ -377,9 +454,21 @@ export default function ChatPopup() {
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                    {guest.guestId}
+                  <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
+                    {guest.lastMsg || guest.guestId}
                   </p>
+                  <div className="mt-2 flex items-center justify-between">
+                    <span className="text-[10px] text-slate-400">
+                      {guest.lastAt
+                        ? new Date(guest.lastAt).toLocaleString()
+                        : ""}
+                    </span>
+                    {guest.unread > 0 && (
+                      <span className="inline-flex items-center justify-center h-5 px-2 rounded-full text-xs font-medium bg-primary-600 text-white">
+                        {guest.unread}
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))
             )}
