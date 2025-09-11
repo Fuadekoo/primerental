@@ -6,7 +6,7 @@ import {
   getAdmin,
   readGuestMessages,
 } from "@/actions/common/chat";
-import io, { Socket } from "socket.io-client";
+import io from "socket.io-client";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { MessageSquare, X, Send, Check, CheckCheck } from "lucide-react";
 
@@ -29,7 +29,9 @@ export default function GuestChatPopup() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
-  const [socket, setSocket] = useState<typeof Socket | null>(null);
+  const [socket, setSocket] = useState<ReturnType<typeof io> | null>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const isOpenRef = useRef(isOpen);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -69,11 +71,16 @@ export default function GuestChatPopup() {
     if (isOpen && guestId) {
       fetchChat(guestId);
       readAction(guestId);
+      setUnreadCount(0);
     }
   }, [isOpen, guestId, stableFetchChat]);
 
   useEffect(() => {
-    if (!isOpen || !guestId) {
+    isOpenRef.current = isOpen;
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!guestId) {
       socket?.disconnect();
       setSocket(null);
       return;
@@ -81,11 +88,6 @@ export default function GuestChatPopup() {
 
     const socketUrl =
       process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3000";
-    if (!socketUrl) {
-      console.error("NEXT_PUBLIC_SOCKET_URL environment variable is not set");
-      return;
-    }
-
     const newSocket = io(socketUrl, {
       query: { guestId },
       reconnection: true,
@@ -106,6 +108,10 @@ export default function GuestChatPopup() {
 
     const handleAdminMessage = (message: ChatMessage) => {
       setMessages((prev) => [...prev, message]);
+      // If chat is closed and message from admin, bump unread badge
+      if (!isOpenRef.current && !message.self) {
+        setUnreadCount((c) => c + 1);
+      }
     };
 
     newSocket.on("connect", onConnect);
@@ -118,15 +124,22 @@ export default function GuestChatPopup() {
       newSocket.off("chat_to_customer", handleAdminMessage);
       newSocket.disconnect();
     };
-  }, [isOpen, guestId]);
+  }, [guestId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // const toggleChat = () => {
-  //   setIsOpen(!isOpen);
-  // };
+  const toggleChat = () => {
+    setIsOpen((prev) => {
+      const next = !prev;
+      if (next && unreadCount > 0 && guestId) {
+        setUnreadCount(0);
+        readAction(guestId);
+      }
+      return next;
+    });
+  };
 
   const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -266,11 +279,16 @@ export default function GuestChatPopup() {
 
       {/* Toggle button */}
       <button
-        onClick={() => setIsOpen((v) => !v)}
-        className="mt-4 float-right p-3 rounded-full text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-400 shadow-lg ring-2 ring-white/60 dark:ring-neutral-800 transition-transform duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-0"
+        onClick={toggleChat}
+        className="mt-4 float-right p-3 rounded-full text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-400 shadow-lg ring-2 ring-white/60 dark:ring-neutral-800 transition-transform duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-0 relative"
         aria-label="Toggle Chat"
       >
         <MessageSquare size={24} />
+        {unreadCount > 0 && (
+          <span className="absolute -top-1 -right-1 min-w-[1.25rem] h-5 px-1 rounded-full bg-red-600 text-white text-[11px] leading-5 text-center">
+            {unreadCount}
+          </span>
+        )}
       </button>
     </div>
   );
