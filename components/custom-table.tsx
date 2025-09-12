@@ -177,7 +177,7 @@ function CustomTable({
                           alt={`Preview for ${item.id || item.key}`}
                           width={100}
                           height={60}
-                          className="object-cover rounded-md cursor-pointer h-16 w-24 ring-1 ring-slate-200 dark:ring-neutral-800"
+                          className="object-contain rounded-md cursor-pointer h-16 w-24 ring-1 ring-slate-200 dark:ring-neutral-800"
                           onClick={() => handleImageClick(cellValue, 0)}
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
@@ -300,10 +300,10 @@ function CustomTable({
                 alt={`Zoomed view ${zoomedImages.currentIndex + 1} of ${
                   zoomedImages.urls.length
                 }`}
-                className="block object-contain max-w-full max-h-full rounded-lg ring-1 ring-white/20"
+                className="block object-contain  rounded-lg ring-1 ring-white/20"
                 layout="intrinsic"
-                width={1200}
-                height={800}
+                width={400}
+                height={400}
               />
             </div>
 

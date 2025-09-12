@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 
 import { Search, Save, Check } from "lucide-react";
@@ -46,13 +46,40 @@ function FilteredComponent({
   });
   const [applied, setApplied] = useState<FilterInput>(normalize(filters));
 
-  // Normalize keys so the action gets what it expects
-  const request = normalize(applied);
+  // Keep applied in sync if parent props change
+  useEffect(() => {
+    setApplied(normalize(filters));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    filters?.property_type,
+    filters?.offer_type,
+    filters?.minPrice,
+    filters?.maxPrice,
+    filters?.bedroom,
+    filters?.bathroom,
+  ]);
+
+  // Build the request to send: only include selected fields (no null/undefined)
+  const request = useMemo(() => {
+    const obj = {
+      property_type: applied.property_type ?? undefined,
+      offer_type: applied.offer_type ?? undefined,
+      minPrice: applied.minPrice ?? undefined,
+      maxPrice: applied.maxPrice ?? undefined,
+      bedroom: applied.bedroom ?? undefined,
+      bathroom: applied.bathroom ?? undefined,
+    } as Record<string, unknown>;
+    return Object.fromEntries(
+      Object.entries(obj).filter(
+        ([, v]) => v !== undefined && v !== null && v !== ""
+      )
+    );
+  }, [applied]);
 
   const [results, , isLoading] = useAction(
     filterProperties,
     [true, () => {}],
-    propertType,
+    JSON.stringify(request)
   );
   const [search, setSearch] = useState("");
   const [saved, setSaved] = useState(false);
@@ -101,7 +128,10 @@ function FilteredComponent({
     mode: "onChange",
     defaultValues: {
       propertyType: applied.property_type ?? undefined,
-      offerType: (applied.offer_type === "RENT" || applied.offer_type === "SALE") ? applied.offer_type : undefined,
+      offerType:
+        applied.offer_type === "RENT" || applied.offer_type === "SALE"
+          ? applied.offer_type
+          : undefined,
       minPrice: applied.minPrice ?? undefined,
       maxPrice: applied.maxPrice ?? undefined,
       bedroom: applied.bedroom ?? undefined,
@@ -111,14 +141,20 @@ function FilteredComponent({
 
   const onApply = handleSubmit((data) => {
     const next: FilterInput = {
-      property_type: data.propertyType ?? null,
-      offer_type: data.offerType ?? null,
-      minPrice: (data.minPrice as any) ?? null,
-      maxPrice: (data.maxPrice as any) ?? null,
-      bedroom: (data.bedroom as any) ?? null,
-      bathroom: (data.bathroom as any) ?? null,
+      property_type: data.propertyType || undefined,
+      offer_type: data.offerType || undefined,
+      minPrice: (data.minPrice as any) ?? undefined,
+      maxPrice: (data.maxPrice as any) ?? undefined,
+      bedroom: (data.bedroom as any) ?? undefined,
+      bathroom: (data.bathroom as any) ?? undefined,
     };
-    setApplied(next);
+    // Clean undefined/empty
+    const cleaned = Object.fromEntries(
+      Object.entries(next).filter(
+        ([, v]) => v !== undefined && v !== null && v !== ""
+      )
+    ) as FilterInput;
+    setApplied(cleaned);
   });
 
   const handleSaveSearch = () => {
