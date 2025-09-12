@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { useTheme } from "next-themes";
 import { useRouter, useParams } from "next/navigation";
 import { Accordion, AccordionItem } from "@heroui/react";
@@ -15,6 +16,10 @@ import {
   Info,
   Type,
 } from "lucide-react";
+import { Button } from "@heroui/button";
+
+import useAction from "@/hooks/useActions";
+import { getLoginUserId } from "@/actions/common/chat";
 
 // Simple i18n copy
 const translations = {
@@ -342,6 +347,7 @@ function SettingsPage() {
         : (params.lang as string)
       : "en";
   const t = translations[currentLang as "en" | "am"] || translations.en;
+  const [loginUser] = useAction(getLoginUserId, [true, () => {}]);
 
   return (
     <div className="h-full bg-gray-50 p-4 dark:bg-gray-900 sm:p-6 lg:p-8">
@@ -370,6 +376,26 @@ function SettingsPage() {
           <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
             <div className="divide-y divide-gray-200 dark:divide-gray-700">
               <LanguageSelector t={t} />
+              {loginUser ? (
+                <div className="flex items-center justify-between p-4">
+                  <div>
+                    <p className="font-medium text-gray-700 dark:text-gray-300">
+                      Admin Mode
+                    </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Switch to admin dashboard
+                    </p>
+                  </div>
+                  <Button
+                    as={Link}
+                    href={`/${currentLang}/dashboard`}
+                    color="primary"
+                    variant="solid"
+                  >
+                    Change to Admin
+                  </Button>
+                </div>
+              ) : null}
             </div>
           </div>
 

@@ -1,10 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { useTheme } from "next-themes";
 import { useRouter, useParams } from "next/navigation";
 import { Accordion, AccordionItem } from "@heroui/react";
 import { Select, SelectItem, Avatar } from "@heroui/react";
+import { Button } from "@heroui/button";
 import {
   Sun,
   Moon,
@@ -366,6 +368,24 @@ function Setting() {
           <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
             <div className="divide-y divide-gray-200 dark:divide-gray-700">
               <LanguageSelector t={t} />
+              <div className="flex items-center justify-between p-4">
+                <div>
+                  <p className="font-medium text-gray-700 dark:text-gray-300">
+                    Guest Mode
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Switch to customer (guest) view
+                  </p>
+                </div>
+                <Button
+                  as={Link}
+                  href={`/${currentLang}/home`}
+                  color="primary"
+                  variant="solid"
+                >
+                  Change to Guest
+                </Button>
+              </div>
             </div>
           </div>
 
