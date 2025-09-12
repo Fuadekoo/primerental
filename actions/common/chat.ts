@@ -124,9 +124,31 @@ export async function getAdmin() {
 export async function getGuestList() {
   const guests = await prisma.guest.findMany({
     select: { id: true, guestId: true, socket: true },
-    orderBy: { updatedAt: "asc" },
   });
-  return guests;
+  const enriched = await Promise.all(
+    guests.map(async (g) => {
+      const last = await prisma.chat.findFirst({
+        where: { OR: [{ fromGuestId: g.id }, { toGuestId: g.id }] },
+        orderBy: { createdAt: "desc" },
+        select: { msg: true, createdAt: true },
+      });
+      const unread = await prisma.chat.count({
+        where: { fromGuestId: g.id, isRead: false },
+      });
+      return {
+        ...g,
+        unread,
+        lastMsg: last?.msg ?? null,
+        lastAt: last?.createdAt ?? null,
+      };
+    })
+  );
+  return enriched.sort((a, b) => {
+    const at = a.lastAt ? new Date(a.lastAt).getTime() : 0;
+    const bt = b.lastAt ? new Date(b.lastAt).getTime() : 0;
+    if (bt !== at) return bt - at; // newest first
+    return (b.unread || 0) - (a.unread || 0);
+  });
 }
 
 export async function readGuestMessages(guestId: string) {
@@ -214,6 +236,28 @@ export async function countUnreadMessagesForGuest(guestId: string) {
     return unreadCount;
   } catch (error) {
     console.error("Error in countUnreadMessages:", error);
+    return 0;
+  }
+}
+
+export async function countUnreadMessagesForAdmin(guestId: string) {
+  try {
+    const mydata = await getLoginUserId();
+    const adminId = mydata?.id;
+    if (!adminId) return 0;
+
+    const guest = await prisma.guest.findUnique({
+      where: { guestId },
+      select: { id: true },
+    });
+    if (!guest) return 0;
+
+    // Count messages from guest to this admin that are unread
+    return await prisma.chat.count({
+      where: { fromGuestId: guest.id, toUserId: adminId, isRead: false },
+    });
+  } catch (e) {
+    console.error("Error in countUnreadMessagesForAdmin:", e);
     return 0;
   }
 }

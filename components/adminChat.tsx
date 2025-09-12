@@ -62,10 +62,16 @@ export default function ChatPopup() {
     true,
     () => {},
   ]);
-  // Seed from API initially (unread = 0)
+  // Seed from API initially with DB values (unread/lastMsg/lastAt) and sort
   useEffect(() => {
     if (guestList?.length) {
-      setGuests(guestList.map((g: any) => ({ guestId: g.guestId, unread: 0 })));
+      const seeded = guestList.map((g: any) => ({
+        guestId: g.guestId,
+        unread: g.unread ?? 0,
+        lastMsg: g.lastMsg ?? undefined,
+        lastAt: g.lastAt ? new Date(g.lastAt).toISOString() : undefined,
+      }));
+      setGuests(sortGuests(seeded));
     }
   }, [guestList]);
 
