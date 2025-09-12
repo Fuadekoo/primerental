@@ -67,19 +67,23 @@ export default function GuestChatPopup() {
   }, [chatHistory, guestId]);
 
   const stableFetchChat = useCallback(fetchChat, []);
-  const [unreadGuestCount, , isUnreadLoading] = useAction(
+  const [unreadGuestCount, fetchUnreadGuestCount, isUnreadLoading] = useAction(
     countUnreadMessagesForGuest,
-    [true, () => {}],
-    guestId
+    [, () => {}]
   );
 
-  // Seed unread badge from DB (hook) on load/refresh when chat is closed
+  // Seed unread badge from DB on load/refresh when chat is closed
   useEffect(() => {
     if (!guestId || isOpen) return;
-    if (typeof unreadGuestCount === "number" && !isUnreadLoading) {
-      setUnreadCount(unreadGuestCount);
-    }
-  }, [guestId, isOpen, unreadGuestCount, isUnreadLoading]);
+    (async () => {
+      try {
+        const count = await fetchUnreadGuestCount(guestId as string);
+        if (typeof count === "number") setUnreadCount(count);
+      } catch (e) {
+        console.error("Failed to get unread count:", e);
+      }
+    })();
+  }, [guestId, isOpen, fetchUnreadGuestCount]);
 
   useEffect(() => {
     if (isOpen && guestId) {

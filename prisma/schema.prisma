@@ -43,6 +43,7 @@ model guest {
   id        String   @id @default(uuid())
   guestId   String   @unique @default(uuid())
   socket    String?
+  remark    String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   chatsFrom chat[]   @relation("FromGuest")
@@ -146,6 +147,7 @@ model chat {
   toGuest     guest?   @relation("ToGuest", fields: [toGuestId], references: [id], onDelete: Cascade)
   toGuestId   String?
   msg         String
+  // remark      String?
   isRead      Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

@@ -103,9 +103,10 @@ export async function getGuestChat(guestId: string) {
     },
   });
   // when my guestId is found in fromGuestId then add a self and true
+  const numericGuestId = guestDataId?.id ?? 0;
   const chats = chat.map((c) => ({
     ...c,
-    self: c.fromGuestId === guestId,
+    self: c.fromGuestId === numericGuestId,
   }));
   return chats;
 }
@@ -127,7 +128,7 @@ export async function getGuestList() {
   if (!adminId) return [];
 
   const guests = await prisma.guest.findMany({
-    select: { id: true, guestId: true, socket: true },
+    select: { id: true, guestId: true, socket: true, remark: true },
   });
   const enriched = await Promise.all(
     guests.map(async (g) => {
@@ -279,10 +280,25 @@ export async function countAllUnreadMessagesForAdmin() {
     const total = await prisma.chat.count({
       where: { toUserId: adminId, isRead: false },
     });
-    console.log("Total unread messages for admin:", total);
+    // console.log("Total unread messages for admin:", total);
     return total;
   } catch (error) {
     console.error("Error in countAllUnreadMessagesForAdmin:", error);
     return 0;
+  }
+}
+
+export async function addRemark(guestId: string, remark: string) {
+  try {
+    if (!guestId) return null;
+    const updated = await prisma.guest.update({
+      where: { guestId },
+      data: { remark },
+      select: { guestId: true, remark: true },
+    });
+    return updated;
+  } catch (error) {
+    console.error("Error in addRemark:", error);
+    return null;
   }
 }

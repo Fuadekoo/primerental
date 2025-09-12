@@ -7,6 +7,7 @@ import {
   getLoginUserId,
   readAdminMessages,
   countAllUnreadMessagesForAdmin,
+  addRemark,
 } from "@/actions/common/chat";
 import io from "socket.io-client";
 import React, { useState, useEffect, useRef, useCallback } from "react";
@@ -17,6 +18,7 @@ import {
   ArrowLeft,
   Check,
   CheckCheck,
+  Pencil,
 } from "lucide-react";
 
 // Use the new, more detailed message type
@@ -48,9 +50,12 @@ export default function ChatPopup() {
     unread: number;
     lastMsg?: string;
     lastAt?: string;
+    remark?: string;
   };
   const [guests, setGuests] = useState<GuestSummary[]>([]);
-  console.log("Selected Guest ID in AdminChatPopup:", selectGuestId);
+  const [editingRemark, setEditingRemark] = useState(false);
+  const [remarkInput, setRemarkInput] = useState("");
+  // console.log("Selected Guest ID in Admin")
 
   useEffect(() => {
     if (user) {
@@ -71,6 +76,7 @@ export default function ChatPopup() {
         unread: g.unread ?? 0,
         lastMsg: g.lastMsg ?? undefined,
         lastAt: g.lastAt ? new Date(g.lastAt).toISOString() : undefined,
+        remark: g.remark ?? undefined,
       }));
       setGuests(sortGuests(seeded));
     }
@@ -89,6 +95,8 @@ export default function ChatPopup() {
     countAllUnreadMessagesForAdmin,
     [true, () => {}]
   );
+
+  const [, remarkAction, isLoadingRemark] = useAction(addRemark, [, () => {}]);
 
   useEffect(() => {
     if (chatHistory && userId) {
@@ -114,9 +122,10 @@ export default function ChatPopup() {
     if (selectGuestId) {
       fetchChat(selectGuestId);
       // Mark messages as read then refresh server-backed lists
-      readAction(selectGuestId);
-      refreshGuestList?.();
-      isRefresh?.();
+      Promise.resolve(readAction(selectGuestId)).then(() => {
+        refreshGuestList?.();
+        isRefresh?.();
+      });
       // Clear unread locally and inform server
       upsertGuest({ guestId: selectGuestId, unread: 0 });
       socket?.emit?.("admin_read", { guestId: selectGuestId });
@@ -360,6 +369,19 @@ export default function ChatPopup() {
           <h3 className="font-bold text-sm sm:text-base">
             {selectGuestId ? "Chat with Guest" : "Select a Guest"}
           </h3>
+          {selectGuestId && (
+            <button
+              onClick={() => {
+                const g = guests.find((x) => x.guestId === selectGuestId);
+                setRemarkInput(g?.remark || "");
+                setEditingRemark((v) => !v);
+              }}
+              className="p-1 rounded-full hover:bg-white/20 transition-colors"
+              aria-label="Edit remark"
+            >
+              <Pencil size={16} />
+            </button>
+          )}
           <button
             onClick={toggleChat}
             className="p-1 rounded-full hover:bg-white/20 transition-colors"
@@ -371,6 +393,41 @@ export default function ChatPopup() {
 
         {selectGuestId ? (
           <>
+            {editingRemark && (
+              <div className="p-2 border-b border-slate-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!selectGuestId) return;
+                    remarkAction(selectGuestId, remarkInput);
+                    setEditingRemark(false);
+                    refreshGuestList?.();
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <input
+                    value={remarkInput}
+                    onChange={(e) => setRemarkInput(e.target.value)}
+                    placeholder="Add a remark..."
+                    className="flex-1 text-sm px-2 py-1 rounded-md border border-slate-300 dark:border-neutral-700 bg-white dark:bg-neutral-900"
+                  />
+                  <button
+                    type="submit"
+                    className="px-3 py-1 text-xs rounded-md bg-primary-600 text-white"
+                  >
+                    Save
+                  </button>
+                </form>
+              </div>
+            )}
+            {(() => {
+              const g = guests.find((x) => x.guestId === selectGuestId);
+              return g?.remark ? (
+                <div className="px-4 py-2 text-xs text-slate-600 dark:text-slate-300 bg-white/50 dark:bg-neutral-900/50 border-b border-slate-200 dark:border-neutral-800">
+                  Remark: {g.remark}
+                </div>
+              ) : null;
+            })()}
             {/* Messages */}
             <div className="flex-1 p-4 overflow-y-auto bg-slate-50 dark:bg-neutral-950/40">
               <div className="space-y-3">
@@ -468,9 +525,15 @@ export default function ChatPopup() {
                   className="p-3 cursor-pointer border-b border-slate-200 dark:border-neutral-800 hover:bg-slate-50 dark:hover:bg-neutral-800 transition-colors"
                 >
                   <div className="flex justify-between items-center">
-                    <p className="font-semibold text-slate-800 dark:text-slate-100">
-                      Guest
-                    </p>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-slate-800 dark:text-slate-100 truncate">
+                        {guests.find((g) => g.guestId === guest.guestId)
+                          ?.remark || "Guest"}
+                      </p>
+                      <p className="text-[10px] text-slate-400 truncate">
+                        {guest.guestId}
+                      </p>
+                    </div>
                     {onlineGuests.has(guest.guestId) ? (
                       <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-green-500/10 text-green-600 dark:text-green-300 dark:bg-green-500/15">
                         <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
