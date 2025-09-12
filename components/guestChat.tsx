@@ -35,6 +35,31 @@ export default function GuestChatPopup() {
   const isOpenRef = useRef(isOpen);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Render message text with clickable links
+  const renderWithLinks = (text: string) => {
+    const urlPattern = /((https?:\/\/|www\.)[^\s]+)/gi;
+    const parts = text.split(urlPattern);
+    return parts.map((part, idx) => {
+      if (!part) return null;
+      const isLink = /(https?:\/\/|www\.)[^\s]+/i.test(part);
+      if (isLink) {
+        const href = part.startsWith("http") ? part : `https://${part}`;
+        return (
+          <a
+            key={`lnk-${idx}`}
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline text-red-600 hover:text-red-700 break-all"
+          >
+            {part}
+          </a>
+        );
+      }
+      return <span key={`txt-${idx}`}>{part}</span>;
+    });
+  };
+
   useEffect(() => {
     if (admin) {
       setAdminId(admin);
@@ -235,7 +260,7 @@ export default function GuestChatPopup() {
                             : "bg-white dark:bg-neutral-800 text-slate-900 dark:text-slate-100 rounded-bl-none border border-slate-200 dark:border-neutral-700"
                         }`}
                     >
-                      <p>{msg.msg}</p>
+                      <p className="break-words">{renderWithLinks(msg.msg)}</p>
                       <div
                         className={`flex items-center justify-end gap-1 text-xs mt-1
                           ${

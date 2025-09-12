@@ -318,6 +318,31 @@ export default function ChatPopup() {
     setSelectGuestId(null);
   };
 
+  // Render message text with clickable links
+  const renderWithLinks = (text: string) => {
+    const urlPattern = /((https?:\/\/|www\.)[^\s]+)/gi;
+    const parts = text.split(urlPattern);
+    return parts.map((part, idx) => {
+      if (!part) return null;
+      const isLink = /(https?:\/\/|www\.)[^\s]+/i.test(part);
+      if (isLink) {
+        const href = part.startsWith("http") ? part : `https://${part}`;
+        return (
+          <a
+            key={`lnk-${idx}`}
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline text-red-600 hover:text-red-700 break-all"
+          >
+            {part}
+          </a>
+        );
+      }
+      return <span key={`txt-${idx}`}>{part}</span>;
+    });
+  };
+
   // Helpers to maintain sorted guest list and unread counts
   const sortGuests = (arr: GuestSummary[]) =>
     [...arr].sort((a, b) => {
@@ -452,6 +477,10 @@ export default function ChatPopup() {
                           }`}
                       >
                         <p>{msg.msg}</p>
+                        {/* clickable links */}
+                        <p className="break-words">
+                          {renderWithLinks(msg.msg)}
+                        </p>
                         <div
                           className={`flex items-center justify-end gap-1 text-[11px] mt-1
                             ${
