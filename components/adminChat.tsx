@@ -6,6 +6,7 @@ import {
   getGuestList,
   getLoginUserId,
   readAdminMessages,
+  countAllUnreadMessagesForAdmin,
 } from "@/actions/common/chat";
 import io from "socket.io-client";
 import React, { useState, useEffect, useRef, useCallback } from "react";
@@ -58,10 +59,10 @@ export default function ChatPopup() {
   }, [user]);
 
   // Action to get the admin user to message
-  const [guestList, , isLoadingGuestList] = useAction(getGuestList, [
-    true,
-    () => {},
-  ]);
+  const [guestList, refreshGuestList, isLoadingGuestList] = useAction(
+    getGuestList,
+    [true, () => {}]
+  );
   // Seed from API initially with DB values (unread/lastMsg/lastAt) and sort
   useEffect(() => {
     if (guestList?.length) {
@@ -83,6 +84,11 @@ export default function ChatPopup() {
 
   // action to mark messages as read
   const [, readAction] = useAction(readAdminMessages, [, () => {}]);
+
+  const [allUnread, isRefresh, isLoading] = useAction(
+    countAllUnreadMessagesForAdmin,
+    [true, () => {}]
+  );
 
   useEffect(() => {
     if (chatHistory && userId) {
@@ -107,7 +113,10 @@ export default function ChatPopup() {
     setMessages([]); // Clear messages when guest selection changes
     if (selectGuestId) {
       fetchChat(selectGuestId);
-      readAction(selectGuestId); // Mark messages as read when fetching
+      // Mark messages as read then refresh server-backed lists
+      readAction(selectGuestId);
+      refreshGuestList?.();
+      isRefresh?.();
       // Clear unread locally and inform server
       upsertGuest({ guestId: selectGuestId, unread: 0 });
       socket?.emit?.("admin_read", { guestId: selectGuestId });
@@ -176,6 +185,9 @@ export default function ChatPopup() {
           lastAt: new Date().toISOString(),
           unread: 0,
         });
+        // Keep server-backed counters in sync
+        refreshGuestList?.();
+        isRefresh?.();
       } else {
         // Bump unread for that guest and move to top by recency
         if (toId === userId && fromId) {
@@ -203,6 +215,9 @@ export default function ChatPopup() {
             };
             return sortGuests(next);
           });
+          // Keep server-backed counters in sync
+          refreshGuestList?.();
+          isRefresh?.();
         }
       }
     };
@@ -250,6 +265,14 @@ export default function ChatPopup() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Refresh total unread when popup opens/closes
+  useEffect(() => {
+    try {
+      // re-run total unread action
+      isRefresh?.();
+    } catch {}
+  }, [isOpen, isRefresh]);
 
   const toggleChat = () => {
     setIsOpen(!isOpen);
@@ -485,10 +508,15 @@ export default function ChatPopup() {
       {/* Chat Toggle Button */}
       <button
         onClick={toggleChat}
-        className="mt-4 float-right p-3 rounded-full text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-400 shadow-lg ring-2 ring-white/60 dark:ring-neutral-800 transition-transform duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-0"
+        className="mt-4 float-right p-3 rounded-full text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-400 shadow-lg ring-2 ring-white/60 dark:ring-neutral-800 transition-transform duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-0 relative"
         aria-label="Toggle Chat"
       >
         <MessageSquare size={24} />
+        {typeof allUnread === "number" && allUnread > 0 && (
+          <span className="absolute -top-1 -right-1 min-w-[1.25rem] h-5 px-1 rounded-full bg-red-600 text-white text-[11px] leading-5 text-center">
+            {allUnread}
+          </span>
+        )}
       </button>
     </div>
   );
