@@ -5,6 +5,7 @@ import {
   getGuestChat,
   getAdmin,
   readGuestMessages,
+  countUnreadMessagesForGuest,
 } from "@/actions/common/chat";
 import io from "socket.io-client";
 import React, { useState, useEffect, useRef, useCallback } from "react";
@@ -66,6 +67,19 @@ export default function GuestChatPopup() {
   }, [chatHistory, guestId]);
 
   const stableFetchChat = useCallback(fetchChat, []);
+  const [unreadGuestCount, , isUnreadLoading] = useAction(
+    countUnreadMessagesForGuest,
+    [true, () => {}],
+    guestId
+  );
+
+  // Seed unread badge from DB (hook) on load/refresh when chat is closed
+  useEffect(() => {
+    if (!guestId || isOpen) return;
+    if (typeof unreadGuestCount === "number" && !isUnreadLoading) {
+      setUnreadCount(unreadGuestCount);
+    }
+  }, [guestId, isOpen, unreadGuestCount, isUnreadLoading]);
 
   useEffect(() => {
     if (isOpen && guestId) {

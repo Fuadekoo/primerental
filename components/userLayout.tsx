@@ -18,6 +18,8 @@ import NotificationBell from "./NotificationBell";
 import CustomerNotificationHandler from "./CustomerNotificationHandler";
 import AdminSocketConnected from "./AdminSocketConnected";
 import ClientSocketConnected from "./ClientSocketConnected";
+import useAction from "@/hooks/useActions";
+import { getLoginUserId } from "@/actions/common/chat";
 
 export default function UserLayout({
   children,
@@ -33,6 +35,23 @@ export default function UserLayout({
   isManager?: boolean;
 }) {
   const [sidebar, setSidebar] = useState(false);
+  // Determine if a logged-in session exists (server verified)
+  const [loginUser] = useAction(getLoginUserId, [true, () => {}]);
+  const hasSession = Boolean(loginUser && (loginUser as any).id);
+  const isAdminSession = (() => {
+    const role = (loginUser as any)?.role;
+    if (!role || typeof role !== "string") return false;
+    return role.toUpperCase() === "ADMIN";
+  })();
+  // Cookie-based session presence for guest-side admin button
+  const [cookieSession, setCookieSession] = useState(false);
+  useEffect(() => {
+    try {
+      const ck = typeof document !== "undefined" ? document.cookie : "";
+      setCookieSession(/(auth|token|session)=/i.test(ck));
+    } catch {}
+  }, []);
+
   // --- Add online status state ---
   const [isOnline, setIsOnline] = useState(true);
   const [showOfflinePopup, setShowOfflinePopup] = useState(false);
@@ -120,7 +139,12 @@ export default function UserLayout({
         </div>
       )}
       {/* --- End Offline Popup --- */}
-      <Sidebar {...{ sidebar, setSidebar, menu, isManager }} />
+      <Sidebar
+        {...{ sidebar, setSidebar, menu, isManager }}
+        hasSession={hasSession}
+        isAdminSession={isAdminSession}
+        cookieSession={cookieSession}
+      />
       <div className="grid grid-rows-[auto_1fr] h-full min-h-0 gap-2 overflow-hidden">
         <Header
           sidebar={sidebar}
@@ -140,6 +164,9 @@ function Sidebar({
   setSidebar,
   menu,
   isManager,
+  hasSession,
+  isAdminSession,
+  cookieSession,
 }: {
   sidebar: boolean;
   setSidebar: React.Dispatch<React.SetStateAction<boolean>>;
@@ -149,9 +176,19 @@ function Sidebar({
     icon: React.ReactNode;
   }[];
   isManager?: boolean;
+  hasSession?: boolean;
+  isAdminSession?: boolean;
+  cookieSession?: boolean;
 }) {
   const pathname = usePathname() ?? "";
   const [, lang] = pathname.split("/");
+  // Simple switch actions
+  const switchToGuest = () => {
+    window.location.href = "/en/home";
+  };
+  const switchToAdmin = () => {
+    window.location.href = "/en/dashboard";
+  };
 
   // Auto-close sidebar on mobile after menu click
   const handleMenuClick = () => {
@@ -205,20 +242,20 @@ function Sidebar({
         </div>
 
         <div className="max-xl:lg:px-2 px-3 sm:px-5 pt-3 grid gap-2 auto-rows-min overflow-auto">
-          {menu.map(({ label, url, icon }, i) => {
-            const isActive = pathname.endsWith(`/${url}`);
+          {menu.map((item, i) => {
+            const active = pathname.endsWith(`/${item.url}`);
             return (
               <Button
-                key={i + ""}
+                key={`menu-${i}`}
                 isIconOnly={false}
-                color={isActive ? "primary" : "default"}
-                variant={isActive ? "solid" : "light"}
+                color={active ? "primary" : "default"}
+                variant={active ? "solid" : "light"}
                 className={`
                   w-full px-3 inline-flex gap-5 justify-start items-center
                   transition-all duration-200 rounded-lg
                   border-l-4
                   ${
-                    isActive
+                    active
                       ? "border-primary-500 bg-primary-50 dark:bg-primary-500/10 text-primary-700 dark:text-primary-300 font-semibold shadow-sm"
                       : "border-slate-200 dark:border-neutral-800 text-slate-600 dark:text-slate-300"
                   }
@@ -226,20 +263,20 @@ function Sidebar({
                   hover:scale-[1.01] active:scale-95
                 `}
                 as={Link}
-                href={`/${lang}/${url}`}
+                href={`/${lang}/${item.url}`}
                 onClick={handleMenuClick}
               >
                 <span
                   className={`${
-                    isActive
+                    active
                       ? "text-primary-600 dark:text-primary-300"
                       : "text-slate-500 dark:text-slate-400"
                   }`}
                 >
-                  {icon}
+                  {item.icon}
                 </span>
                 {sidebar && (
-                  <span className="px-5 capitalize truncate">{label}</span>
+                  <span className="px-5 capitalize truncate">{item.label}</span>
                 )}
               </Button>
             );
@@ -247,7 +284,26 @@ function Sidebar({
         </div>
 
         <div className="p-5 max-xl:lg:p-2 grid gap-2 overflow-hidden">
-          {isManager && <User sidebar={sidebar} />}
+          {isManager ? (
+            <User
+              sidebar={sidebar}
+              isManager={!!isManager}
+              hasSession={!!hasSession}
+              isAdminSession={!!isAdminSession}
+              onSwitchToGuest={switchToGuest}
+              onSwitchToAdmin={switchToAdmin}
+            />
+          ) : cookieSession ? (
+            <Button
+              as={Link}
+              href="/en/dashboard"
+              color="primary"
+              variant="solid"
+              className="w-full"
+            >
+              Go to Admin
+            </Button>
+          ) : null}
         </div>
       </div>
 
@@ -294,7 +350,21 @@ function Header({
   );
 }
 
-function User({ sidebar }: { sidebar: boolean }) {
+function User({
+  sidebar,
+  isManager,
+  hasSession,
+  isAdminSession,
+  onSwitchToGuest,
+  onSwitchToAdmin,
+}: {
+  sidebar: boolean;
+  isManager: boolean;
+  hasSession: boolean;
+  isAdminSession: boolean;
+  onSwitchToGuest?: () => void;
+  onSwitchToAdmin?: () => void;
+}) {
   const pathname = usePathname() ?? "";
   const [, lang] = pathname.split("/");
 
@@ -317,6 +387,24 @@ function User({ sidebar }: { sidebar: boolean }) {
         </div>
       </DropdownTrigger>
       <DropdownMenu color="primary" variant="flat">
+        {isManager ? (
+          <DropdownItem
+            key="switchToGuest"
+            className="font-semibold"
+            onClick={() => onSwitchToGuest?.()}
+          >
+            Switch to Guest
+          </DropdownItem>
+        ) : null}
+        {!isManager && hasSession && isAdminSession ? (
+          <DropdownItem
+            key="switchToAdmin"
+            className="font-semibold"
+            onClick={() => onSwitchToAdmin?.()}
+          >
+            Switch to Admin
+          </DropdownItem>
+        ) : null}
         <DropdownItem
           key={"signout"}
           startContent={<LogOutIcon className="size-4 text-red-600" />}

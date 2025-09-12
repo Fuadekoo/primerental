@@ -191,3 +191,29 @@ export async function readAdminMessages(guestId: string) {
     console.error("Error in readAdminMessages:", error);
   }
 }
+
+export async function countUnreadMessagesForGuest(guestId: string) {
+  try {
+    const guestData = await prisma.guest.findUnique({
+      where: { guestId },
+      select: { id: true, guestId: true },
+    });
+
+    if (!guestData) {
+      console.error("Guest not found for counting unread messages");
+      return 0;
+    }
+
+    const unreadCount = await prisma.chat.count({
+      where: {
+        toGuestId: guestData.id,
+        isRead: false,
+      },
+    });
+
+    return unreadCount;
+  } catch (error) {
+    console.error("Error in countUnreadMessages:", error);
+    return 0;
+  }
+}
