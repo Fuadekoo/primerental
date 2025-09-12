@@ -20,6 +20,7 @@ import AdminSocketConnected from "./AdminSocketConnected";
 import ClientSocketConnected from "./ClientSocketConnected";
 import useAction from "@/hooks/useActions";
 import { getLoginUserId } from "@/actions/common/chat";
+import InstallPrompt from "./InstallPrompt";
 
 export default function UserLayout({
   children,
@@ -98,6 +99,7 @@ export default function UserLayout({
 
   return (
     <div className="h-dvh w-dvw grid lg:grid-cols-[auto_1fr] overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+      <InstallPrompt />
       {/* --- Offline Popup --- */}
       {showOfflinePopup && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
@@ -224,9 +226,9 @@ function Sidebar({
           )}
         </Button>
 
-        <div className=" bg-blue-400 flex items-center gap-3 px-5 pt-3 pb-2 mb-4">
+        <div className=" bg-red-400 flex items-center gap-3 px-5 pt-3 pb-2 mb-4">
           <Image
-            src="/logo.png"
+            src="/logo_with_bg.png"
             alt="Prime Rental"
             width={80}
             height={80}
@@ -411,7 +413,7 @@ function User({
           className="!text-red-600 font-semibold rounded-md border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
           onClick={async () => {
             await logout();
-            window.location.href = `/${lang}/signin`;
+            window.location.href = `/${lang}/login`;
           }}
         >
           <span className="text-red-600">Sign Out</span>

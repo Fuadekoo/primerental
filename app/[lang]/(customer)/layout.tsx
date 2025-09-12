@@ -19,6 +19,7 @@ import {
 import { SocketProvider } from "@/components/SocketProvider";
 import GuestSocketRegistrar from "@/components/GuestSocketRegistrar";
 import ChatPopup from "@/components/guestChat";
+import InstallPrompt from "@/components/InstallPrompt";
 
 const translations = {
   en: {
@@ -115,6 +116,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <SocketProvider guestId={guestId}>
         <GuestSocketRegistrar />
         {children}
+        <InstallPrompt />
       </SocketProvider>
       <ChatPopup />
     </UserLayout>

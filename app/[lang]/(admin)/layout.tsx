@@ -14,6 +14,7 @@ import {
 // import AdminSocketHandler from "@/components/AdminSocketHandler";
 import { SocketProvider } from "@/components/SocketProvider";
 import ChatPopup from "@/components/adminChat";
+import InstallPrompt from "@/components/InstallPrompt";
 
 const translations = {
   en: {
@@ -78,7 +79,9 @@ export default async function Layout({
   return (
     <div className="overflow-hidden h-svh w-svw">
       <UserLayout menu={menu} isManager={isManager}>
-        <SocketProvider userId={session.user.id}>{children}</SocketProvider>
+        <SocketProvider userId={session.user.id}>
+          {children} <InstallPrompt />
+        </SocketProvider>
         <ChatPopup />
       </UserLayout>
     </div>
