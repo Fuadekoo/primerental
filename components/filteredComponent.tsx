@@ -79,7 +79,7 @@ function FilteredComponent({
   const [results, , isLoading] = useAction(
     filterProperties,
     [true, () => {}],
-    JSON.stringify(request)
+    request
   );
   const [search, setSearch] = useState("");
   const [saved, setSaved] = useState(false);

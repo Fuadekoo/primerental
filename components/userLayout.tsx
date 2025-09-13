@@ -229,7 +229,7 @@ function Sidebar({
         <div className=" bg-red-400 flex items-center gap-3 px-5 pt-3 pb-2 mb-4">
           <Image
             src="/logo_with_bg.png"
-            alt="Prime Rental"
+            alt="Prime FUAD"
             width={80}
             height={80}
             className="rounded-full ring-1 ring-slate-200 dark:ring-neutral-800"

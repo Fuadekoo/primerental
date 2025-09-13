@@ -1,14 +1,21 @@
 "use server";
 import prisma from "@/lib/db";
 
-export async function filterProperties(
-  propertyType?: string,
-  offerType?: string,
-  minPrice?: number,
-  maxPrice?: number,
-  bedroom?: number,
-  bathroom?: number
-) {
+export async function filterProperties({
+  propertyType,
+  offerType,
+  minPrice,
+  maxPrice,
+  bedroom,
+  bathroom,
+}: {
+  propertyType?: string;
+  offerType?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  bedroom?: number;
+  bathroom?: number;
+}) {
   try {
     console.log("Filtering with:", {
       propertyType,
