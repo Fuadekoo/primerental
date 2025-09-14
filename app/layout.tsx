@@ -23,9 +23,10 @@ const dancingScript = Dancing_Script({
 });
 
 export const metadata: Metadata = {
-  title: "My PWA",
-  description: "Next.js PWA Example",
-  manifest: "/manifest.webmanifest", // ✅ root manifest
+  title: "Prime Rental - House Sell & Rent in Ethiopia",
+  description:
+    "Buy, sell, and rent houses in Ethiopia. Prime Rental is your comprehensive property management platform to streamline your real estate business.",
+  manifest: "/manifest.webmanifest",
   themeColor: "#000000",
   metadataBase: new URL("http://localhost:3000"),
 };
