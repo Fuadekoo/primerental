@@ -91,12 +91,12 @@ export default function ChatPopup() {
   // action to mark messages as read
   const [, readAction] = useAction(readAdminMessages, [, () => {}]);
 
-  const [allUnread, isRefresh, ] = useAction(
-    countAllUnreadMessagesForAdmin,
-    [true, () => {}]
-  );
+  const [allUnread, isRefresh] = useAction(countAllUnreadMessagesForAdmin, [
+    true,
+    () => {},
+  ]);
 
-  const [, remarkAction, ] = useAction(addRemark, [, () => {}]);
+  const [, remarkAction] = useAction(addRemark, [, () => {}]);
 
   useEffect(() => {
     if (chatHistory && userId) {
@@ -140,8 +140,7 @@ export default function ChatPopup() {
       return;
     }
 
-    const socketUrl =
-      process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3000";
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL;
     if (!socketUrl) {
       console.error("NEXT_PUBLIC_SOCKET_URL environment variable is not set");
       return;

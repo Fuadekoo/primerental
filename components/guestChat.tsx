@@ -129,8 +129,11 @@ export default function GuestChatPopup() {
       return;
     }
 
-    const socketUrl =
-      process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3000";
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL;
+    if (!socketUrl) {
+      console.error("Socket URL is not defined");
+      return;
+    }
     const newSocket = io(socketUrl, {
       query: { guestId },
       reconnection: true,

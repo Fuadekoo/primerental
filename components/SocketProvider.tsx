@@ -32,8 +32,7 @@ export function SocketProvider({
     // Only connect if we have an identifier (userId or guestId)
     if (!userId && !guestId) return null;
 
-    const socketUrl =
-      process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3000";
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL;
     if (!socketUrl) {
       console.error("NEXT_PUBLIC_SOCKET_URL environment variable is not set");
       return null; // or you can throw an error
