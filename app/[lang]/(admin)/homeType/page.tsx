@@ -34,7 +34,7 @@ interface HomeTypeItem {
   createdAt?: string;
 }
 
-interface ColumnDef<T = Record<string, any>> {
+interface ColumnDef<T = Record<string, string>> {
   key: string;
   label: string;
   renderCell?: (item: T) => React.ReactNode;
@@ -290,7 +290,7 @@ function HomeTypePage() {
     ...item,
     key: item.id,
   }));
-
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const columns: ColumnDef<Record<string, any>>[] = [
     {
       key: "autoId",

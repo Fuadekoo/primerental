@@ -71,7 +71,7 @@ export default function ChatPopup() {
   // Seed from API initially with DB values (unread/lastMsg/lastAt) and sort
   useEffect(() => {
     if (guestList?.length) {
-      const seeded = guestList.map((g: any) => ({
+      const seeded = guestList.map((g) => ({
         guestId: g.guestId,
         unread: g.unread ?? 0,
         lastMsg: g.lastMsg ?? undefined,
@@ -91,12 +91,12 @@ export default function ChatPopup() {
   // action to mark messages as read
   const [, readAction] = useAction(readAdminMessages, [, () => {}]);
 
-  const [allUnread, isRefresh, isLoading] = useAction(
+  const [allUnread, isRefresh, ] = useAction(
     countAllUnreadMessagesForAdmin,
     [true, () => {}]
   );
 
-  const [, remarkAction, isLoadingRemark] = useAction(addRemark, [, () => {}]);
+  const [, remarkAction, ] = useAction(addRemark, [, () => {}]);
 
   useEffect(() => {
     if (chatHistory && userId) {

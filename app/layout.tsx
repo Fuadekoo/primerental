@@ -23,8 +23,11 @@ const dancingScript = Dancing_Script({
 });
 
 export const metadata: Metadata = {
-  title: "Prime Rental",
-  description: "Your prime choice for rentals.",
+  title: "My PWA",
+  description: "Next.js PWA Example",
+  manifest: "/manifest.webmanifest", // ✅ root manifest
+  themeColor: "#000000",
+  metadataBase: new URL("http://localhost:3000"),
 };
 
 export default function RootLayout({

@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     // Determine extension and ensure filename present
     let ext = path.extname(filename || "").replace(".", "");
     if (!ext) {
-      const original = (chunk as any).name as string | undefined;
+      const original = chunk.name as string | undefined;
       if (original && original.includes(".")) {
         ext = original.split(".").pop() as string;
       } else {
@@ -91,10 +91,7 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ success: true });
-  } catch (err: any) {
-    return NextResponse.json(
-      { error: err?.message || "Upload failed" },
-      { status: 500 }
-    );
+  } catch {
+    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
   }
 }

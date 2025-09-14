@@ -38,8 +38,9 @@ export default function UserLayout({
   const [sidebar, setSidebar] = useState(false);
   // Determine if a logged-in session exists (server verified)
   const [loginUser] = useAction(getLoginUserId, [true, () => {}]);
-  const hasSession = Boolean(loginUser && (loginUser as any).id);
+  const hasSession = Boolean(loginUser && loginUser.id);
   const isAdminSession = (() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const role = (loginUser as any)?.role;
     if (!role || typeof role !== "string") return false;
     return role.toUpperCase() === "ADMIN";
@@ -54,7 +55,7 @@ export default function UserLayout({
   }, []);
 
   // --- Add online status state ---
-  const [isOnline, setIsOnline] = useState(true);
+  const [, setIsOnline] = useState(true);
   const [showOfflinePopup, setShowOfflinePopup] = useState(false);
 
   useEffect(() => {

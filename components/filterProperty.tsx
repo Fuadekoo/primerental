@@ -79,7 +79,7 @@ export default function FilterProperty({
   if (!isOpen) return null;
 
   const pick = (key: keyof FormValues, val: string) => {
-    setValue(key, ((values as any)[key] ?? "") === val ? "" : val, {
+    setValue(key, (values[key] ?? "") === val ? "" : val, {
       shouldValidate: true,
       shouldDirty: true,
     });

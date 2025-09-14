@@ -1,5 +1,12 @@
 import type { MetadataRoute } from "next";
 
+export const dynamic = "force-static";
+
+export const revalidate = false;
+
+// 👇 This disables i18n prefixing for this route
+export const dynamicParams = false;
+
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Prime Rental",

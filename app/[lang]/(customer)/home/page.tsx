@@ -13,9 +13,8 @@ import {
   Car,
   Building2,
   X,
-  Loader2,
 } from "lucide-react";
-import { addToast } from "@heroui/toast";
+// import { addToast } from "@heroui/toast";
 import useAction from "@/hooks/useActions";
 import {
   getPromotion,
@@ -23,14 +22,14 @@ import {
   categoryListHouse,
   specialOffers,
 } from "@/actions/customer/home";
-import { filterProperties } from "@/actions/customer/filter";
+// import { filterProperties } from "@/actions/customer/filter";
 import Link from "next/link";
 import ProductPerCategoryId from "@/components/productper-catagoryid";
 import FilteredComponent, { FilterInput } from "@/components/filteredComponent";
 import FilterProperty, { FilterValues } from "@/components/filterProperty";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import { filterSchema } from "@/lib/zodSchema";
+// import { filterSchema } from "@/lib/zodSchema";
 
 // i18n strings
 const translations = {
@@ -94,7 +93,7 @@ const translations = {
   },
 } as const;
 
-type TDict = (typeof translations)[keyof typeof translations];
+// type TDict = (typeof translations)[keyof typeof translations];
 
 // --- Reusable Components ---
 
@@ -473,7 +472,7 @@ function Page() {
         <FilterProperty
           isOpen={isFilterOpen}
           onClose={() => setIsFilterOpen(false)}
-          categories={(categoryData || []).map((c: any) => ({
+          categories={(categoryData || []).map((c) => ({
             id: c.id,
             name: c.name,
           }))}

@@ -17,6 +17,7 @@ function isInstalled(): boolean {
     "(display-mode: standalone)"
   ).matches;
   // iOS Safari
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const iosStandalone = (window as any).navigator?.standalone === true;
   const stored = localStorage.getItem("pwa_installed") === "1";
   return Boolean(standaloneMq || iosStandalone || stored);

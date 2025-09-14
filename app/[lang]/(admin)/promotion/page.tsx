@@ -35,7 +35,7 @@ interface PromotionItem {
   createdAt?: string;
 }
 
-interface ColumnDef<T = Record<string, any>> {
+interface ColumnDef<T = Record<string, string>> {
   key: string;
   label: string;
   renderCell?: (item: T) => React.ReactNode;
@@ -297,12 +297,12 @@ function Page() {
     return `/api/filedata/${encodeURIComponent(url)}`;
   };
 
-  const rows = (promotionData?.data || []).map((item: any) => ({
+  const rows = (promotionData?.data || []).map((item) => ({
     ...item,
     description: item.description ?? undefined,
     key: item.id,
   }));
-
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const columns: ColumnDef<Record<string, any>>[] = [
     {
       key: "autoId",

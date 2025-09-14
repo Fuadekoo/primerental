@@ -12,11 +12,11 @@ type ErrorPageProps = {
 export default function Error({ error, reset }: ErrorPageProps) {
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    // Log the error for debugging in the console
-    // eslint-disable-next-line no-console
-    console.error(error);
-  }, [error]);
+  // useEffect(() => {
+  //   // Log the error for debugging in the console
+  //   // eslint-disable-next-line no-console
+  //   console.error(error);
+  // }, []);
 
   const errorText = useMemo(() => {
     const parts = [

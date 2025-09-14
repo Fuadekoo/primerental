@@ -12,7 +12,7 @@ import { z } from "zod";
 import { filterSchema } from "@/lib/zodSchema";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Plus, Trash2, X } from "lucide-react";
+// import { Loader2, Plus, Trash2, X } from "lucide-react";
 
 // Shape of the filters you pass into this component
 export interface FilterInput {
@@ -97,11 +97,11 @@ function FilteredComponent({
       bedroom: applied.bedroom ?? undefined,
       bathroom: applied.bathroom ?? undefined,
     } as const;
-    setSaved(exists(normalized as any));
+    setSaved(exists(normalized));
   }, [applied, exists]);
 
   const list = Array.isArray(results) ? results : [];
-  const filtered = list.filter((item: any) => {
+  const filtered = list.filter((item) => {
     const q = search.trim().toLowerCase();
     if (!q) return true;
     const title = String(item?.title || "").toLowerCase();
@@ -120,7 +120,7 @@ function FilteredComponent({
     handleSubmit,
     register,
     reset,
-    setValue,
+    // setValue,
     watch,
     formState: { errors, isSubmitting },
   } = useForm<z.infer<typeof filterSchema>>({
@@ -143,10 +143,10 @@ function FilteredComponent({
     const next: FilterInput = {
       property_type: data.propertyType || undefined,
       offer_type: data.offerType || undefined,
-      minPrice: (data.minPrice as any) ?? undefined,
-      maxPrice: (data.maxPrice as any) ?? undefined,
-      bedroom: (data.bedroom as any) ?? undefined,
-      bathroom: (data.bathroom as any) ?? undefined,
+      minPrice: data.minPrice ?? undefined,
+      maxPrice: data.maxPrice ?? undefined,
+      bedroom: data.bedroom ?? undefined,
+      bathroom: data.bathroom ?? undefined,
     };
     // Clean undefined/empty
     const cleaned = Object.fromEntries(
@@ -166,7 +166,7 @@ function FilteredComponent({
       bedroom: filters.bedroom ?? undefined,
       bathroom: filters.bathroom ?? undefined,
     } as const;
-    saveSearch(normalized as any);
+    saveSearch(normalized);
     setSaved(true);
   };
 
@@ -295,7 +295,7 @@ function FilteredComponent({
             </div>
           ) : hasResults ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {filtered.map((item: any) => (
+              {filtered.map((item) => (
                 <div
                   key={item.id}
                   className="flex gap-4 rounded-lg bg-white p-3 shadow-sm border border-slate-200/70"

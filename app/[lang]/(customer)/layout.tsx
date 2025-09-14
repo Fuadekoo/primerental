@@ -1,12 +1,11 @@
 "use client";
 import React, { useEffect } from "react";
-import { guestAuth } from "@/actions/common/authentication";
+// import { guestAuth } from "@/actions/common/authentication";
 import UserLayout from "@/components/userLayout";
 import useGuestSession from "@/hooks/useGuestSession";
-import { redirect, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import {
   Home,
-  User,
   ShoppingBasket,
   Settings,
   Heart,

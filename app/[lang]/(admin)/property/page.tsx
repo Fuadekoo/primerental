@@ -23,10 +23,11 @@ import Image from "next/image";
 // Type definitions
 interface PropertyItem {
   id: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
-
-interface ColumnDef<T = Record<string, any>> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+interface ColumnDef<T = Record<string, string>> {
   key: string;
   label: string;
   renderCell?: (item: T) => React.ReactNode;
@@ -408,11 +409,12 @@ function PropertyPage() {
     ...item,
     key: item.id,
   }));
-
-  const columns: ColumnDef<Record<string, any>>[] = [
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const columns: ColumnDef<Record<string, string>>[] = [
     {
       key: "images",
       label: "Image",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       renderCell: (item: Record<string, any>) => {
         const imageUrl = formatImageUrl(item.images?.[0]);
         return (
@@ -439,7 +441,7 @@ function PropertyPage() {
     {
       key: "price",
       label: "Price",
-      renderCell: (item: Record<string, any>) =>
+      renderCell: (item: Record<string, string>) =>
         `${item.price} ${item.currency}`,
     },
     { key: "location", label: "Location" },
@@ -447,7 +449,7 @@ function PropertyPage() {
     {
       key: "actions",
       label: "Actions",
-      renderCell: (item: Record<string, any>) => (
+      renderCell: (item: Record<string, string>) => (
         <div className="flex items-center gap-2">
           <Button
             size="sm"
@@ -793,7 +795,8 @@ const InputField = ({
   placeholder,
   isTextArea = false,
   ...props
-}: any) => (
+}: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+any) => (
   <div>
     <label htmlFor={props.name} className="block mb-1 text-sm font-medium">
       {label}
@@ -830,7 +833,8 @@ const SelectField = ({
   errors,
   disabled,
   isLoading,
-}: any) => (
+}: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+any) => (
   <div>
     <label className="block mb-1 text-sm font-medium">{label}</label>
     <Controller
@@ -842,6 +846,7 @@ const SelectField = ({
           options={options}
           isDisabled={disabled}
           isLoading={isLoading}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           value={options.find((c: any) => c.value === field.value) || null}
           onChange={(val) => field.onChange(val ? val.value : null)}
           styles={{
