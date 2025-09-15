@@ -8,7 +8,7 @@ import {
   DropdownTrigger,
 } from "@heroui/react";
 import { LogOutIcon, UserIcon } from "lucide-react";
-import { AlignLeft, ChevronLeft, ChevronRight, WifiOff } from "lucide-react";
+import { AlignLeft, WifiOff, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
@@ -21,6 +21,8 @@ import ClientSocketConnected from "./ClientSocketConnected";
 import useAction from "@/hooks/useActions";
 import { getLoginUserId } from "@/actions/common/chat";
 import InstallPrompt from "./InstallPrompt";
+import { Sun, Moon } from "lucide-react";
+import { useTheme } from "next-themes";
 
 export default function UserLayout({
   children,
@@ -211,36 +213,48 @@ function Sidebar({
           sidebar ? "max-xl:lg:w-64 w-72" : "max-xl:lg:w-14 w-20"
         )}
       >
+        {/* Sidebar toggle button with both icons in a larger circle */}
         <Button
           isIconOnly
           variant="ghost"
           color="primary"
           size="sm"
           radius="full"
-          className="max-lg:hidden z-[100] absolute top-8 -right-3.5 bg-white/80 dark:bg-neutral-900 border border-slate-200 dark:border-neutral-700 shadow"
+          className="z-[100] absolute top-8 -right-5 w-11 h-11 flex items-center justify-center bg-white/80 dark:bg-neutral-900 border border-slate-200 dark:border-neutral-700 shadow"
           onPress={() => setSidebar((prev) => !prev)}
         >
-          {sidebar ? (
-            <ChevronLeft className="size-4" />
-          ) : (
-            <ChevronRight className="size-4" />
-          )}
+          <span className="relative w-full h-full flex items-center justify-center">
+            <AlignLeft
+              className={`size-4 absolute transition-opacity duration-200 ${
+                sidebar ? "opacity-0" : "opacity-100"
+              }`}
+            />
+            <X
+              className={`size-4 absolute transition-opacity duration-200 ${
+                sidebar ? "opacity-100" : "opacity-0"
+              }`}
+            />
+          </span>
         </Button>
 
-        <div className=" bg-red-400 flex items-center gap-3 px-5 pt-3 pb-2 mb-4">
+        <div className=" bg-gray-200 dark:bg-gray-700 flex items-center gap-3 px-5 pt-3 pb-2 mb-4">
           <Image
             src="/logo_with_bg.png"
-            alt="Prime FUAD"
+            alt="Prime"
             width={80}
             height={80}
+            loading="lazy"
             className="rounded-full ring-1 ring-slate-200 dark:ring-neutral-800"
           />
           {sidebar && (
-            <span className="font-bold text-lg text-primary-700 dark:text-primary-300 whitespace-nowrap">
+            <Link
+              href={`/${lang}/login`}
+              className="font-bold text-lg text-primary-700 dark:text-primary-300 whitespace-nowrap"
+            >
               PRIME
               <br />
               RENTAL
-            </span>
+            </Link>
           )}
         </div>
 
@@ -347,9 +361,36 @@ function Header({
         <div className="flex items-center gap-2">
           {isManager ? <AdminSocketConnected /> : <ClientSocketConnected />}
           {isManager ? <NotificationBell /> : <CustomerNotificationHandler />}
+          <ThemeSwitcher />
         </div>
       </div>
     </header>
+  );
+}
+
+// --- Theme Switcher Component ---
+function ThemeSwitcher() {
+  const [mounted, setMounted] = useState(false);
+  const { theme, setTheme } = useTheme();
+
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted) return null;
+
+  const isDark = theme === "dark";
+
+  return (
+    <button
+      aria-label="Toggle theme"
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+      className="ml-2 rounded-full p-2 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+    >
+      {isDark ? (
+        <Sun className="h-5 w-5 text-yellow-400" />
+      ) : (
+        <Moon className="h-5 w-5 text-gray-700 dark:text-gray-200" />
+      )}
+    </button>
   );
 }
 

@@ -142,16 +142,16 @@ function Page() {
   ]);
 
   return (
-    <div className="relative flex min-h-dvh w-full items-center justify-center overflow-hidden bg-gradient-to-br from-violet-50 via-white to-sky-50 p-4">
+    <div className="relative flex min-h-dvh w-full items-center justify-center overflow-hidden bg-gradient-to-br from-violet-50 via-white to-sky-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 p-4 transition-colors">
       <LanguageSelector />
       {/* Decorative blobs */}
-      <div className="pointer-events-none absolute -left-48 -top-48 h-[32rem] w-[32rem] rounded-full bg-violet-200/40 blur-3xl" />
-      <div className="pointer-events-none absolute -right-48 -bottom-48 h-[32rem] w-[32rem] rounded-full bg-sky-200/40 blur-3xl" />
+      <div className="pointer-events-none absolute -left-48 -top-48 h-[32rem] w-[32rem] rounded-full bg-violet-200/40 blur-3xl dark:bg-violet-900/30" />
+      <div className="pointer-events-none absolute -right-48 -bottom-48 h-[32rem] w-[32rem] rounded-full bg-sky-200/40 blur-3xl dark:bg-sky-900/30" />
 
       <div className="relative w-full max-w-4xl">
-        <div className="grid overflow-hidden rounded-2xl border border-white/60 bg-white/60 shadow-xl backdrop-blur-lg lg:grid-cols-2">
+        <div className="grid overflow-hidden rounded-2xl border border-white/60 bg-white/60 shadow-xl backdrop-blur-lg lg:grid-cols-2 dark:border-slate-800 dark:bg-slate-900/70">
           {/* Visual / Messaging Panel */}
-          <div className="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-violet-300 to-sky-300 p-8 lg:flex">
+          <div className="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-violet-300 to-sky-300 p-8 lg:flex dark:from-violet-900 dark:to-sky-900">
             <Image
               src="/logo.png"
               alt="Primerental Illustration"
@@ -169,11 +169,11 @@ function Page() {
                   height={40}
                   className="rounded-lg"
                 />
-                <span className="text-lg font-bold text-white">
+                <span className="text-lg font-bold text-white drop-shadow">
                   PRIMERENTAL
                 </span>
               </div>
-              <h2 className="mt-8 text-3xl font-extrabold leading-tight text-white">
+              <h2 className="mt-8 text-3xl font-extrabold leading-tight text-white drop-shadow">
                 {t.tagline}
               </h2>
               <p className="mt-3 text-white/80">{t.description}</p>
@@ -184,13 +184,13 @@ function Page() {
           </div>
 
           {/* Form Panel */}
-          <div className="flex flex-col justify-center p-8 sm:p-12">
+          <div className="flex flex-col justify-center p-8 sm:p-12 bg-white/80 dark:bg-slate-900/80 transition-colors">
             <div className="w-full">
               <div className="mb-6 text-center lg:text-left">
-                <h1 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">
                   {t.welcomeBack}
                 </h1>
-                <p className="mt-1 text-sm text-gray-600">
+                <p className="mt-1 text-sm text-gray-600 dark:text-slate-400">
                   {t.signInToContinue}
                 </p>
               </div>
@@ -202,7 +202,7 @@ function Page() {
                 <div>
                   <label
                     htmlFor="email"
-                    className="mb-1.5 block text-sm font-medium text-gray-700"
+                    className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-slate-200"
                   >
                     {t.emailOrPhoneLabel}
                   </label>
@@ -225,7 +225,7 @@ function Page() {
                   <div className="mb-1.5 flex items-center justify-between">
                     <label
                       htmlFor="password"
-                      className="text-sm font-medium text-gray-700"
+                      className="text-sm font-medium text-gray-700 dark:text-slate-200"
                     >
                       {t.passwordLabel}
                     </label>
