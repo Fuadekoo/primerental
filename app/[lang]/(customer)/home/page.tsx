@@ -280,12 +280,12 @@ function Page() {
         <div className="mb-6 ">
           <div className="flex items-center justify-between px-1 mb-3">
             <h2 className="text-xl font-bold">{t.specialOffers}</h2>
-            <Link
+            {/* <Link
               href={`/${currentLang}/offers`}
               className="text-sm font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
             >
               {t.viewAll}
-            </Link>
+            </Link> */}
           </div>
           <div className="flex gap-4 overflow-x-auto pb-2  [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {isLoadingSpecialOffers
@@ -330,12 +330,12 @@ function Page() {
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2 px-1">
             <h2 className="text-xl font-bold">{t.exploreByType}</h2>
-            <Link
+            {/* <Link
               href={`/${currentLang}/categories`}
               className="text-sm font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
             >
               {t.viewAll}
-            </Link>
+            </Link> */}
           </div>
           <div className="flex gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {isLoadingCategory
@@ -377,29 +377,29 @@ function Page() {
         <div>
           <div className="flex items-center justify-between px-1 mb-3">
             <h2 className="text-xl font-bold">{t.listOfProperties}</h2>
-            <Link
+            {/* <Link
               href={`/${currentLang}/properties`}
               className="text-sm font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
             >
               {t.seeAll}
-            </Link>
+            </Link> */}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {isLoadingAllHouse ? (
               Array.from({ length: 4 }).map((_, i) => (
                 <div
                   key={i}
-                  className="flex gap-4 rounded-lg bg-white p-3 shadow-sm"
+                  className="flex gap-4 rounded-lg bg-white dark:bg-neutral-900 p-3 shadow-sm"
                 >
-                  <SkeletonLoader className="h-32 w-28 flex-shrink-0 rounded-md" />
+                  <SkeletonLoader className="h-32 w-28 flex-shrink-0 rounded-md dark:bg-slate-800" />
                   <div className="flex-grow space-y-2">
-                    <SkeletonLoader className="h-5 w-3/4" />
-                    <SkeletonLoader className="h-4 w-1/2" />
-                    <SkeletonLoader className="h-4 w-full" />
-                    <SkeletonLoader className="h-4 w-2/3" />
+                    <SkeletonLoader className="h-5 w-3/4 dark:bg-slate-800" />
+                    <SkeletonLoader className="h-4 w-1/2 dark:bg-slate-800" />
+                    <SkeletonLoader className="h-4 w-full dark:bg-slate-800" />
+                    <SkeletonLoader className="h-4 w-2/3 dark:bg-slate-800" />
                     <div className="flex justify-between pt-2">
-                      <SkeletonLoader className="h-4 w-1/4" />
-                      <SkeletonLoader className="h-6 w-1/3" />
+                      <SkeletonLoader className="h-4 w-1/4 dark:bg-slate-800" />
+                      <SkeletonLoader className="h-6 w-1/3 dark:bg-slate-800" />
                     </div>
                   </div>
                 </div>

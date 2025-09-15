@@ -12,7 +12,7 @@ import { z } from "zod";
 import { filterSchema } from "@/lib/zodSchema";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-// import { Loader2, Plus, Trash2, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 // Shape of the filters you pass into this component
 export interface FilterInput {
@@ -170,19 +170,23 @@ function FilteredComponent({
     setSaved(true);
   };
 
+  const router = useRouter();
+
   return (
-    <div className="bg-gray-50 min-h-screen p-4 sm:p-6 lg:p-8">
+    <div className="h-full bg-gray-50 dark:bg-slate-950 p-4 sm:p-6 lg:p-8 transition-colors">
       <div className="mx-auto max-w-4xl">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center justify-between gap-3">
-            <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-slate-100">
+              {title}
+            </h1>
             <button
               type="button"
               onClick={handleSaveSearch}
               disabled={saved}
               aria-pressed={saved}
-              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-medium text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 disabled:opacity-60"
               aria-label="Save search"
               title={saved ? "Saved to My Searches" : "Save this search"}
             >
@@ -199,19 +203,21 @@ function FilteredComponent({
               )}
             </button>
           </div>
-          <p className="mt-1 text-gray-600">Results based on your filters.</p>
+          <p className="mt-1 text-gray-600 dark:text-slate-400">
+            Results based on your filters.
+          </p>
         </div>
 
         {/* Search Bar (only show if there are results) */}
         {hasResults && (
           <div className="relative mb-6">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-slate-500" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search in results..."
-              className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="w-full rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 py-2.5 pl-10 pr-4 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400 dark:text-slate-100"
             />
           </div>
         )}
@@ -219,14 +225,17 @@ function FilteredComponent({
         {/* Filter Form */}
         <form
           onSubmit={onApply}
-          className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white p-3 rounded-lg border border-slate-200"
+          className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white dark:bg-slate-900 p-3 rounded-lg border border-slate-200 dark:border-slate-700 transition-colors"
         >
           <input
             placeholder="Property type"
-            className="rounded border p-2"
+            className="rounded border p-2 bg-white dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-gray-900 dark:text-slate-100"
             {...register("propertyType")}
           />
-          <select className="rounded border p-2" {...register("offerType")}>
+          <select
+            className="rounded border p-2 bg-white dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-gray-900 dark:text-slate-100"
+            {...register("offerType")}
+          >
             <option value="">Any offer</option>
             <option value="SALE">Sale</option>
             <option value="RENT">Rent</option>
@@ -234,31 +243,31 @@ function FilteredComponent({
           <input
             type="number"
             placeholder="Min price"
-            className="rounded border p-2"
+            className="rounded border p-2 bg-white dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-gray-900 dark:text-slate-100"
             {...register("minPrice", { valueAsNumber: true })}
           />
           <input
             type="number"
             placeholder="Max price"
-            className="rounded border p-2"
+            className="rounded border p-2 bg-white dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-gray-900 dark:text-slate-100"
             {...register("maxPrice", { valueAsNumber: true })}
           />
           <input
             type="number"
             placeholder="Bedrooms"
-            className="rounded border p-2"
+            className="rounded border p-2 bg-white dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-gray-900 dark:text-slate-100"
             {...register("bedroom", { valueAsNumber: true })}
           />
           <input
             type="number"
             placeholder="Bathrooms"
-            className="rounded border p-2"
+            className="rounded border p-2 bg-white dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-gray-900 dark:text-slate-100"
             {...register("bathroom", { valueAsNumber: true })}
           />
           <div className="sm:col-span-2 flex justify-end gap-2">
             <button
               type="button"
-              className="px-3 py-2 rounded border"
+              className="px-3 py-2 rounded border bg-white dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-gray-700 dark:text-slate-200"
               onClick={() => {
                 reset();
                 setApplied(normalize(filters));
@@ -268,7 +277,7 @@ function FilteredComponent({
             </button>
             <button
               type="submit"
-              className="px-3 py-2 rounded bg-blue-600 text-white"
+              className="px-3 py-2 rounded bg-blue-600 text-white dark:bg-blue-700"
             >
               Apply
             </button>
@@ -282,13 +291,13 @@ function FilteredComponent({
               {Array.from({ length: 6 }).map((_, i) => (
                 <div
                   key={i}
-                  className="flex gap-4 rounded-lg bg-white p-3 shadow-sm"
+                  className="flex gap-4 rounded-lg bg-white dark:bg-slate-900 p-3 shadow-sm"
                 >
-                  <div className="h-24 w-28 bg-gray-200 rounded-md animate-pulse" />
+                  <div className="h-24 w-28 bg-gray-200 dark:bg-slate-800 rounded-md animate-pulse" />
                   <div className="flex-grow space-y-2">
-                    <div className="h-5 w-3/4 bg-gray-200 rounded animate-pulse" />
-                    <div className="h-4 w-1/2 bg-gray-200 rounded animate-pulse" />
-                    <div className="h-4 w-full bg-gray-200 rounded animate-pulse" />
+                    <div className="h-5 w-3/4 bg-gray-200 dark:bg-slate-800 rounded animate-pulse" />
+                    <div className="h-4 w-1/2 bg-gray-200 dark:bg-slate-800 rounded animate-pulse" />
+                    <div className="h-4 w-full bg-gray-200 dark:bg-slate-800 rounded animate-pulse" />
                   </div>
                 </div>
               ))}
@@ -298,18 +307,24 @@ function FilteredComponent({
               {filtered.map((item) => (
                 <div
                   key={item.id}
-                  className="flex gap-4 rounded-lg bg-white p-3 shadow-sm border border-slate-200/70"
+                  className="flex gap-4 rounded-lg bg-white dark:bg-slate-900 p-3 shadow-sm border border-slate-200/70 dark:border-slate-700 cursor-pointer hover:ring-2 hover:ring-blue-400/60 transition"
+                  onClick={() => item.id && router.push(`/property/${item.id}`)}
+                  tabIndex={0}
+                  role="button"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      item.id && router.push(`/property/${item.id}`);
+                    }
+                  }}
                 >
-                  <div className="h-24 w-28 flex-shrink-0 rounded-md overflow-hidden bg-gray-100">
-                    {Array.isArray(item.images) && item.images[0] ? (
-                      <Image
-                        src={formatImageUrl(item.images[0])}
-                        alt={item.title || "Property"}
-                        width={112}
-                        height={96}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : null}
+                  <div className="h-24 w-28 flex-shrink-0 rounded-md overflow-hidden bg-gray-100 dark:bg-slate-800">
+                    <Image
+                      src={formatImageUrl(item?.images?.[0])}
+                      alt={item.title || "Property image"}
+                      width={112}
+                      height={96}
+                      className="object-cover h-24 w-28"
+                    />
                   </div>
                   <div className="flex flex-col flex-grow">
                     <h3 className="font-bold text-gray-800 truncate">
