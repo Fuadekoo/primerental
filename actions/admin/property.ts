@@ -4,10 +4,10 @@ import prisma from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { propertySchema } from "@/lib/zodSchema";
 import { z } from "zod";
-import bcrypt from "bcryptjs";
-import path from "path";
-import fs from "fs/promises";
-import { randomUUID } from "crypto";
+// import bcrypt from "bcryptjs";
+// import path from "path";
+// import fs from "fs/promises";
+// import { randomUUID } from "crypto";
 
 export async function getProperty(
   search?: string,

@@ -6,6 +6,7 @@ export async function allFavorite(propertyIds: string[], search?: string) {
     const houseItems = await prisma.property.findMany({
       include: { propertyType: true },
       where: {
+        isAvailable: true,
         id: {
           in: propertyIds,
         },
