@@ -469,6 +469,7 @@ function PropertyPage() {
     {
       key: "status",
       label: "Status",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       renderCell: (item: Record<string, any>) => {
         const isActive = !!item.isAvailable; // Use isAvailable from backend
         return (
