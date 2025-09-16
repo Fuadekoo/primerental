@@ -6,8 +6,8 @@ import { Search, Save, Check } from "lucide-react";
 import useAction from "@/hooks/useActions";
 import { filterProperties } from "@/actions/customer/filter";
 import { useSavedSearch } from "@/hooks/useSavedSearch";
-import { Button, Input } from "@heroui/react";
-import { addToast } from "@heroui/toast";
+// import { Button, Input } from "@heroui/react";
+// import { addToast } from "@heroui/toast";
 import { z } from "zod";
 import { filterSchema } from "@/lib/zodSchema";
 import { useForm } from "react-hook-form";
@@ -121,8 +121,8 @@ function FilteredComponent({
     register,
     reset,
     // setValue,
-    watch,
-    formState: { errors, isSubmitting },
+    // watch,
+    // formState: { errors, isSubmitting },
   } = useForm<z.infer<typeof filterSchema>>({
     resolver: zodResolver(filterSchema),
     mode: "onChange",

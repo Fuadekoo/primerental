@@ -10,7 +10,7 @@ import {
   FolderOpen,
   X,
 } from "lucide-react";
-import { useParams } from "next/navigation";
+// import { useParams } from "next/navigation";
 import Image from "next/image";
 
 // Helper to format image URLs

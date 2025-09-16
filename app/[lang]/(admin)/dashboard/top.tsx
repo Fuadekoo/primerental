@@ -1,44 +1,44 @@
 "use client";
 import React from "react";
-import Image from "next/image";
-import { Button } from "@heroui/react";
-import { MoreVertical } from "lucide-react";
+// import Image from "next/image";
+// import { Button } from "@heroui/react";
+// import { MoreVertical } from "lucide-react";
 import type { TopTenant } from "@/actions/admin/dashboard";
 
-type Performer = { name: string; email: string; avatar: string };
+// type Performer = { name: string; email: string; avatar: string };
 
-const performers: Performer[] = [
-  {
-    name: "Rainer Brown",
-    email: "rainer.b@example.com",
-    avatar: "/avatars/01.png",
-  },
-  {
-    name: "Alex Sullivan",
-    email: "alex.s@example.com",
-    avatar: "/avatars/02.png",
-  },
-  {
-    name: "Conny Rany",
-    email: "conny.r@example.com",
-    avatar: "/avatars/03.png",
-  },
-  {
-    name: "Lily Alexa",
-    email: "lily.a@example.com",
-    avatar: "/avatars/04.png",
-  },
-  {
-    name: "Armin Falcon",
-    email: "armin.f@example.com",
-    avatar: "/avatars/05.png",
-  },
-  {
-    name: "Agatha Smith",
-    email: "agatha.s@example.com",
-    avatar: "/avatars/01.png",
-  },
-];
+// const performers: Performer[] = [
+//   {
+//     name: "Rainer Brown",
+//     email: "rainer.b@example.com",
+//     avatar: "/avatars/01.png",
+//   },
+//   {
+//     name: "Alex Sullivan",
+//     email: "alex.s@example.com",
+//     avatar: "/avatars/02.png",
+//   },
+//   {
+//     name: "Conny Rany",
+//     email: "conny.r@example.com",
+//     avatar: "/avatars/03.png",
+//   },
+//   {
+//     name: "Lily Alexa",
+//     email: "lily.a@example.com",
+//     avatar: "/avatars/04.png",
+//   },
+//   {
+//     name: "Armin Falcon",
+//     email: "armin.f@example.com",
+//     avatar: "/avatars/05.png",
+//   },
+//   {
+//     name: "Agatha Smith",
+//     email: "agatha.s@example.com",
+//     avatar: "/avatars/01.png",
+//   },
+// ];
 
 // const TopPerformers = ({ t }: { t: Record<string, string> }) => (
 //   <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
