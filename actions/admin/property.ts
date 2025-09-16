@@ -55,6 +55,7 @@ export async function getProperty(
         discount: true,
         currency: true,
         images: true,
+        isAvailable: true,
         description: true,
         createdAt: true,
         propertyType: { select: { name: true } },
@@ -191,6 +192,7 @@ export async function changeAvailabilityProperty(
       where: { id: propertyId },
       data: { isAvailable: status },
     });
+    console.log("Property availability updated successfully.>>>>to", status);
     return { message: "Property availability updated successfully." };
   } catch (error) {
     return { message: `error` };

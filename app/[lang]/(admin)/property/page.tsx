@@ -6,6 +6,7 @@ import {
   deleteProperty,
   getProperty,
   updateProperty,
+  changeAvailabilityProperty,
 } from "@/actions/admin/property";
 import { getPropertyType } from "@/actions/admin/propertyType";
 import CustomTable from "@/components/custom-table";
@@ -63,13 +64,18 @@ const PropertyCard = ({
   onEdit,
   onDelete,
   isDeleting,
+  onToggleStatus,
+  isTogglingStatus,
 }: {
   item: PropertyItem;
   onEdit: (item: PropertyItem) => void;
   onDelete: (id: string) => void;
   isDeleting: boolean;
+  onToggleStatus: (id: string, status: boolean) => void;
+  isTogglingStatus: boolean;
 }) => {
   const imageUrl = formatImageUrl(item.images?.[0]);
+  const isActive = !!item.isAvailable; // Use isAvailable from backend
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden border border-gray-200 dark:border-gray-700 transition-transform hover:scale-105">
@@ -105,6 +111,15 @@ const PropertyCard = ({
           {item.price} {item.currency}
         </p>
         <div className="flex items-center justify-end gap-2 mt-4">
+          <Button
+            size="sm"
+            variant="flat"
+            color={isActive ? "success" : "warning"}
+            onPress={() => onToggleStatus(item.id, !isActive)}
+            isLoading={isTogglingStatus}
+          >
+            {isActive ? "Active" : "Inactive"}
+          </Button>
           <Button
             size="sm"
             color="primary"
@@ -240,6 +255,11 @@ function PropertyPage() {
     ,
     (res) => handleActionCompletion(res, res?.message, refreshProperties),
   ]);
+
+  const [, executeChangeAvailability, isLoadingChangeAvailability] = useAction(
+    changeAvailabilityProperty,
+    [, (res) => handleActionCompletion(res, res?.message, refreshProperties)]
+  );
 
   const [, executeUpdate, isLoadingUpdate] = useAction(updateProperty, [
     ,
@@ -447,6 +467,26 @@ function PropertyPage() {
     { key: "location", label: "Location" },
     { key: "quantity", label: "Quantity" },
     {
+      key: "status",
+      label: "Status",
+      renderCell: (item: Record<string, any>) => {
+        const isActive = !!item.isAvailable; // Use isAvailable from backend
+        return (
+          <Button
+            size="sm"
+            variant="flat"
+            color={isActive ? "success" : "warning"}
+            onPress={() => handleToggleStatus(item.id, !isActive)}
+            isLoading={
+              pendingToggleId === item.id && isLoadingChangeAvailability
+            }
+          >
+            {isActive ? "Active" : "Inactive"}
+          </Button>
+        );
+      },
+    },
+    {
       key: "actions",
       label: "Actions",
       renderCell: (item: Record<string, string>) => (
@@ -472,6 +512,20 @@ function PropertyPage() {
       ),
     },
   ];
+
+  // State for toggling property status
+  const [pendingToggleId, setPendingToggleId] = useState<string | null>(null);
+
+  // Handler for toggling property status (active/inactive)
+  const handleToggleStatus = async (id: string, nextActive: boolean) => {
+    setPendingToggleId(id);
+    try {
+      await executeChangeAvailability(id, nextActive); // pass true for active, false for inactive
+      refreshProperties();
+    } finally {
+      setPendingToggleId(null);
+    }
+  };
 
   const disableSubmit =
     isLoadingCreate || isLoadingUpdate || isSubmitting || isUploading;
@@ -537,6 +591,10 @@ function PropertyPage() {
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 isDeleting={pendingDeleteId === item.id && isLoadingDelete}
+                onToggleStatus={handleToggleStatus}
+                isTogglingStatus={
+                  pendingToggleId === item.id && isLoadingChangeAvailability
+                }
               />
             ))}
         </div>
