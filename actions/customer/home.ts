@@ -24,7 +24,7 @@ export async function categoryListHouse() {
 export async function specialOffers() {
   try {
     const offers = await prisma.property.findMany({
-      where: { discount: { gt: 0 } },
+      where: { discount: { gt: 0 }, isAvailable: true },
       include: { propertyType: true },
       // take: 4,
     });
@@ -53,11 +53,13 @@ export async function allHouse(search?: string) {
     const houseItems = await prisma.property.findMany({
       include: { propertyType: true },
       where: {
+        isAvailable: true,
         title: {
           contains: search,
           // mode: "insensitive",
         },
       },
+      orderBy: { createdAt: "desc" },
     });
     return houseItems;
   } catch (error) {
@@ -70,8 +72,9 @@ export async function allHouse(search?: string) {
 export async function listPropertyByCategory(categoryId: string) {
   try {
     const properties = await prisma.property.findMany({
-      where: { propertyTypeId: categoryId },
+      where: { propertyTypeId: categoryId, isAvailable: true },
       include: { propertyType: true },
+      orderBy: { createdAt: "desc" },
     });
     return properties;
   } catch (error) {
