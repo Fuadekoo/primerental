@@ -42,19 +42,81 @@ export default function RootLayout({
       <head>
         {/* Global font theme classes */}
         <style>{`
-          /* Theme 1: Dancing Script */
+          /* Theme 1: Times New Roman (system) */
           .font-theme-1, .font-theme-1 body {
-            font-family: var(--font-dancing), cursive !important;
-          }
-          /* Theme 2: Times New Roman (system) */
-          .font-theme-2, .font-theme-2 body {
             font-family: "Times New Roman", Times, serif !important;
+          }
+          /* Theme 2: Dancing Script */
+          .font-theme-2, .font-theme-2 body {
+            font-family: var(--font-dancing), cursive !important;
           }
           /* Theme 3: Arial (system) */
           .font-theme-3, .font-theme-3 body {
             font-family: Arial, Helvetica, sans-serif !important;
           }
         `}</style>
+        {/* --- Open Graph Meta Tags --- */}
+        <meta
+          property="og:title"
+          content="Prime Rental - House Sell & Rent in Ethiopia"
+        />
+        <meta
+          property="og:description"
+          content="Buy, sell, and rent houses in Ethiopia. Prime Rental is your comprehensive property management platform to streamline your real estate business."
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://primerental.et" />
+        <meta property="og:image" content="https://primerental.com/logo.jpg" />
+        {/* --- Twitter Card Meta Tags --- */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content="Prime Rental - House Sell & Rent in Ethiopia"
+        />
+        <meta
+          name="twitter:description"
+          content="Buy, sell, and rent houses in Ethiopia. Prime Rental is your comprehensive property management platform to streamline your real estate business."
+        />
+        <meta name="twitter:image" content="https://primerental.com/logo.jpg" />
+        {/* --- Telegram Card Meta Tags (unofficial, for link previews) --- */}
+        <meta
+          name="telegram:title"
+          content="Prime Rental - House Sell & Rent in Ethiopia"
+        />
+        <meta
+          name="telegram:description"
+          content="Buy, sell, and rent houses in Ethiopia. Prime Rental is your comprehensive property management platform to streamline your real estate business."
+        />
+        <meta
+          name="telegram:image"
+          content="https://primerental.com/logo.jpg"
+        />
+        {/* --- WhatsApp Card Meta Tags (unofficial, uses og tags but can add for clarity) --- */}
+        <meta
+          name="whatsapp:title"
+          content="Prime Rental - House Sell & Rent in Ethiopia"
+        />
+        <meta
+          name="whatsapp:description"
+          content="Buy, sell, and rent houses in Ethiopia. Prime Rental is your comprehensive property management platform to streamline your real estate business."
+        />
+        <meta
+          name="whatsapp:image"
+          content="https://primerental.com/logo.jpg"
+        />
+        {/* --- Instagram Card Meta Tags (unofficial, for link previews) --- */}
+        <meta
+          name="instagram:title"
+          content="Prime Rental - House Sell & Rent in Ethiopia"
+        />
+        <meta
+          name="instagram:description"
+          content="Buy, sell, and rent houses in Ethiopia. Prime Rental is your comprehensive property management platform to streamline your real estate business."
+        />
+        <meta
+          name="instagram:image"
+          content="https://primerental.com/logo.jpg"
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${dancingScript.variable} antialiased`}
