@@ -88,12 +88,121 @@ const SkeletonLoader = ({ className }: { className?: string }) => (
   />
 );
 
-// const DetailRow = ({ label, value }: { label: string; value: string }) => (
-//   <div className="flex justify-between items-center py-3 border-b border-gray-100">
-//     <span className="text-sm text-gray-500">{label}</span>
-//     <span className="font-semibold text-gray-800">{value}</span>
-//   </div>
-// );
+// --- Popup Modal for Images ---
+type ImageModalProps = {
+  open: boolean;
+  onClose: () => void;
+  images: string[];
+  youtubeLink?: string;
+  initialIndex: number;
+  t: TDict;
+};
+
+const ImageModal: React.FC<ImageModalProps> = ({
+  open,
+  onClose,
+  images,
+  youtubeLink,
+  initialIndex,
+  t,
+}) => {
+  const [current, setCurrent] = useState(initialIndex);
+
+  const embedUrl = (() => {
+    if (!youtubeLink) return null;
+    const videoIdMatch =
+      youtubeLink.match(/(?:v=|\/embed\/|\/)([\w-]{11})(?:\?|&|$)/) ||
+      youtubeLink.match(/(?:youtu\.be\/)([\w-]{11})/);
+    return videoIdMatch
+      ? `https://www.youtube.com/embed/${videoIdMatch[1]}`
+      : null;
+  })();
+
+  const mediaItems = [...images, ...(embedUrl ? [embedUrl] : [])];
+
+  useEffect(() => {
+    setCurrent(initialIndex);
+  }, [initialIndex, open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "ArrowRight")
+        setCurrent((c) => (c + 1) % mediaItems.length);
+      if (e.key === "ArrowLeft")
+        setCurrent((c) => (c - 1 + mediaItems.length) % mediaItems.length);
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [open, mediaItems.length, onClose]);
+
+  if (!open) return null;
+
+  return (
+    <>
+      {/* Blurred background overlay */}
+      <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"></div>
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <button
+          className="absolute top-4 right-4 bg-white/80 dark:bg-neutral-900/80 rounded-full p-2 shadow"
+          onClick={onClose}
+          aria-label="Close"
+        >
+          <ChevronRight className="rotate-180 h-6 w-6 text-black dark:text-white" />
+        </button>
+        <button
+          className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/60 dark:bg-neutral-900/60 rounded-full p-2"
+          onClick={() =>
+            setCurrent((c) => (c - 1 + mediaItems.length) % mediaItems.length)
+          }
+          aria-label="Previous"
+        >
+          <ChevronLeft className="h-7 w-7 text-black dark:text-white" />
+        </button>
+        <div className="relative w-[90vw] max-w-2xl h-[60vw] max-h-[80vh] flex items-center justify-center bg-black rounded-lg overflow-hidden">
+          {current < images.length ? (
+            <Image
+              src={`/api/filedata/${images[current]}`}
+              alt={`${t.propertyImage} ${current + 1}`}
+              fill
+              className="object-contain"
+              priority
+            />
+          ) : embedUrl ? (
+            <iframe
+              width="100%"
+              height="100%"
+              src={embedUrl}
+              title={t.youtubeTitle}
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope;"
+              allowFullScreen
+              className="w-full h-full"
+            ></iframe>
+          ) : null}
+        </div>
+        <button
+          className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/60 dark:bg-neutral-900/60 rounded-full p-2"
+          onClick={() => setCurrent((c) => (c + 1) % mediaItems.length)}
+          aria-label="Next"
+        >
+          <ChevronRight className="h-7 w-7 text-black dark:text-white" />
+        </button>
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+          {mediaItems.map((_, idx) => (
+            <div
+              key={idx}
+              className={`h-2 w-2 rounded-full ${
+                idx === current ? "bg-white" : "bg-white/40"
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+    </>
+  );
+};
 
 // --- Media Scroller Component ---
 type MediaScrollerProps = {
@@ -109,6 +218,9 @@ const MediaScroller: React.FC<MediaScrollerProps> = ({
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  // Add modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalIndex, setModalIndex] = useState(0);
 
   const getYouTubeEmbedUrl = (url: string) => {
     if (!url) return null;
@@ -167,7 +279,11 @@ const MediaScroller: React.FC<MediaScrollerProps> = ({
           <div
             key={index}
             data-index={index}
-            className="w-full h-full flex-shrink-0 snap-center relative"
+            className="w-full h-full flex-shrink-0 snap-center relative cursor-pointer"
+            onClick={() => {
+              setModalIndex(index);
+              setModalOpen(true);
+            }}
           >
             <Image
               src={`/api/filedata/${img}`}
@@ -181,7 +297,11 @@ const MediaScroller: React.FC<MediaScrollerProps> = ({
         {embedUrl && (
           <div
             data-index={images.length}
-            className="w-full h-full flex-shrink-0 snap-center object-cover"
+            className="w-full h-full flex-shrink-0 snap-center object-cover cursor-pointer"
+            onClick={() => {
+              setModalIndex(images.length);
+              setModalOpen(true);
+            }}
           >
             <iframe
               width="100%"
@@ -222,6 +342,14 @@ const MediaScroller: React.FC<MediaScrollerProps> = ({
           </div>
         </>
       )}
+      <ImageModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        images={images}
+        youtubeLink={youtubeLink}
+        initialIndex={modalIndex}
+        t={t}
+      />
     </div>
   );
 };
