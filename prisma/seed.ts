@@ -20,9 +20,9 @@ async function main() {
 
   const adminUser = await prisma.user.create({
     data: {
-      name: "Admin User",
-      phone: "0900000000",
-      email: "admin@primerental.com",
+      name: "Natnael Yohannes",
+      phone: "0933571691",
+      email: "natnaelyohannes23@gmail.com",
       password: hashedPasswordAdmin,
       role: Role.ADMIN,
     },
@@ -178,25 +178,25 @@ async function main() {
   console.log("Created more properties.");
 
   // --- Create Chat Messages ---
-  await prisma.chat.create({
-    data: {
-      msg: "Hello, I am interested in the downtown apartment. Is it still available?",
-      fromUserId: regularUser.id,
-      toUserId: adminUser.id,
-      // fromGuestId: guest1.id, // If guest is sender, set this instead
-      // toGuestId: guest1.id,   // If guest is receiver, set this instead
-    },
-  });
+  // await prisma.chat.create({
+  //   data: {
+  //     msg: "Hello, I am interested in the downtown apartment. Is it still available?",
+  //     fromUserId: regularUser.id,
+  //     toUserId: adminUser.id,
+  //     // fromGuestId: guest1.id, // If guest is sender, set this instead
+  //     // toGuestId: guest1.id,   // If guest is receiver, set this instead
+  //   },
+  // });
 
-  await prisma.chat.create({
-    data: {
-      msg: "Hi there! Yes, it is. When would you like to schedule a viewing?",
-      fromUserId: adminUser.id,
-      toUserId: regularUser.id,
-      // fromGuestId: guest1.id,
-      // toGuestId: guest1.id,
-    },
-  });
+  // await prisma.chat.create({
+  //   data: {
+  //     msg: "Hi there! Yes, it is. When would you like to schedule a viewing?",
+  //     fromUserId: adminUser.id,
+  //     toUserId: regularUser.id,
+  //     // fromGuestId: guest1.id,
+  //     // toGuestId: guest1.id,
+  //   },
+  // });
   console.log("Created chat messages.");
 
   console.log("Seeding finished.");
