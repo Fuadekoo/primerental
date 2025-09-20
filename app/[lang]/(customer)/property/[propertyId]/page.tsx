@@ -144,23 +144,26 @@ const ImageModal: React.FC<ImageModalProps> = ({
       {/* Blurred background overlay */}
       <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"></div>
       <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <button
-          className="absolute top-4 right-4 bg-white/80 dark:bg-neutral-900/80 rounded-full p-2 shadow"
-          onClick={onClose}
-          aria-label="Close"
-        >
-          <ChevronRight className="rotate-180 h-6 w-6 text-black dark:text-white" />
-        </button>
-        <button
-          className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/60 dark:bg-neutral-900/60 rounded-full p-2"
-          onClick={() =>
-            setCurrent((c) => (c - 1 + mediaItems.length) % mediaItems.length)
-          }
-          aria-label="Previous"
-        >
-          <ChevronLeft className="h-7 w-7 text-black dark:text-white" />
-        </button>
         <div className="relative w-[90vw] max-w-2xl h-dvh flex items-center justify-center bg-black rounded-lg overflow-hidden">
+          {/* Close button inside the modal, top-right */}
+          <button
+            className="absolute top-4 right-4 z-10 bg-white/80 dark:bg-neutral-900/80 rounded-full p-2 shadow"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            <ChevronRight className="rotate-180 h-6 w-6 text-black dark:text-white" />
+          </button>
+          {/* Previous button */}
+          <button
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/60 dark:bg-neutral-900/60 rounded-full p-2"
+            onClick={() =>
+              setCurrent((c) => (c - 1 + mediaItems.length) % mediaItems.length)
+            }
+            aria-label="Previous"
+          >
+            <ChevronLeft className="h-7 w-7 text-black dark:text-white" />
+          </button>
+          {/* Image or video */}
           {current < images.length ? (
             <Image
               src={`/api/filedata/${images[current]}`}
@@ -181,23 +184,25 @@ const ImageModal: React.FC<ImageModalProps> = ({
               className="w-full h-full"
             ></iframe>
           ) : null}
-        </div>
-        <button
-          className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/60 dark:bg-neutral-900/60 rounded-full p-2"
-          onClick={() => setCurrent((c) => (c + 1) % mediaItems.length)}
-          aria-label="Next"
-        >
-          <ChevronRight className="h-7 w-7 text-black dark:text-white" />
-        </button>
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
-          {mediaItems.map((_, idx) => (
-            <div
-              key={idx}
-              className={`h-2 w-2 rounded-full ${
-                idx === current ? "bg-white" : "bg-white/40"
-              }`}
-            />
-          ))}
+          {/* Next button */}
+          <button
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/60 dark:bg-neutral-900/60 rounded-full p-2"
+            onClick={() => setCurrent((c) => (c + 1) % mediaItems.length)}
+            aria-label="Next"
+          >
+            <ChevronRight className="h-7 w-7 text-black dark:text-white" />
+          </button>
+          {/* Dots */}
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+            {mediaItems.map((_, idx) => (
+              <div
+                key={idx}
+                className={`h-2 w-2 rounded-full ${
+                  idx === current ? "bg-white" : "bg-white/40"
+                }`}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </>
