@@ -160,7 +160,7 @@ const ImageModal: React.FC<ImageModalProps> = ({
         >
           <ChevronLeft className="h-7 w-7 text-black dark:text-white" />
         </button>
-        <div className="relative w-[90vw] max-w-2xl h-[60vw] max-h-[80vh] flex items-center justify-center bg-black rounded-lg overflow-hidden">
+        <div className="relative w-[90vw] max-w-2xl h-dvh flex items-center justify-center bg-black rounded-lg overflow-hidden">
           {current < images.length ? (
             <Image
               src={`/api/filedata/${images[current]}`}
