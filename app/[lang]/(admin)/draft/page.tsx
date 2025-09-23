@@ -5,9 +5,8 @@ import {
   createProperty,
   deleteProperty,
   updateProperty,
-  changeAvailabilityProperty,
 } from "@/actions/admin/property";
-import { getDraftProperty } from "@/actions/admin/draft";
+import { getDraftProperty, publishDraftProperty } from "@/actions/admin/draft";
 import { getPropertyType } from "@/actions/admin/propertyType";
 import CustomTable from "@/components/custom-table";
 import { Button, Form, Input, Textarea } from "@heroui/react";
@@ -66,6 +65,8 @@ const PropertyCard = ({
   isDeleting,
   onToggleStatus,
   isTogglingStatus,
+  onPublish,
+  isPublishing,
 }: {
   item: PropertyItem;
   onEdit: (item: PropertyItem) => void;
@@ -73,6 +74,8 @@ const PropertyCard = ({
   isDeleting: boolean;
   onToggleStatus: (id: string, status: boolean) => void;
   isTogglingStatus: boolean;
+  onPublish: (id: string) => void;
+  isPublishing: boolean;
 }) => {
   const imageUrl = formatImageUrl(item.images?.[0]);
   const isActive = !!item.isAvailable; // Use isAvailable from backend
@@ -111,6 +114,15 @@ const PropertyCard = ({
           {item.price} {item.currency}
         </p>
         <div className="flex items-center justify-end gap-2 mt-4">
+          <Button
+            size="sm"
+            color="success"
+            variant="flat"
+            onPress={() => onPublish(item.id)}
+            isLoading={isPublishing}
+          >
+            Post
+          </Button>
           <Button
             size="sm"
             variant="flat"
@@ -257,7 +269,7 @@ function PropertyPage() {
   ]);
 
   const [, executeChangeAvailability, isLoadingChangeAvailability] = useAction(
-    changeAvailabilityProperty,
+    publishDraftProperty,
     [, (res) => handleActionCompletion(res, res?.message, refreshProperties)]
   );
 
@@ -494,6 +506,17 @@ function PropertyPage() {
         <div className="flex items-center gap-2">
           <Button
             size="sm"
+            color="success"
+            variant="flat"
+            onPress={() => handlePublish(item.id)}
+            isLoading={
+              pendingPublishId === item.id && isLoadingChangeAvailability
+            }
+          >
+            Post
+          </Button>
+          <Button
+            size="sm"
             color="primary"
             variant="flat"
             onPress={() => handleEdit(item as PropertyItem)}
@@ -521,10 +544,24 @@ function PropertyPage() {
   const handleToggleStatus = async (id: string, nextActive: boolean) => {
     setPendingToggleId(id);
     try {
-      await executeChangeAvailability(id, nextActive); // pass true for active, false for inactive
+      await executeChangeAvailability(id); // pass true for active, false for inactive
       refreshProperties();
     } finally {
       setPendingToggleId(null);
+    }
+  };
+
+  // Add state for publishing
+  const [pendingPublishId, setPendingPublishId] = useState<string | null>(null);
+
+  // Handler for publishing draft property
+  const handlePublish = async (id: string) => {
+    setPendingPublishId(id);
+    try {
+      await executeChangeAvailability(id);
+      refreshProperties();
+    } finally {
+      setPendingPublishId(null);
     }
   };
 
@@ -596,6 +633,10 @@ function PropertyPage() {
                 onToggleStatus={handleToggleStatus}
                 isTogglingStatus={
                   pendingToggleId === item.id && isLoadingChangeAvailability
+                }
+                onPublish={handlePublish}
+                isPublishing={
+                  pendingPublishId === item.id && isLoadingChangeAvailability
                 }
               />
             ))}

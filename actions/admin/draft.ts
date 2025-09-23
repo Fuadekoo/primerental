@@ -26,8 +26,11 @@ export async function getDraftProperty(
         title: {
           contains: search,
         },
+        isDraft: true,
       }
-    : {};
+    : {
+        isDraft: true,
+      };
 
   try {
     // Get the total count of records matching the filter
@@ -97,5 +100,18 @@ export async function getDraftProperty(
         hasPreviousPage: false,
       },
     };
+  }
+}
+
+// change the isDraft to false
+export async function publishDraftProperty(propertyId: string) {
+  try {
+    await prisma.property.update({
+      where: { id: propertyId },
+      data: { isDraft: false },
+    });
+    return { message: "Draft property published successfully" };
+  } catch (error) {
+    return { message: "Failed to publish draft property" };
   }
 }
