@@ -28,6 +28,7 @@ export async function filterProperties({
     const properties = await prisma.property.findMany({
       where: {
         isAvailable: true,
+        isDraft: false,
         ...(propertyType && { propertyType: { is: { name: propertyType } } }),
         ...(offerType && { offerType: offerType }), // offerType is an enum: "rent" or "sell"
         ...(minPrice && { price: { gte: minPrice } }),

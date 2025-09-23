@@ -30,8 +30,11 @@ export async function getProperty(
         title: {
           contains: search,
         },
+        isDraft: false,
       }
-    : {};
+    : {
+        isDraft: false,
+      };
 
   try {
     // Get the total count of records matching the filter

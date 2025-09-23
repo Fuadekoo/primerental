@@ -13,7 +13,7 @@ interface Item {
 export async function getProperty(id: string) {
   try {
     const property = await prisma.property.findUnique({
-      where: { id },
+      where: { id, isDraft: false, isAvailable: true },
       include: { propertyType: { select: { name: true } } },
     });
     return property;
