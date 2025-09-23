@@ -177,9 +177,9 @@ function HomeTypePage() {
     setUploadProgresses([]);
   };
 
-  const uploadFile = async (file: File, uuid: string): Promise<string> => {
+  const uploadFile = async (file: File): Promise<string> => {
     const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-    const uuidName = uuid || getTimestampUUID(ext);
+    const uuidName = getTimestampUUID(ext);
 
     const chunkSize = CHUNK_SIZE;
     const total = Math.ceil(file.size / chunkSize);
@@ -211,7 +211,7 @@ function HomeTypePage() {
       // Update progress for this file
       setUploadProgresses((prev) =>
         prev.map((item) =>
-          item.uuid === uuid
+          item.uuid === uuidName
             ? { ...item, progress: Math.round(((i + 1) / total) * 100) }
             : item
         )
@@ -241,7 +241,7 @@ function HomeTypePage() {
     setUploadProgresses([newUpload]);
 
     try {
-      const serverFilename = await uploadFile(newUpload.file, newUpload.uuid);
+      const serverFilename = await uploadFile(newUpload.file);
 
       // Mark as completed
       setUploadProgresses((prev) =>
