@@ -68,7 +68,7 @@ model property {
   bedroom        Int
   squareMeter    Int
   parking        Int
-  isAvailable    Boolean      @default(true)
+  isAvailable    Boolean      @default(false)
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 }
