@@ -27,7 +27,7 @@ export default function useSafeAction<T, Args extends unknown[]>(
   } = options;
 
   const isMountedRef = useRef(true);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   const executeAction = useCallback(
     async (forceRetry = false) => {
