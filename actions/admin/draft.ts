@@ -45,6 +45,7 @@ export async function getDraftProperty(
         offer_type: true,
         location: true,
         bedroom: true,
+        bathroom: true,
         kitchen: true,
         parking: true,
         quantity: true,

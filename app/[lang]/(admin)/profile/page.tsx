@@ -22,7 +22,8 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { passwordChangeSchema, updateUserSchema } from "@/lib/zodSchema";
-import useAction from "@/hooks/useActions";
+import { useData } from "@/hooks/useData";
+import useMutation from "@/hooks/useMutation";
 
 const translations = {
   en: {
@@ -150,18 +151,18 @@ export default function Page() {
   // const [isSubmitting, setIsSubmitting] = useState(false); // for Edit Profile
 
   // --- actions ---
-  const [, updateProfileAction, isLoadingProfileUpdate] = useAction(
+  const [updateProfileAction, isLoadingProfileUpdate] = useMutation(
     updateProfile,
-    [, () => {}]
+    () => {}
   );
-  const [, changePasswordAction, isLoadingChange] = useAction(changePassword, [
-    ,
-    () => {},
-  ]);
-  const [profileData, refreshProfile, isLoading] = useAction(getProfile, [
-    true,
-    () => {},
-  ]);
+  const [changePasswordAction, isLoadingChange] = useMutation(
+    changePassword,
+    () => {}
+  );
+  const [profileData, isLoading, refreshProfile] = useData(
+    getProfile,
+    () => {}
+  );
 
   // --- Password form (react-hook-form + zod) ---
   const {

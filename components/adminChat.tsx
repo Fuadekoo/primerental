@@ -1,5 +1,6 @@
 "use client";
-import useAction from "@/hooks/useActions";
+import { useData } from "@/hooks/useData";
+import useMutation from "@/hooks/useMutation";
 // import useGuestSession from "@/hooks/useGuestSession";
 import {
   getAdminChat,
@@ -34,7 +35,7 @@ type ChatMessage = {
 
 export default function ChatPopup() {
   //   const guestId = useGuestSession();
-  const [user, ,] = useAction(getLoginUserId, [true, () => {}]);
+  const [user] = useData(getLoginUserId, () => {});
   const [userId, setUserId] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   // Update state to use the new ChatMessage type
@@ -64,9 +65,9 @@ export default function ChatPopup() {
   }, [user]);
 
   // Action to get the admin user to message
-  const [guestList, refreshGuestList, isLoadingGuestList] = useAction(
+  const [guestList, isLoadingGuestList, refreshGuestList] = useData(
     getGuestList,
-    [true, () => {}]
+    () => {}
   );
   // Seed from API initially with DB values (unread/lastMsg/lastAt) and sort
   useEffect(() => {
@@ -83,20 +84,21 @@ export default function ChatPopup() {
   }, [guestList]);
 
   // Action to get existing chat messages
-  const [chatHistory, fetchChat, isFetchingChat] = useAction(getAdminChat, [
-    ,
+  const [chatHistory, isFetchingChat, fetchChat] = useData(
+    getAdminChat,
     () => {},
-  ]);
+    selectGuestId || ""
+  );
 
   // action to mark messages as read
-  const [, readAction] = useAction(readAdminMessages, [, () => {}]);
+  const [readAction] = useMutation(readAdminMessages, () => {});
 
-  const [allUnread, isRefresh] = useAction(countAllUnreadMessagesForAdmin, [
-    true,
-    () => {},
-  ]);
+  const [allUnread, isRefresh] = useData(
+    countAllUnreadMessagesForAdmin,
+    () => {}
+  );
 
-  const [, remarkAction] = useAction(addRemark, [, () => {}]);
+  const [remarkAction] = useMutation(addRemark, () => {});
 
   useEffect(() => {
     if (chatHistory && userId) {
@@ -120,11 +122,11 @@ export default function ChatPopup() {
   useEffect(() => {
     setMessages([]); // Clear messages when guest selection changes
     if (selectGuestId) {
-      fetchChat(selectGuestId);
+      fetchChat();
       // Mark messages as read then refresh server-backed lists
       Promise.resolve(readAction(selectGuestId)).then(() => {
-        refreshGuestList?.();
-        isRefresh?.();
+        refreshGuestList();
+        // isRefresh is a boolean, not a function
       });
       // Clear unread locally and inform server
       upsertGuest({ guestId: selectGuestId, unread: 0 });
@@ -195,7 +197,7 @@ export default function ChatPopup() {
         });
         // Keep server-backed counters in sync
         refreshGuestList?.();
-        isRefresh?.();
+        // isRefresh is a boolean, not a function
       } else {
         // Bump unread for that guest and move to top by recency
         if (toId === userId && fromId) {
@@ -225,7 +227,7 @@ export default function ChatPopup() {
           });
           // Keep server-backed counters in sync
           refreshGuestList?.();
-          isRefresh?.();
+          // isRefresh is a boolean, not a function
         }
       }
     };
@@ -278,7 +280,7 @@ export default function ChatPopup() {
   useEffect(() => {
     try {
       // re-run total unread action
-      isRefresh?.();
+      // isRefresh is a boolean, not a function
     } catch {}
   }, [isOpen, isRefresh]);
 

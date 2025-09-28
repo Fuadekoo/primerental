@@ -18,7 +18,7 @@ import NotificationBell from "./NotificationBell";
 import CustomerNotificationHandler from "./CustomerNotificationHandler";
 import AdminSocketConnected from "./AdminSocketConnected";
 import ClientSocketConnected from "./ClientSocketConnected";
-import useAction from "@/hooks/useActions";
+import { useData } from "@/hooks/useData";
 import { getLoginUserId } from "@/actions/common/chat";
 import InstallPrompt from "./InstallPrompt";
 import { Sun, Moon } from "lucide-react";
@@ -39,7 +39,7 @@ export default function UserLayout({
 }) {
   const [sidebar, setSidebar] = useState(false);
   // Determine if a logged-in session exists (server verified)
-  const [loginUser] = useAction(getLoginUserId, [true, () => {}]);
+  const [loginUser] = useData(getLoginUserId, () => {});
   const hasSession = Boolean(loginUser && loginUser.id);
   const isAdminSession = (() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

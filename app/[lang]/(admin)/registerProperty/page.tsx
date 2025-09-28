@@ -7,7 +7,7 @@ import {
   getRegisteredProperties,
   registerDashboard,
 } from "@/actions/admin/registerProperty";
-import useAction from "@/hooks/useActions";
+import { useData } from "@/hooks/useData";
 import { Eye, EyeOff, ListChecks } from "lucide-react";
 
 function RegisterPropertyPage() {
@@ -19,18 +19,18 @@ function RegisterPropertyPage() {
   const [pageSize, setPageSize] = useState(10);
   const [search, setSearch] = useState("");
 
-  // useAction returns [data, refresh, isLoading]
-  const [propertiesData, refresh, isLoadingDatas] = useAction(
+  // useData returns [data, isLoading, refresh]
+  const [propertiesData, isLoadingDatas, refresh] = useData(
     getRegisteredProperties,
-    [true, () => {}],
+    () => {},
     search,
     page,
     pageSize
   );
-  const [dashboardData, , isLoadingDashboard] = useAction(registerDashboard, [
-    true,
-    () => {},
-  ]);
+  const [dashboardData, isLoadingDashboard] = useData(
+    registerDashboard,
+    () => {}
+  );
 
   useEffect(() => {
     refresh();

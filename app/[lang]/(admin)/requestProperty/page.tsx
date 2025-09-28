@@ -8,7 +8,7 @@ import {
   deleteRequestProperty,
   requestDashboard,
 } from "@/actions/admin/requestProperty";
-import useAction from "@/hooks/useActions";
+import { useData } from "@/hooks/useData";
 import { Eye, EyeOff, ListChecks } from "lucide-react";
 
 function RequestPropertyPage() {
@@ -20,18 +20,18 @@ function RequestPropertyPage() {
   const [pageSize, setPageSize] = useState(10);
   const [search, setSearch] = useState("");
 
-  const [propertiesData, refresh, isLoading] = useAction(
+  const [propertiesData, isLoading, refresh] = useData(
     getRequestProperties,
-    [true, () => {}],
+    () => {},
     search,
     page,
     pageSize
   );
 
-  const [dashboardData, , isLoadingDashboard] = useAction(requestDashboard, [
-    true,
-    () => {},
-  ]);
+  const [dashboardData, isLoadingDashboard] = useData(
+    requestDashboard,
+    () => {}
+  );
 
   useEffect(() => {
     refresh();

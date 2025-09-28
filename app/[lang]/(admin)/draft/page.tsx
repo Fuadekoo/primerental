@@ -186,6 +186,7 @@ function PropertyPage() {
     images: string[];
     kitchen: number;
     bedroom: number;
+    bathroom: number;
     squareMeter: number;
     parking: number;
     youtubeLink?: string;
@@ -732,6 +733,13 @@ function PropertyPage() {
                 label="Kitchens"
                 type="number"
                 {...register("kitchen")}
+                errors={errors}
+                disabled={disableSubmit}
+              />
+              <InputField
+                label="Bathrooms"
+                type="number"
+                {...register("bathroom")}
                 errors={errors}
                 disabled={disableSubmit}
               />

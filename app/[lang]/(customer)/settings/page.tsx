@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { Button } from "@heroui/button";
 
-import useAction from "@/hooks/useActions";
+import { useData } from "@/hooks/useData";
 import { getLoginUserId } from "@/actions/common/chat";
 
 // Simple i18n copy
@@ -347,7 +347,7 @@ function SettingsPage() {
         : (params.lang as string)
       : "en";
   const t = translations[currentLang as "en" | "am"] || translations.en;
-  const [loginUser] = useAction(getLoginUserId, [true, () => {}]);
+  const [loginUser] = useData(getLoginUserId, () => {});
 
   return (
     <div className="h-full bg-gray-50 p-4 dark:bg-gray-900 sm:p-6 lg:p-8">

@@ -4,7 +4,8 @@ import Image from "next/image";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import useAction from "@/hooks/useActions";
+import { useData } from "@/hooks/useData";
+import useMutation from "@/hooks/useMutation";
 import { getPropertyTypes } from "@/actions/customer/propertyType";
 import { propertyRegister } from "@/actions/customer/registerProperty";
 import { propertyRegisterSchema } from "@/lib/zodSchema";
@@ -93,23 +94,20 @@ function PropertyRegisterPage() {
     },
   });
 
-  const [propertyTypesResult, , isLoadingTypes] = useAction(getPropertyTypes, [
-    true,
-    () => {},
-  ]);
+  const [propertyTypesResult, isLoadingTypes] = useData(
+    getPropertyTypes,
+    () => {}
+  );
 
   // If your getPropertyTypes returns { data: [...] }, use propertyTypesResult?.data
   const propertyTypes = propertyTypesResult;
 
-  const [, action, loading] = useAction(propertyRegister, [
-    undefined,
-    () => {
-      addToast({
-        description: t.successMessage,
-      });
-      router.push(`/${lang}/home`);
-    },
-  ]);
+  const [action, loading] = useMutation(propertyRegister, () => {
+    addToast({
+      description: t.successMessage,
+    });
+    router.push(`/${lang}/home`);
+  });
 
   const onSubmit = (data: RegisterFormValues) => {
     // No mapping needed, just pass data directly

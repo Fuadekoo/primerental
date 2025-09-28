@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { listPropertyByCategory } from "@/actions/customer/home";
-import useAction from "@/hooks/useActions";
+import { useData } from "@/hooks/useData";
 // import MiniCart from "@/components/mini-cart";
 import { ArrowLeft } from "lucide-react";
 // import { useCart, CartItem } from "@/hooks/useCart";
@@ -64,9 +64,9 @@ function ProductPerCategoryId({
   categoryId,
   onBack,
 }: ProductPerCategoryIdProps) {
-  const [productsData, , isLoadingProducts] = useAction(
+  const [productsData, isLoadingProducts] = useData(
     listPropertyByCategory,
-    [true, () => {}],
+    () => {},
     categoryId
   );
 

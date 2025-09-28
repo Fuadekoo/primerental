@@ -442,6 +442,7 @@ function Page() {
     id,
     description,
     bedroom,
+    bathroom,
     kitchen,
     squareMeter,
     parking,
@@ -553,7 +554,7 @@ function Page() {
               <BedDouble size={20} /> {bedroom} {t.bedrooms}
             </span>
             <span className="flex items-center gap-2">
-              <Bath size={20} /> {kitchen} {t.bathrooms}
+              <Bath size={20} /> {bathroom} {t.bathrooms}
             </span>
             <span className="flex items-center gap-2">
               <Ruler size={20} /> {squareMeter} {t.m2}

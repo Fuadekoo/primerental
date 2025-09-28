@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import useAction from "@/hooks/useActions";
+import { useData } from "@/hooks/useData";
 import Link from "next/link";
 import Image from "next/image";
 import { allFavorite } from "@/actions/customer/favorite";
@@ -91,9 +91,9 @@ function Page() {
   const { favorites, toggleFavorite } = useFavoriteStore();
 
   // Pass the array of favorite IDs from the Zustand store to the action
-  const [allFavoriteData, , isLoadingAllFavorite] = useAction(
+  const [allFavoriteData, isLoadingAllFavorite] = useData(
     allFavorite,
-    [true, () => {}],
+    () => {},
     favorites,
     search
   );

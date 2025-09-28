@@ -1,5 +1,6 @@
 "use client";
-import useAction from "@/hooks/useActions";
+import { useData } from "@/hooks/useData";
+import useMutation from "@/hooks/useMutation";
 import useGuestSession from "@/hooks/useGuestSession";
 import {
   getGuestChat,
@@ -24,7 +25,7 @@ type ChatMessage = {
 export default function GuestChatPopup() {
   const guestId = useGuestSession();
   console.log("Guest ID in GuestChatPopup:", guestId);
-  const [admin, , isAdminLoading] = useAction(getAdmin, [true, () => {}]);
+  const [admin, isAdminLoading] = useData(getAdmin, () => {});
   const [adminId, setAdminId] = useState<string | null>(null);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -66,13 +67,14 @@ export default function GuestChatPopup() {
     }
   }, [admin]);
 
-  const [chatHistory, fetchChat, isFetchingChat] = useAction(getGuestChat, [
-    ,
+  const [chatHistory, isFetchingChat, fetchChat] = useData(
+    getGuestChat,
     () => {},
-  ]);
+    adminId || ""
+  );
 
   // action when guest read a message from admin
-  const [, readAction] = useAction(readGuestMessages, [, () => {}]);
+  const [readAction] = useMutation(readGuestMessages, () => {});
 
   useEffect(() => {
     if (chatHistory && guestId) {
@@ -92,9 +94,10 @@ export default function GuestChatPopup() {
   }, [chatHistory, guestId]);
 
   const stableFetchChat = useCallback(fetchChat, []);
-  const [unreadGuestCount, fetchUnreadGuestCount, isUnreadLoading] = useAction(
+  const [unreadGuestCount, isUnreadLoading, fetchUnreadGuestCount] = useData(
     countUnreadMessagesForGuest,
-    [, () => {}]
+    () => {},
+    guestId || ""
   );
 
   // Seed unread badge from DB on load/refresh when chat is closed
@@ -102,8 +105,7 @@ export default function GuestChatPopup() {
     if (!guestId || isOpen) return;
     (async () => {
       try {
-        const count = await fetchUnreadGuestCount(guestId as string);
-        if (typeof count === "number") setUnreadCount(count);
+        fetchUnreadGuestCount();
       } catch (e) {
         console.error("Failed to get unread count:", e);
       }
@@ -112,7 +114,7 @@ export default function GuestChatPopup() {
 
   useEffect(() => {
     if (isOpen && guestId) {
-      fetchChat(guestId);
+      fetchChat();
       readAction(guestId);
       setUnreadCount(0);
     }

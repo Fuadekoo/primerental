@@ -49,6 +49,7 @@ export async function getProperty(
         offer_type: true,
         location: true,
         bedroom: true,
+        bathroom: true,
         kitchen: true,
         parking: true,
         quantity: true,

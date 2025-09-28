@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 
 import { Search, Save, Check } from "lucide-react";
-import useAction from "@/hooks/useActions";
+import { useData } from "@/hooks/useData";
 import { filterProperties } from "@/actions/customer/filter";
 import { useSavedSearch } from "@/hooks/useSavedSearch";
 // import { Button, Input } from "@heroui/react";
@@ -76,11 +76,7 @@ function FilteredComponent({
     );
   }, [applied]);
 
-  const [results, , isLoading] = useAction(
-    filterProperties,
-    [true, () => {}],
-    request
-  );
+  const [results, isLoading] = useData(filterProperties, () => {}, request);
   const [search, setSearch] = useState("");
   const [saved, setSaved] = useState(false);
 

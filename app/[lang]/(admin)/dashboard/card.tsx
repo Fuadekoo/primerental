@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { Briefcase, DollarSign, Home, Plus, User, Users } from "lucide-react";
-import useAction from "@/hooks/useActions";
+import { useData } from "@/hooks/useData";
 import { getDashboardCardsData } from "@/actions/admin/dashboard";
 
 // --- MOCK DATA & TYPES ---
@@ -74,10 +74,10 @@ import { getDashboardCardsData } from "@/actions/admin/dashboard";
 // );
 
 export default function Card() {
-  const [cardData, , isLoadingCardData] = useAction(getDashboardCardsData, [
-    true,
-    () => {},
-  ]);
+  const [cardData, isLoadingCardData] = useData(
+    getDashboardCardsData,
+    () => {}
+  );
   // const t = translations.en;
 
   // Prepare stats from backend data

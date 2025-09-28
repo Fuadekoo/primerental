@@ -2,15 +2,12 @@
 import React from "react";
 import { RefreshCcw, CheckCheck } from "lucide-react";
 import { adminConnected } from "@/actions/common/socketChecker";
-import useAction from "@/hooks/useActions";
+import { useData } from "@/hooks/useData";
 
 export default function AdminSocketConnected() {
   // gate the id from the session
 
-  const [connected, refresh, isLoading] = useAction(adminConnected, [
-    true,
-    () => {},
-  ]);
+  const [connected, isLoading, refresh] = useData(adminConnected, () => {});
 
   const handleRefresh = () => {
     refresh();

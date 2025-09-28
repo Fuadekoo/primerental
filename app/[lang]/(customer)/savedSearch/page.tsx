@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { X, Trash2, Save, ArrowRight } from "lucide-react";
 import { useSavedSearch } from "@/hooks/useSavedSearch";
 import FilteredComponent, { FilterInput } from "@/components/filteredComponent";
-import useAction from "@/hooks/useActions";
+import { useData } from "@/hooks/useData";
 import { categoryListHouse } from "@/actions/customer/home";
 import { useParams } from "next/navigation";
 
@@ -66,7 +66,7 @@ function Page() {
   const clear = useSavedSearch((s) => s.clear);
 
   // Optional: load category names to resolve property_type IDs
-  const [categoryData] = useAction(categoryListHouse, [true, () => {}]);
+  const [categoryData] = useData(categoryListHouse, () => {});
   const typeNameById = useMemo(() => {
     const map = new Map<string, string>();
     if (Array.isArray(categoryData)) {

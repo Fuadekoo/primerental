@@ -7,7 +7,7 @@ import Top from "./top";
 import ApplicationStats from "./ApplicationStats";
 import Schedule from "./Schedule";
 import RecentActivity from "./RecentActivity";
-import useAction from "@/hooks/useActions";
+import { useData } from "@/hooks/useData";
 import {
   getTopTenants,
   getUpcomingAppointments,
@@ -64,10 +64,10 @@ export default function DashboardPage() {
   const t = translations[lang];
 
   // Load sample-backed server actions (replace inside components or pass as props)
-  const [topTenants] = useAction(getTopTenants, [true, () => {}]);
-  const [appointments] = useAction(getUpcomingAppointments, [true, () => {}]);
-  const [stats] = useAction(getApplicationStats, [true, () => {}]);
-  const [activity] = useAction(getRecentActivity, [true, () => {}]);
+  const [topTenants] = useData(getTopTenants, () => {});
+  const [appointments] = useData(getUpcomingAppointments, () => {});
+  const [stats] = useData(getApplicationStats, () => {});
+  const [activity] = useData(getRecentActivity, () => {});
 
   return (
     <div className="bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8 min-h-full">

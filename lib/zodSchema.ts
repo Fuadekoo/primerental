@@ -85,6 +85,7 @@ export const propertySchema = z.object({
           "Please enter a valid YouTube URL (youtube.com, youtu.be, etc.)",
       }
     ),
+  bathroom: z.coerce.number().min(0),
   kitchen: z.coerce.number().min(0),
   bedroom: z.coerce.number().min(0),
   squareMeter: z.coerce.number().min(0),

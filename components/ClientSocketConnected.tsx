@@ -3,7 +3,7 @@
 import React from "react";
 import { RefreshCcw, CheckCheck } from "lucide-react";
 import { customerConnected } from "@/actions/common/socketChecker";
-import useAction from "@/hooks/useActions";
+import { useData } from "@/hooks/useData";
 import useGuestSession from "@/hooks/useGuestSession";
 
 /**
@@ -12,9 +12,9 @@ import useGuestSession from "@/hooks/useGuestSession";
  */
 export default function ClientSocketConnected() {
   const guestId = useGuestSession();
-  const [connected, refresh, isLoading] = useAction(
+  const [connected, isLoading, refresh] = useData(
     customerConnected,
-    [true, () => {}],
+    () => {},
     guestId || ""
   );
 
