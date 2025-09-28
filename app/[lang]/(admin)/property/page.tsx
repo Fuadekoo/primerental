@@ -292,7 +292,7 @@ function PropertyPage() {
     setValue("price", item.price);
     setValue("discount", item.discount);
     setValue("currency", item.currency);
-    setValue("youtubeLink", item.youtubeLink || "");
+    setValue("youtubeLink", item.youtubeLink || undefined);
     setValue("kitchen", item.kitchen);
     setValue("bedroom", item.bedroom);
     setValue("squareMeter", item.squareMeter);

@@ -1,5 +1,20 @@
 import { z } from "zod";
 
+// Helper function to validate YouTube URLs
+const isValidYouTubeUrl = (url: string): boolean => {
+  try {
+    const urlObj = new URL(url);
+    return (
+      urlObj.hostname === "www.youtube.com" ||
+      urlObj.hostname === "youtube.com" ||
+      urlObj.hostname === "youtu.be" ||
+      urlObj.hostname === "m.youtube.com"
+    );
+  } catch {
+    return false;
+  }
+};
+
 export const loginSchema = z.object({
   email: z.string().min(9, "email number is too short"),
   password: z.string().min(8, "Password must be at least 8 characters long"),
@@ -53,7 +68,23 @@ export const propertySchema = z.object({
   discount: z.coerce.number().min(0),
   currency: z.string().min(1).max(10),
   images: z.array(z.string()),
-  youtubeLink: z.string().url().optional(),
+  youtubeLink: z
+    .string()
+    .optional()
+    .transform((val) => {
+      if (!val || val.trim() === "") return undefined;
+      return val;
+    })
+    .refine(
+      (val) => {
+        if (!val) return true; // Allow undefined/empty
+        return isValidYouTubeUrl(val);
+      },
+      {
+        message:
+          "Please enter a valid YouTube URL (youtube.com, youtu.be, etc.)",
+      }
+    ),
   kitchen: z.coerce.number().min(0),
   bedroom: z.coerce.number().min(0),
   squareMeter: z.coerce.number().min(0),
