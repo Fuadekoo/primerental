@@ -53,7 +53,7 @@ model guest {
 model property {
   id             String       @id @default(uuid())
   title          String
-  description    String
+  description    String       @db.Text
   offer_type     offerType
   propertyType   propertyType @relation(fields: [propertyTypeId], references: [id])
   propertyTypeId String
