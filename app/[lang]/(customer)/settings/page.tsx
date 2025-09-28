@@ -349,6 +349,20 @@ function SettingsPage() {
   const t = translations[currentLang as "en" | "am"] || translations.en;
   const [loginUser, isLoadingUser, refreshUser] = useData(getLoginUserId, () => {});
 
+  // Show loading state while user data is loading
+  if (isLoadingUser) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
+          <span className="text-lg font-semibold text-gray-700 dark:text-gray-200">
+            Loading settings...
+          </span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-full bg-gray-50 p-4 dark:bg-gray-900 sm:p-6 lg:p-8">
       <div className="mx-auto max-w-2xl">

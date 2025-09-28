@@ -112,6 +112,20 @@ function Page() {
   const resolveType = (id?: string) =>
     id ? typeNameById.get(String(id)) || id : t.anyType;
 
+  // Show loading state while category data is loading
+  if (isLoadingCategories) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-950">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
+          <span className="text-lg font-semibold text-gray-700 dark:text-gray-200">
+            Loading saved searches...
+          </span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-full w-full overflow-x-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-4 sm:p-6 lg:p-8">
       <div className="mx-auto max-w-4xl">
