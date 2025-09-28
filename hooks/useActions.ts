@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useActionState, useEffect } from "react";
+import { startTransition, useActionState, useEffect, useCallback } from "react";
 
 export default function useAction<
   T extends true | undefined,
@@ -17,31 +17,68 @@ export default function useAction<
 ] {
   const [data, action, loading] = useActionState(
     async (prev: Data | undefined, payload: Args) => {
-      return await func(...payload);
+      try {
+        if (!func || typeof func !== 'function') {
+          console.error('useAction: Invalid function provided');
+          return prev;
+        }
+        return await func(...payload);
+      } catch (error) {
+        console.error('useAction: Error in action:', error);
+        return prev;
+      }
     },
     undefined
   );
 
-  useEffect(() => {
-    if (isPrevFetch) {
-      startTransition(() => {
-        action(args as Args);
-      });
+  // Memoize the action function to prevent unnecessary re-renders
+  const memoizedAction = useCallback((payload: Args) => {
+    try {
+      if (isPrevFetch && payload && payload.length > 0) {
+        startTransition(() => {
+          action(payload);
+        });
+      }
+    } catch (error) {
+      console.error('useAction: Error in memoized action:', error);
     }
-  }, [...args]);
+  }, [action, isPrevFetch]);
 
   useEffect(() => {
-    if (data) {
-      onFinish?.(data);
+    if (isPrevFetch && args && args.length > 0) {
+      try {
+        startTransition(() => {
+          action(args as Args);
+        });
+      } catch (error) {
+        console.error('useAction: Error in useEffect:', error);
+      }
     }
-  }, [data]);
+  }, [...(args || [])]);
+
+  useEffect(() => {
+    if (data && onFinish && typeof onFinish === 'function') {
+      try {
+        onFinish(data);
+      } catch (error) {
+        console.error('useAction: Error in onFinish callback:', error);
+      }
+    }
+  }, [data, onFinish]);
 
   return [
     data,
     (...newArgs: Args) => {
-      startTransition(() => {
-        action((isPrevFetch && newArgs.length === 0 ? args : newArgs) as Args);
-      });
+      try {
+        const payload = (isPrevFetch && newArgs.length === 0 ? args : newArgs) as Args;
+        if (payload && payload.length > 0) {
+          startTransition(() => {
+            action(payload);
+          });
+        }
+      } catch (error) {
+        console.error('useAction: Error in return function:', error);
+      }
     },
     loading,
   ];
