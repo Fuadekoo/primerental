@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import useAction from "@/hooks/useActions";
+import { useData, UseData } from "@/hooks/useData";
 import {
   createProperty,
   deleteProperty,
@@ -199,9 +200,14 @@ function PropertyPage() {
     pageSize
   );
 
-  const [propertyTypeResponse, , isLoadingPropertyTypes] = useAction(
+  // const [propertyTypeResponse, , isLoadingPropertyTypes] = useAction(
+  //   getPropertyType,
+  //   [true, () => {}]
+  // );
+
+  const [propertyTypeResponse, isLoadingPropertyTypes, refresh] = useData(
     getPropertyType,
-    [true, () => {}]
+    null
   );
 
   useEffect(() => {
