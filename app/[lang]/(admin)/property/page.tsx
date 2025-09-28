@@ -905,32 +905,199 @@ const SelectField = ({
   isLoading,
 }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
 any) => (
-  <div>
-    <label className="block mb-1 text-sm font-medium">{label}</label>
+  <div className="w-full">
+    <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+      {label}
+    </label>
     <Controller
       name={name}
       control={control}
       render={({ field }) => (
-        <Select
-          {...field}
-          options={options}
-          isDisabled={disabled}
-          isLoading={isLoading}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          value={options.find((c: any) => c.value === field.value) || null}
-          onChange={(val) => field.onChange(val ? val.value : null)}
-          styles={{
-            control: (base) => ({
-              ...base,
-              minHeight: "42px",
-              borderColor: errors[name] ? "#ef4444" : base.borderColor,
-            }),
-          }}
-        />
+        <div className="relative">
+          <Select
+            {...field}
+            options={options}
+            isDisabled={disabled}
+            isLoading={isLoading}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            value={options.find((c: any) => c.value === field.value) || null}
+            onChange={(val) => field.onChange(val ? val.value : null)}
+            className="react-select-container"
+            classNamePrefix="react-select"
+            styles={{
+              control: (base, state) => ({
+                ...base,
+                minHeight: "44px",
+                borderColor: errors[name]
+                  ? "#ef4444"
+                  : state.isFocused
+                  ? "#3b82f6"
+                  : "#d1d5db",
+                borderWidth: "1px",
+                borderRadius: "8px",
+                backgroundColor: "transparent",
+                boxShadow: state.isFocused
+                  ? "0 0 0 3px rgba(59, 130, 246, 0.1)"
+                  : "none",
+                transition: "all 0.2s ease-in-out",
+                "&:hover": {
+                  borderColor: errors[name] ? "#ef4444" : "#9ca3af",
+                },
+              }),
+              valueContainer: (base) => ({
+                ...base,
+                padding: "8px 12px",
+              }),
+              input: (base) => ({
+                ...base,
+                color: "inherit",
+              }),
+              placeholder: (base) => ({
+                ...base,
+                color: "#9ca3af",
+              }),
+              singleValue: (base) => ({
+                ...base,
+                color: "inherit",
+              }),
+              menu: (base) => ({
+                ...base,
+                borderRadius: "8px",
+                boxShadow:
+                  "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+                border: "1px solid #e5e7eb",
+                zIndex: 9999,
+              }),
+              option: (base, state) => ({
+                ...base,
+                backgroundColor: state.isSelected
+                  ? "#3b82f6"
+                  : state.isFocused
+                  ? "#f3f4f6"
+                  : "transparent",
+                color: state.isSelected ? "#ffffff" : "inherit",
+                padding: "12px 16px",
+                transition: "all 0.2s ease-in-out",
+                "&:hover": {
+                  backgroundColor: state.isSelected ? "#3b82f6" : "#f3f4f6",
+                },
+              }),
+              indicatorSeparator: (base) => ({
+                ...base,
+                backgroundColor: "#d1d5db",
+              }),
+              dropdownIndicator: (base) => ({
+                ...base,
+                color: "#6b7280",
+                "&:hover": {
+                  color: "#374151",
+                },
+              }),
+              loadingIndicator: (base) => ({
+                ...base,
+                color: "#6b7280",
+              }),
+            }}
+            theme={(theme) => ({
+              ...theme,
+              colors: {
+                ...theme.colors,
+                primary: "#3b82f6",
+                primary75: "#60a5fa",
+                primary50: "#93c5fd",
+                primary25: "#dbeafe",
+                danger: "#ef4444",
+                dangerLight: "#fca5a5",
+                neutral0: "#ffffff",
+                neutral5: "#f9fafb",
+                neutral10: "#f3f4f6",
+                neutral20: "#e5e7eb",
+                neutral30: "#d1d5db",
+                neutral40: "#9ca3af",
+                neutral50: "#6b7280",
+                neutral60: "#4b5563",
+                neutral70: "#374151",
+                neutral80: "#1f2937",
+                neutral90: "#111827",
+              },
+            })}
+          />
+          <style jsx global>{`
+            .react-select-container .react-select__control {
+              @apply bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600;
+              @apply hover:border-gray-400 dark:hover:border-gray-500;
+              @apply focus:border-blue-500 dark:focus:border-blue-400;
+              @apply focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800;
+              @apply transition-all duration-200 ease-in-out;
+            }
+            .react-select-container .react-select__control--is-focused {
+              @apply border-blue-500 dark:border-blue-400;
+              @apply ring-2 ring-blue-200 dark:ring-blue-800;
+            }
+            .react-select-container .react-select__control--is-disabled {
+              @apply bg-gray-50 dark:bg-gray-700;
+              @apply cursor-not-allowed;
+            }
+            .react-select-container .react-select__value-container {
+              @apply px-3 py-2;
+            }
+            .react-select-container .react-select__input {
+              @apply text-gray-900 dark:text-gray-100;
+            }
+            .react-select-container .react-select__placeholder {
+              @apply text-gray-500 dark:text-gray-400;
+            }
+            .react-select-container .react-select__single-value {
+              @apply text-gray-900 dark:text-gray-100;
+            }
+            .react-select-container .react-select__menu {
+              @apply bg-white dark:bg-gray-800;
+              @apply border border-gray-200 dark:border-gray-700;
+              @apply shadow-lg dark:shadow-2xl;
+              @apply rounded-lg;
+              @apply z-50;
+            }
+            .react-select-container .react-select__option {
+              @apply text-gray-900 dark:text-gray-100;
+              @apply hover:bg-gray-100 dark:hover:bg-gray-700;
+              @apply transition-colors duration-150;
+            }
+            .react-select-container .react-select__option--is-selected {
+              @apply bg-blue-500 text-white;
+            }
+            .react-select-container .react-select__option--is-focused {
+              @apply bg-gray-100 dark:bg-gray-700;
+            }
+            .react-select-container .react-select__indicator-separator {
+              @apply bg-gray-300 dark:bg-gray-600;
+            }
+            .react-select-container .react-select__dropdown-indicator {
+              @apply text-gray-500 dark:text-gray-400;
+              @apply hover:text-gray-700 dark:hover:text-gray-200;
+            }
+            .react-select-container .react-select__loading-indicator {
+              @apply text-gray-500 dark:text-gray-400;
+            }
+            .react-select-container .react-select__menu-notice {
+              @apply text-gray-500 dark:text-gray-400;
+            }
+            .react-select-container .react-select__menu-list {
+              @apply max-h-60 overflow-y-auto;
+            }
+            .react-select-container .react-select__option:first-child {
+              @apply rounded-t-lg;
+            }
+            .react-select-container .react-select__option:last-child {
+              @apply rounded-b-lg;
+            }
+          `}</style>
+        </div>
       )}
     />
     {errors[name] && (
-      <span className="text-red-500 text-xs">{errors[name].message}</span>
+      <span className="text-red-500 text-xs mt-1 block">
+        {errors[name].message}
+      </span>
     )}
   </div>
 );

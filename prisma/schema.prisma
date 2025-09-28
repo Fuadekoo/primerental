@@ -64,7 +64,7 @@ model property {
   currency       String
   images         String[]
   youtubeLink    String?
-  bathroom       Int
+  bathroom       Int?
   kitchen        Int
   bedroom        Int
   squareMeter    Int
