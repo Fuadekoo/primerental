@@ -91,7 +91,7 @@ function Page() {
   const { favorites, toggleFavorite } = useFavoriteStore();
 
   // Pass the array of favorite IDs from the Zustand store to the action
-  const [allFavoriteData, isLoadingAllFavorite] = useData(
+  const [allFavoriteData, isLoadingAllFavorite, refreshFavorites] = useData(
     allFavorite,
     () => {},
     favorites,

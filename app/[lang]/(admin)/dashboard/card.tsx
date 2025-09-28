@@ -74,7 +74,7 @@ import { getDashboardCardsData } from "@/actions/admin/dashboard";
 // );
 
 export default function Card() {
-  const [cardData, isLoadingCardData] = useData(
+  const [cardData, isLoadingCardData, refreshCardData] = useData(
     getDashboardCardsData,
     () => {}
   );

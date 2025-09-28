@@ -64,7 +64,7 @@ function ProductPerCategoryId({
   categoryId,
   onBack,
 }: ProductPerCategoryIdProps) {
-  const [productsData, isLoadingProducts] = useData(
+  const [productsData, isLoadingProducts, refreshProducts] = useData(
     listPropertyByCategory,
     () => {},
     categoryId

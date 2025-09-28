@@ -380,7 +380,11 @@ function Page() {
   const { toggleFavorite, isFavorite } = useFavoriteStore();
   const isFav = isFavorite(propertyId);
 
-  const [propertyData, isLoading] = useData(getProperty, () => {}, propertyId);
+  const [propertyData, isLoading, refresh] = useData(
+    getProperty,
+    () => {},
+    propertyId
+  );
 
   const handleToggleFavorite = () => {
     toggleFavorite(propertyId);

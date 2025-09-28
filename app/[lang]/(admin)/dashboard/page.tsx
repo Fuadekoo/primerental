@@ -64,10 +64,22 @@ export default function DashboardPage() {
   const t = translations[lang];
 
   // Load sample-backed server actions (replace inside components or pass as props)
-  const [topTenants] = useData(getTopTenants, () => {});
-  const [appointments] = useData(getUpcomingAppointments, () => {});
-  const [stats] = useData(getApplicationStats, () => {});
-  const [activity] = useData(getRecentActivity, () => {});
+  const [topTenants, isLoadingTenants, refreshTenants] = useData(
+    getTopTenants,
+    () => {}
+  );
+  const [appointments, isLoadingAppointments, refreshAppointments] = useData(
+    getUpcomingAppointments,
+    () => {}
+  );
+  const [stats, isLoadingStats, refreshStats] = useData(
+    getApplicationStats,
+    () => {}
+  );
+  const [activity, isLoadingActivity, refreshActivity] = useData(
+    getRecentActivity,
+    () => {}
+  );
 
   return (
     <div className="bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8 min-h-full">

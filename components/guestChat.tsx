@@ -25,7 +25,7 @@ type ChatMessage = {
 export default function GuestChatPopup() {
   const guestId = useGuestSession();
   console.log("Guest ID in GuestChatPopup:", guestId);
-  const [admin, isAdminLoading] = useData(getAdmin, () => {});
+  const [admin, isAdminLoading, refreshAdmin] = useData(getAdmin, () => {});
   const [adminId, setAdminId] = useState<string | null>(null);
 
   const [isOpen, setIsOpen] = useState(false);

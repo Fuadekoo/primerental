@@ -76,7 +76,11 @@ function FilteredComponent({
     );
   }, [applied]);
 
-  const [results, isLoading] = useData(filterProperties, () => {}, request);
+  const [results, isLoading, refresh] = useData(
+    filterProperties,
+    () => {},
+    request
+  );
   const [search, setSearch] = useState("");
   const [saved, setSaved] = useState(false);
 

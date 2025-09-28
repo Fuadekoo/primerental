@@ -27,7 +27,7 @@ function RegisterPropertyPage() {
     page,
     pageSize
   );
-  const [dashboardData, isLoadingDashboard] = useData(
+  const [dashboardData, isLoadingDashboard, refreshDashboard] = useData(
     registerDashboard,
     () => {}
   );

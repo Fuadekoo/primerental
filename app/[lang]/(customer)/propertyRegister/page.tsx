@@ -94,7 +94,7 @@ function PropertyRegisterPage() {
     },
   });
 
-  const [propertyTypesResult, isLoadingTypes] = useData(
+  const [propertyTypesResult, isLoadingTypes, refreshTypes] = useData(
     getPropertyTypes,
     () => {}
   );

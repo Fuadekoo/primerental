@@ -103,7 +103,7 @@ function PropertyRequestPage() {
   });
 
   // Handle propertyTypes result structure
-  const [propertyTypesResult, isLoadingTypes] = useData(
+  const [propertyTypesResult, isLoadingTypes, refreshTypes] = useData(
     getPropertyTypes,
     () => {}
   );

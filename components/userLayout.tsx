@@ -39,7 +39,10 @@ export default function UserLayout({
 }) {
   const [sidebar, setSidebar] = useState(false);
   // Determine if a logged-in session exists (server verified)
-  const [loginUser] = useData(getLoginUserId, () => {});
+  const [loginUser, isLoadingUser, refreshUser] = useData(
+    getLoginUserId,
+    () => {}
+  );
   const hasSession = Boolean(loginUser && loginUser.id);
   const isAdminSession = (() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

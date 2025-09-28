@@ -213,10 +213,8 @@ function PropertyPage() {
     pageSize
   );
 
-  const [propertyTypeResponse, isLoadingPropertyTypes] = useData(
-    getPropertyType,
-    () => {}
-  );
+  const [propertyTypeResponse, isLoadingPropertyTypes, refreshPropertyTypes] =
+    useData(getPropertyType, () => {});
 
   useEffect(() => {
     if (propertyTypeResponse?.data) {

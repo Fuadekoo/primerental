@@ -35,7 +35,7 @@ type ChatMessage = {
 
 export default function ChatPopup() {
   //   const guestId = useGuestSession();
-  const [user] = useData(getLoginUserId, () => {});
+  const [user, isLoadingUser, refreshUser] = useData(getLoginUserId, () => {});
   const [userId, setUserId] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   // Update state to use the new ChatMessage type
@@ -93,7 +93,7 @@ export default function ChatPopup() {
   // action to mark messages as read
   const [readAction] = useMutation(readAdminMessages, () => {});
 
-  const [allUnread, isRefresh] = useData(
+  const [allUnread, isRefresh, refreshUnread] = useData(
     countAllUnreadMessagesForAdmin,
     () => {}
   );

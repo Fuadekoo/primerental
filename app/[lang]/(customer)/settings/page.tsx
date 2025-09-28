@@ -347,7 +347,7 @@ function SettingsPage() {
         : (params.lang as string)
       : "en";
   const t = translations[currentLang as "en" | "am"] || translations.en;
-  const [loginUser] = useData(getLoginUserId, () => {});
+  const [loginUser, isLoadingUser, refreshUser] = useData(getLoginUserId, () => {});
 
   return (
     <div className="h-full bg-gray-50 p-4 dark:bg-gray-900 sm:p-6 lg:p-8">

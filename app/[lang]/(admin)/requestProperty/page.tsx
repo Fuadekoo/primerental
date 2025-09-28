@@ -28,7 +28,7 @@ function RequestPropertyPage() {
     pageSize
   );
 
-  const [dashboardData, isLoadingDashboard] = useData(
+  const [dashboardData, isLoadingDashboard, refreshDashboard] = useData(
     requestDashboard,
     () => {}
   );

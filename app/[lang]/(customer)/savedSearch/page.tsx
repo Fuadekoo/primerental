@@ -66,7 +66,10 @@ function Page() {
   const clear = useSavedSearch((s) => s.clear);
 
   // Optional: load category names to resolve property_type IDs
-  const [categoryData] = useData(categoryListHouse, () => {});
+  const [categoryData, isLoadingCategories, refreshCategories] = useData(
+    categoryListHouse,
+    () => {}
+  );
   const typeNameById = useMemo(() => {
     const map = new Map<string, string>();
     if (Array.isArray(categoryData)) {
