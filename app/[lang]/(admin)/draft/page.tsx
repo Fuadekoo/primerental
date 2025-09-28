@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import useAction from "@/hooks/useActions";
+import { useData } from "@/hooks/useData";
+import useMutation from "@/hooks/useMutation";
 import {
   createProperty,
   deleteProperty,
@@ -203,17 +204,17 @@ function PropertyPage() {
     mode: "onChange",
   });
 
-  const [propertiesData, refreshProperties, isLoadingData] = useAction(
+  const [propertiesData, isLoadingData, refreshProperties] = useData(
     getDraftProperty,
-    [true, () => {}],
+    () => {},
     search,
     page,
     pageSize
   );
 
-  const [propertyTypeResponse, , isLoadingPropertyTypes] = useAction(
+  const [propertyTypeResponse, isLoadingPropertyTypes] = useData(
     getPropertyType,
-    [true, () => {}]
+    () => {}
   );
 
   useEffect(() => {
@@ -258,25 +259,22 @@ function PropertyPage() {
     }
   };
 
-  const [, executeDelete, isLoadingDelete] = useAction(deleteProperty, [
-    ,
-    (res) => handleActionCompletion(res, res?.message, refreshProperties),
-  ]);
-
-  const [, executeCreate, isLoadingCreate] = useAction(createProperty, [
-    ,
-    (res) => handleActionCompletion(res, res?.message, refreshProperties),
-  ]);
-
-  const [, executeChangeAvailability, isLoadingChangeAvailability] = useAction(
-    publishDraftProperty,
-    [, (res) => handleActionCompletion(res, res?.message, refreshProperties)]
+  const [executeDelete, isLoadingDelete] = useMutation(deleteProperty, (res) =>
+    handleActionCompletion(res, res?.message, refreshProperties)
   );
 
-  const [, executeUpdate, isLoadingUpdate] = useAction(updateProperty, [
-    ,
-    (res) => handleActionCompletion(res, res?.message, refreshProperties),
-  ]);
+  const [executeCreate, isLoadingCreate] = useMutation(createProperty, (res) =>
+    handleActionCompletion(res, res?.message, refreshProperties)
+  );
+
+  const [executeChangeAvailability, isLoadingChangeAvailability] = useMutation(
+    publishDraftProperty,
+    (res) => handleActionCompletion(res, res?.message, refreshProperties)
+  );
+
+  const [executeUpdate, isLoadingUpdate] = useMutation(updateProperty, (res) =>
+    handleActionCompletion(res, res?.message, refreshProperties)
+  );
 
   const handleDelete = (id: string) => {
     setDeleteId(id);

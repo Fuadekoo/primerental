@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import useAction from "@/hooks/useActions";
+import { useData } from "@/hooks/useData";
 import { useFavoriteStore } from "@/hooks/useFavoriteStore";
 import { getProperty } from "@/actions/customer/property";
 import { useParams, useRouter } from "next/navigation";
@@ -380,11 +380,7 @@ function Page() {
   const { toggleFavorite, isFavorite } = useFavoriteStore();
   const isFav = isFavorite(propertyId);
 
-  const [propertyData, , isLoading] = useAction(
-    getProperty,
-    [true, () => {}],
-    propertyId
-  );
+  const [propertyData, isLoading] = useData(getProperty, () => {}, propertyId);
 
   const handleToggleFavorite = () => {
     toggleFavorite(propertyId);

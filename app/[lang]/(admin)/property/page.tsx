@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import useAction from "@/hooks/useActions";
 import { useData, UseData } from "@/hooks/useData";
+import useMutation from "@/hooks/useMutation";
 import {
   createProperty,
   deleteProperty,
@@ -192,9 +192,9 @@ function PropertyPage() {
     mode: "onChange",
   });
 
-  const [propertiesData, refreshProperties, isLoadingData] = useAction(
+  const [propertiesData, isLoadingData, refreshProperties] = useData(
     getProperty,
-    [true, () => {}],
+    () => {},
     search,
     page,
     pageSize
@@ -252,25 +252,22 @@ function PropertyPage() {
     }
   };
 
-  const [, executeDelete, isLoadingDelete] = useAction(deleteProperty, [
-    ,
-    (res) => handleActionCompletion(res, res?.message, refreshProperties),
-  ]);
-
-  const [, executeCreate, isLoadingCreate] = useAction(createProperty, [
-    ,
-    (res) => handleActionCompletion(res, res?.message, refreshProperties),
-  ]);
-
-  const [, executeChangeAvailability, isLoadingChangeAvailability] = useAction(
-    changeAvailabilityProperty,
-    [, (res) => handleActionCompletion(res, res?.message, refreshProperties)]
+  const [executeDelete, isLoadingDelete] = useMutation(deleteProperty, (res) =>
+    handleActionCompletion(res, res?.message, refreshProperties)
   );
 
-  const [, executeUpdate, isLoadingUpdate] = useAction(updateProperty, [
-    ,
-    (res) => handleActionCompletion(res, res?.message, refreshProperties),
-  ]);
+  const [executeCreate, isLoadingCreate] = useMutation(createProperty, (res) =>
+    handleActionCompletion(res, res?.message, refreshProperties)
+  );
+
+  const [executeChangeAvailability, isLoadingChangeAvailability] = useMutation(
+    changeAvailabilityProperty,
+    (res) => handleActionCompletion(res, res?.message, refreshProperties)
+  );
+
+  const [executeUpdate, isLoadingUpdate] = useMutation(updateProperty, (res) =>
+    handleActionCompletion(res, res?.message, refreshProperties)
+  );
 
   const handleDelete = (id: string) => {
     setDeleteId(id);

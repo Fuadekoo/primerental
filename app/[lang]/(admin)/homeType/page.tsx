@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
-import useAction from "@/hooks/useActions";
+import { useData } from "@/hooks/useData";
+import useMutation from "@/hooks/useMutation";
 import {
   createPropertyType,
   deletePropertyType,
@@ -103,43 +104,37 @@ function HomeTypePage() {
     }
   };
 
-  const [propertyTypeData, refreshPropertyTypes, isLoadingData] = useAction(
+  const [propertyTypeData, isLoadingData, refreshPropertyTypes] = useData(
     getPropertyType,
-    [true, () => {}],
+    () => {},
     search,
     page,
     pageSize
   );
 
-  const [, executeDelete, isLoadingDelete] = useAction(deletePropertyType, [
-    ,
-    (res) =>
-      handleActionCompletion(
-        res,
-        "Home type deleted successfully.",
-        "Failed to delete home type."
-      ),
-  ]);
+  const [executeDelete, isLoadingDelete] = useMutation(deletePropertyType, (res) =>
+    handleActionCompletion(
+      res,
+      "Home type deleted successfully.",
+      "Failed to delete home type."
+    )
+  );
 
-  const [, executeCreate, isLoadingCreate] = useAction(createPropertyType, [
-    ,
-    (res) =>
-      handleActionCompletion(
-        res,
-        "Home type created successfully.",
-        "Failed to create home type."
-      ),
-  ]);
+  const [executeCreate, isLoadingCreate] = useMutation(createPropertyType, (res) =>
+    handleActionCompletion(
+      res,
+      "Home type created successfully.",
+      "Failed to create home type."
+    )
+  );
 
-  const [, executeUpdate, isLoadingUpdate] = useAction(updatePropertyType, [
-    ,
-    (res) =>
-      handleActionCompletion(
-        res,
-        "Home type updated successfully.",
-        "Failed to update home type."
-      ),
-  ]);
+  const [executeUpdate, isLoadingUpdate] = useMutation(updatePropertyType, (res) =>
+    handleActionCompletion(
+      res,
+      "Home type updated successfully.",
+      "Failed to update home type."
+    )
+  );
 
   const handleDelete = (id: string) => {
     setDeleteId(id);

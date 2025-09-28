@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
-import useAction from "@/hooks/useActions";
+import { useData } from "@/hooks/useData";
+import useMutation from "@/hooks/useMutation";
 import {
   createPromotion,
   getPromotions,
@@ -104,61 +105,52 @@ function Page() {
     }
   };
 
-  const [promotionData, refreshPromotions, isLoadingData] = useAction(
+  const [promotionData, isLoadingData, refreshPromotions] = useData(
     getPromotions,
-    [true, () => {}],
+    () => {},
     search,
     page,
     pageSize
   );
 
-  const [, executeDelete, isLoadingDelete] = useAction(deletePromotion, [
-    ,
-    (res) =>
-      handleActionCompletion(
-        res,
-        "Promotion deleted successfully.",
-        "Failed to delete promotion."
-      ),
-  ]);
+  const [executeDelete, isLoadingDelete] = useMutation(deletePromotion, (res) =>
+    handleActionCompletion(
+      res,
+      "Promotion deleted successfully.",
+      "Failed to delete promotion."
+    )
+  );
 
-  const [, executeCreate, isLoadingCreate] = useAction(createPromotion, [
-    ,
-    (res) =>
-      handleActionCompletion(
-        res,
-        "Promotion created successfully.",
-        "Failed to create promotion."
-      ),
-  ]);
+  const [executeCreate, isLoadingCreate] = useMutation(createPromotion, (res) =>
+    handleActionCompletion(
+      res,
+      "Promotion created successfully.",
+      "Failed to create promotion."
+    )
+  );
 
-  const [, executeUpdate, isLoadingUpdate] = useAction(updatePromotion, [
-    ,
-    (res) =>
-      handleActionCompletion(
-        res,
-        "Promotion updated successfully.",
-        "Failed to update promotion."
-      ),
-  ]);
+  const [executeUpdate, isLoadingUpdate] = useMutation(updatePromotion, (res) =>
+    handleActionCompletion(
+      res,
+      "Promotion updated successfully.",
+      "Failed to update promotion."
+    )
+  );
 
-  const [, executeChangeStatus] = useAction(changeStatusPromotion, [
-    ,
-    (res) => {
-      if (res) {
-        addToast({
-          title: "Success",
-          description: "Promotion status updated successfully.",
-        });
-        refreshPromotions();
-      } else {
-        addToast({
-          title: "Error",
-          description: "Failed to update promotion status.",
-        });
-      }
-    },
-  ]);
+  const [executeChangeStatus] = useMutation(changeStatusPromotion, (res) => {
+    if (res) {
+      addToast({
+        title: "Success",
+        description: "Promotion status updated successfully.",
+      });
+      refreshPromotions();
+    } else {
+      addToast({
+        title: "Error",
+        description: "Failed to update promotion status.",
+      });
+    }
+  });
 
   const resetForm = () => {
     reset();

@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { loginSchema } from "@/lib/zodSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import useAction from "@/hooks/useActions";
+import useMutation from "@/hooks/useMutation";
 import { authenticate } from "@/actions/common/authentication";
 import { Input } from "@heroui/input";
 import { Button, Select, SelectItem, Avatar } from "@heroui/react"; // Assuming Select components are from here
@@ -127,19 +127,16 @@ function Page() {
     resolver: zodResolver(loginSchema),
   });
 
-  const [, action, loading] = useAction(authenticate, [
-    ,
-    (response) => {
-      if (response) {
-        addToast({
-          title: t.loginErrorToastTitle,
-          description: response.message,
-        });
-      }
-      // Always redirect to dashboard on attempt
-      router.push(`/${lang}/dashboard`);
-    },
-  ]);
+  const [action, loading] = useMutation(authenticate, (response) => {
+    if (response) {
+      addToast({
+        title: t.loginErrorToastTitle,
+        description: response.message,
+      });
+    }
+    // Always redirect to dashboard on attempt
+    router.push(`/${lang}/dashboard`);
+  });
 
   return (
     <div className="relative flex min-h-dvh w-full items-center justify-center overflow-hidden bg-gradient-to-br from-violet-50 via-white to-sky-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 p-4 transition-colors">
