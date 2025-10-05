@@ -7,7 +7,6 @@ import {
   getRegisteredProperties,
   registerDashboard,
 } from "@/actions/admin/registerProperty";
-import { useData } from "@/hooks/useData";
 import { Eye, EyeOff, ListChecks } from "lucide-react";
 
 function RegisterPropertyPage() {
@@ -19,22 +18,52 @@ function RegisterPropertyPage() {
   const [pageSize, setPageSize] = useState(10);
   const [search, setSearch] = useState("");
 
-  // useData returns [data, isLoading, refresh]
-  const [propertiesData, isLoadingDatas, refresh] = useData(
-    getRegisteredProperties,
-    () => {},
-    search,
-    page,
-    pageSize
-  );
-  const [dashboardData, isLoadingDashboard, refreshDashboard] = useData(
-    registerDashboard,
-    () => {}
-  );
+  const [propertiesData, setPropertiesData] = useState<any>(null);
+  const [isLoadingDatas, setIsLoadingDatas] = useState(false);
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [isLoadingDashboard, setIsLoadingDashboard] = useState(false);
+
+  const fetchProperties = async () => {
+    setIsLoadingDatas(true);
+    try {
+      const data = await getRegisteredProperties(search, page, pageSize);
+      setPropertiesData(data);
+    } catch (error) {
+      console.error("Error fetching properties:", error);
+      setPropertiesData(null);
+    } finally {
+      setIsLoadingDatas(false);
+    }
+  };
+
+  const fetchDashboard = async () => {
+    setIsLoadingDashboard(true);
+    try {
+      const data = await registerDashboard();
+      setDashboardData(data);
+    } catch (error) {
+      console.error("Error fetching dashboard:", error);
+      setDashboardData(null);
+    } finally {
+      setIsLoadingDashboard(false);
+    }
+  };
+
+  const refresh = () => {
+    fetchProperties();
+  };
+
+  const refreshDashboard = () => {
+    fetchDashboard();
+  };
 
   useEffect(() => {
-    refresh();
-  }, [search, page, pageSize, refresh]);
+    fetchProperties();
+  }, [search, page, pageSize]);
+
+  useEffect(() => {
+    fetchDashboard();
+  }, []);
 
   const handleMarkVisited = async (id: string) => {
     const res = await markPropertyAsVisited(id);

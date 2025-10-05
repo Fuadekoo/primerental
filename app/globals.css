@@ -2,3 +2,91 @@
 @plugin '../lib/hero.ts';
 @source '../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
 @custom-variant dark (&:is(.dark *));
+
+/* React Select Dark Mode Styles */
+.react-select-container .react-select__control {
+  @apply bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600;
+  @apply hover:border-gray-400 dark:hover:border-gray-500;
+  @apply focus:border-blue-500 dark:focus:border-blue-400;
+  @apply focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800;
+  @apply transition-all duration-200 ease-in-out;
+  @apply min-h-[44px] rounded-lg;
+}
+
+.react-select-container .react-select__control--is-focused {
+  @apply border-blue-500 dark:border-blue-400;
+  @apply ring-2 ring-blue-200 dark:ring-blue-800;
+}
+
+.react-select-container .react-select__control--is-disabled {
+  @apply bg-gray-50 dark:bg-gray-700;
+  @apply cursor-not-allowed;
+}
+
+.react-select-container .react-select__value-container {
+  @apply px-3 py-2;
+}
+
+.react-select-container .react-select__input {
+  @apply text-gray-900 dark:text-gray-100;
+}
+
+.react-select-container .react-select__placeholder {
+  @apply text-gray-500 dark:text-gray-400;
+}
+
+.react-select-container .react-select__single-value {
+  @apply text-gray-900 dark:text-gray-100;
+}
+
+.react-select-container .react-select__menu {
+  @apply bg-white dark:bg-gray-800;
+  @apply border border-gray-200 dark:border-gray-700;
+  @apply shadow-lg dark:shadow-2xl;
+  @apply rounded-lg;
+  @apply z-50;
+}
+
+.react-select-container .react-select__option {
+  @apply text-gray-900 dark:text-gray-100;
+  @apply hover:bg-gray-100 dark:hover:bg-gray-700;
+  @apply transition-colors duration-150;
+  @apply px-4 py-2;
+}
+
+.react-select-container .react-select__option--is-selected {
+  @apply bg-blue-500 text-white;
+}
+
+.react-select-container .react-select__option--is-focused {
+  @apply bg-gray-100 dark:bg-gray-700;
+}
+
+.react-select-container .react-select__indicator-separator {
+  @apply bg-gray-300 dark:bg-gray-600;
+}
+
+.react-select-container .react-select__dropdown-indicator {
+  @apply text-gray-500 dark:text-gray-400;
+  @apply hover:text-gray-700 dark:hover:text-gray-200;
+}
+
+.react-select-container .react-select__loading-indicator {
+  @apply text-gray-500 dark:text-gray-400;
+}
+
+.react-select-container .react-select__menu-notice {
+  @apply text-gray-500 dark:text-gray-400;
+}
+
+.react-select-container .react-select__menu-list {
+  @apply max-h-60 overflow-y-auto;
+}
+
+.react-select-container .react-select__option:first-child {
+  @apply rounded-t-lg;
+}
+
+.react-select-container .react-select__option:last-child {
+  @apply rounded-b-lg;
+}

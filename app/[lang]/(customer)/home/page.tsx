@@ -532,45 +532,55 @@ function Page() {
                     key={item.id}
                     className="block rounded-lg p-3 transition-all hover:shadow-lg hover:-translate-y-0.5 bg-white/80 dark:bg-neutral-900 shadow-sm border border-slate-200/70 dark:border-neutral-800"
                   >
-                    <div className="flex gap-4">
+                    <div className="flex gap-3 sm:gap-4">
                       <Image
                         src={`/api/filedata/${item.images[0]}`}
                         alt={item.title}
                         width={112}
                         height={128}
-                        className="h-32 w-28 flex-shrink-0 rounded-md object-cover"
+                        className="h-24 w-20 sm:h-32 sm:w-28 flex-shrink-0 rounded-md object-cover"
                       />
-                      <div className="flex flex-col flex-grow">
-                        <h3 className="font-bold text-gray-800 dark:text-slate-100 truncate">
+                      <div className="flex flex-col flex-grow min-w-0">
+                        <h3 className="font-bold text-gray-800 dark:text-slate-100 truncate text-sm sm:text-base">
                           {item.title}
                         </h3>
-                        <div className="flex items-center gap-1.5 text-sm text-gray-500 mt-1">
+                        <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 mt-1">
                           <MapPin size={14} className="flex-shrink-0" />
-                          <span>{item.location}</span>
+                          <span className="truncate">{item.location}</span>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm text-gray-600 dark:text-gray-400 mt-2">
-                          <span className="flex items-center gap-1.5">
-                            <BedDouble size={14} /> {item.bedroom} {t.beds}
+                        <div className="grid grid-cols-2 gap-x-2 sm:gap-x-4 gap-y-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-2">
+                          <span className="flex items-center gap-1 sm:gap-1.5">
+                            <BedDouble
+                              size={12}
+                              className="sm:w-3.5 sm:h-3.5"
+                            />{" "}
+                            {item.bedroom} {t.beds}
                           </span>
-                          <span className="flex items-center gap-1.5">
-                            <Ruler size={14} /> {item.squareMeter} {t.m2}
+                          <span className="flex items-center gap-1 sm:gap-1.5">
+                            <Ruler size={12} className="sm:w-3.5 sm:h-3.5" />{" "}
+                            {item.squareMeter} {t.m2}
                           </span>
-                          <span className="flex items-center gap-1.5">
-                            <Car size={14} /> {item.parking} {t.parking}
+                          <span className="flex items-center gap-1 sm:gap-1.5">
+                            <Car size={12} className="sm:w-3.5 sm:h-3.5" />{" "}
+                            {item.parking} {t.parking}
                           </span>
-                          <span className="flex items-center gap-1.5">
-                            <Building2 size={14} /> {item.propertyType.name}
+                          <span className="flex items-center gap-1 sm:gap-1.5">
+                            <Building2
+                              size={12}
+                              className="sm:w-3.5 sm:h-3.5"
+                            />{" "}
+                            {item.propertyType.name}
                           </span>
                         </div>
 
                         <div className="flex items-end justify-between mt-auto pt-2">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-semibold px-2 py-0.5 rounded-full capitalize bg-primary-500/10 text-primary-700 dark:bg-primary-400/10 dark:text-primary-300">
+                          <div className="flex items-center gap-1 sm:gap-2">
+                            <span className="text-xs font-semibold px-1.5 sm:px-2 py-0.5 rounded-full capitalize bg-primary-500/10 text-primary-700 dark:bg-primary-400/10 dark:text-primary-300">
                               {item.offer_type.toLowerCase()}
                             </span>
                           </div>
-                          <p className="text-lg font-bold text-primary-600 dark:text-primary-400">
+                          <p className="text-sm sm:text-lg font-bold text-primary-600 dark:text-primary-400">
                             ${item.price.toLocaleString()}
                           </p>
                         </div>

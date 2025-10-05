@@ -103,12 +103,12 @@ function ProductPerCategoryId({
                 style={{ objectFit: "cover" }}
                 loading="lazy"
               />
-              <div className="p-3 flex-grow flex flex-col justify-between">
-                <div>
-                  <h3 className="font-semibold text-gray-800 truncate">
+              <div className="p-3 flex-grow flex flex-col justify-between min-w-0">
+                <div className="min-w-0">
+                  <h3 className="font-semibold text-gray-800 dark:text-gray-100 truncate text-sm sm:text-base">
                     {item.title}
                   </h3>
-                  <p className="text-lg font-bold text-primary-600">
+                  <p className="text-sm sm:text-lg font-bold text-primary-600 dark:text-primary-400">
                     ${item.price.toFixed(2)}
                   </p>
                 </div>
