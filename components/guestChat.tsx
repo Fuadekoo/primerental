@@ -83,7 +83,7 @@ export default function GuestChatPopup() {
       setAdminId(admin);
     }
   }, [admin]);
-
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [chatHistory, setChatHistory] = useState<any[]>([]);
   const [isFetchingChat, setIsFetchingChat] = useState(false);
 
