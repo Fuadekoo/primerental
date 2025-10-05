@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import CustomAlert from "@/components/custom-alert";
 import CustomTable from "@/components/custom-table";
 import {
@@ -17,13 +17,35 @@ function RegisterPropertyPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [search, setSearch] = useState("");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 
-  const [propertiesData, setPropertiesData] = useState<any>(null);
+  const [propertiesData, setPropertiesData] = useState<{
+    success: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: any[];
+    pagination: {
+      currentPage: number;
+      totalPages: number;
+      itemsPerPage: number;
+      totalRecords: number;
+      hasNextPage: boolean;
+      hasPreviousPage: boolean;
+    };
+    error: string | null;
+  } | null>(null);
   const [isLoadingDatas, setIsLoadingDatas] = useState(false);
-  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [dashboardData, setDashboardData] = useState<{
+    success: boolean;
+    data: {
+      total: number;
+      visited: number;
+      notVisited: number;
+    };
+    error: string | null;
+  } | null>(null);
   const [isLoadingDashboard, setIsLoadingDashboard] = useState(false);
 
-  const fetchProperties = async () => {
+  const fetchProperties = useCallback(async () => {
     setIsLoadingDatas(true);
     try {
       const data = await getRegisteredProperties(search, page, pageSize);
@@ -34,9 +56,9 @@ function RegisterPropertyPage() {
     } finally {
       setIsLoadingDatas(false);
     }
-  };
+  }, [search, page, pageSize]);
 
-  const fetchDashboard = async () => {
+  const fetchDashboard = useCallback(async () => {
     setIsLoadingDashboard(true);
     try {
       const data = await registerDashboard();
@@ -47,7 +69,7 @@ function RegisterPropertyPage() {
     } finally {
       setIsLoadingDashboard(false);
     }
-  };
+  }, []);
 
   const refresh = () => {
     fetchProperties();
@@ -59,7 +81,7 @@ function RegisterPropertyPage() {
 
   useEffect(() => {
     fetchProperties();
-  }, [search, page, pageSize]);
+  }, [fetchProperties]);
 
   useEffect(() => {
     fetchDashboard();

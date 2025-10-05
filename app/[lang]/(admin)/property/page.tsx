@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useData, UseData } from "@/hooks/useData";
+import { useData } from "@/hooks/useData";
 import useMutation from "@/hooks/useMutation";
 import {
   createProperty,

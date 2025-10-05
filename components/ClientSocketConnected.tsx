@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { RefreshCcw, CheckCheck } from "lucide-react";
 import { customerConnected } from "@/actions/common/socketChecker";
 import useGuestSession from "@/hooks/useGuestSession";
@@ -14,7 +14,7 @@ export default function ClientSocketConnected() {
   const [connected, setConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchConnectionStatus = async () => {
+  const fetchConnectionStatus = useCallback(async () => {
     if (!guestId) return;
 
     setIsLoading(true);
@@ -27,11 +27,11 @@ export default function ClientSocketConnected() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [guestId]);
 
   useEffect(() => {
     fetchConnectionStatus();
-  }, [guestId]);
+  }, [guestId, fetchConnectionStatus]);
 
   const refresh = () => {
     fetchConnectionStatus();

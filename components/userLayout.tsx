@@ -18,7 +18,6 @@ import NotificationBell from "./NotificationBell";
 import CustomerNotificationHandler from "./CustomerNotificationHandler";
 import AdminSocketConnected from "./AdminSocketConnected";
 import ClientSocketConnected from "./ClientSocketConnected";
-import { getLoginUserId } from "@/actions/common/chat";
 import InstallPrompt from "./InstallPrompt";
 import { Sun, Moon } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -38,8 +37,8 @@ export default function UserLayout({
 }) {
   const [sidebar, setSidebar] = useState(false);
   // Determine if a logged-in session exists (server verified)
-  const [loginUser, setLoginUser] = useState<{ id: string } | null>(null);
-  const [isLoadingUser, setIsLoadingUser] = useState(false);
+  const [loginUser] = useState<{ id: string } | null>(null);
+  const [isLoadingUser] = useState(false);
 
   // useEffect(() => {
   //   const fetchUser = async () => {
