@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 export function useData<Args extends unknown[], Data>(
   func: (...args: Args) => Promise<Data>,
@@ -10,17 +10,48 @@ export function useData<Args extends unknown[], Data>(
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState<Data>();
   const [refresh, setRefresh] = useState("");
-  const handle = useCallback(async () => {
-    setIsLoading(true);
-    const result = await func(...args);
-    setData(result);
-    onFinish?.(result);
-    setIsLoading(false);
-  }, [...args]);
+  const onFinishRef = useRef(onFinish);
+  const argsRef = useRef(args);
+
+  // Update refs when values change
+  useEffect(() => {
+    onFinishRef.current = onFinish;
+  }, [onFinish]);
 
   useEffect(() => {
-    handle();
-  }, [handle, refresh]);
+    argsRef.current = args;
+  }, [args]);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    const fetchData = async () => {
+      if (isCancelled) return;
+
+      setIsLoading(true);
+      try {
+        const result = await func(...argsRef.current);
+        if (!isCancelled) {
+          setData(result);
+          onFinishRef.current?.(result);
+        }
+      } catch (error) {
+        if (!isCancelled) {
+          console.error("useData error:", error);
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchData();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [func, refresh]);
 
   return [data, isLoading, () => setRefresh(new Date().toISOString())];
 }

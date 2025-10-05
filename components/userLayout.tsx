@@ -18,7 +18,6 @@ import NotificationBell from "./NotificationBell";
 import CustomerNotificationHandler from "./CustomerNotificationHandler";
 import AdminSocketConnected from "./AdminSocketConnected";
 import ClientSocketConnected from "./ClientSocketConnected";
-import { useData } from "@/hooks/useData";
 import { getLoginUserId } from "@/actions/common/chat";
 import InstallPrompt from "./InstallPrompt";
 import { Sun, Moon } from "lucide-react";
@@ -39,10 +38,25 @@ export default function UserLayout({
 }) {
   const [sidebar, setSidebar] = useState(false);
   // Determine if a logged-in session exists (server verified)
-  const [loginUser, isLoadingUser, refreshUser] = useData(
-    getLoginUserId,
-    () => {}
-  );
+  const [loginUser, setLoginUser] = useState<{ id: string } | null>(null);
+  const [isLoadingUser, setIsLoadingUser] = useState(false);
+
+  // useEffect(() => {
+  //   const fetchUser = async () => {
+  //     setIsLoadingUser(true);
+  //     try {
+  //       const user = await getLoginUserId();
+  //       setLoginUser(user as { id: string } | null);
+  //     } catch (error) {
+  //       console.error("Error fetching user:", error);
+  //       setLoginUser(null);
+  //     } finally {
+  //       setIsLoadingUser(false);
+  //     }
+  //   };
+
+  //   fetchUser();
+  // }, []);
   const hasSession = Boolean(loginUser && loginUser.id);
   const isAdminSession = (() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -159,7 +173,7 @@ export default function UserLayout({
           setSidebar={setSidebar}
           isManager={isManager}
         />
-        <div className="m-0 rounded-xl overflow-y-auto min-h-0 h-full p-2 sm:p-4 grid">
+        <div className="m-0 rounded-xl overflow-y-auto min-h-0 h-full p-2 sm:p-4">
           {children}
         </div>
       </div>

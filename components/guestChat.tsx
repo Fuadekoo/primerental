@@ -1,5 +1,5 @@
 "use client";
-import { useData } from "@/hooks/useData";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import useMutation from "@/hooks/useMutation";
 import useGuestSession from "@/hooks/useGuestSession";
 import {
@@ -9,7 +9,6 @@ import {
   countUnreadMessagesForGuest,
 } from "@/actions/common/chat";
 import io from "socket.io-client";
-import React, { useState, useEffect, useRef, useCallback } from "react";
 import { MessageSquare, X, Send, Check, CheckCheck } from "lucide-react";
 
 type ChatMessage = {
@@ -25,7 +24,25 @@ type ChatMessage = {
 export default function GuestChatPopup() {
   const guestId = useGuestSession();
   console.log("Guest ID in GuestChatPopup:", guestId);
-  const [admin, isAdminLoading, refreshAdmin] = useData(getAdmin, () => {});
+  const [admin, setAdmin] = useState<string | null>(null);
+  const [isAdminLoading, setIsAdminLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchAdmin = async () => {
+      setIsAdminLoading(true);
+      try {
+        const adminId = await getAdmin();
+        setAdmin(adminId);
+      } catch (error) {
+        console.error("Error fetching admin:", error);
+        setAdmin(null);
+      } finally {
+        setIsAdminLoading(false);
+      }
+    };
+
+    fetchAdmin();
+  }, []);
   const [adminId, setAdminId] = useState<string | null>(null);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -67,14 +84,49 @@ export default function GuestChatPopup() {
     }
   }, [admin]);
 
-  const [chatHistory, isFetchingChat, fetchChat] = useData(
-    getGuestChat,
-    () => {},
-    adminId || ""
-  );
+  const [chatHistory, setChatHistory] = useState<any[]>([]);
+  const [isFetchingChat, setIsFetchingChat] = useState(false);
+
+  const fetchChat = useCallback(async () => {
+    if (!adminId) return;
+
+    setIsFetchingChat(true);
+    try {
+      const history = await getGuestChat(adminId);
+      setChatHistory(history);
+    } catch (error) {
+      console.error("Error fetching chat history:", error);
+      setChatHistory([]);
+    } finally {
+      setIsFetchingChat(false);
+    }
+  }, [adminId]);
+
+  // Fetch chat history when adminId changes
+  useEffect(() => {
+    fetchChat();
+  }, [fetchChat]);
 
   // action when guest read a message from admin
   const [readAction] = useMutation(readGuestMessages, () => {});
+
+  const [unreadGuestCount, setUnreadGuestCount] = useState(0);
+  const [isUnreadLoading, setIsUnreadLoading] = useState(false);
+
+  const fetchUnreadGuestCount = useCallback(async () => {
+    if (!guestId) return;
+
+    setIsUnreadLoading(true);
+    try {
+      const count = await countUnreadMessagesForGuest(guestId);
+      setUnreadGuestCount(count);
+    } catch (error) {
+      console.error("Error fetching unread count:", error);
+      setUnreadGuestCount(0);
+    } finally {
+      setIsUnreadLoading(false);
+    }
+  }, [guestId]);
 
   useEffect(() => {
     if (chatHistory && guestId) {
@@ -93,12 +145,10 @@ export default function GuestChatPopup() {
     }
   }, [chatHistory, guestId]);
 
-  const stableFetchChat = useCallback(fetchChat, []);
-  const [unreadGuestCount, isUnreadLoading, fetchUnreadGuestCount] = useData(
-    countUnreadMessagesForGuest,
-    () => {},
-    guestId || ""
-  );
+  // Fetch unread count when guestId changes
+  useEffect(() => {
+    fetchUnreadGuestCount();
+  }, [fetchUnreadGuestCount]);
 
   // Seed unread badge from DB on load/refresh when chat is closed
   useEffect(() => {
@@ -118,7 +168,7 @@ export default function GuestChatPopup() {
       readAction(guestId);
       setUnreadCount(0);
     }
-  }, [isOpen, guestId, stableFetchChat]);
+  }, [isOpen, guestId, fetchChat]);
 
   useEffect(() => {
     isOpenRef.current = isOpen;

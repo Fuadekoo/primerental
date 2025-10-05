@@ -1,13 +1,32 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { RefreshCcw, CheckCheck } from "lucide-react";
 import { adminConnected } from "@/actions/common/socketChecker";
-import { useData } from "@/hooks/useData";
 
 export default function AdminSocketConnected() {
-  // gate the id from the session
+  const [connected, setConnected] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [connected, isLoading, refresh] = useData(adminConnected, () => {});
+  const fetchConnectionStatus = async () => {
+    setIsLoading(true);
+    try {
+      const result = await adminConnected();
+      setConnected(result.status);
+    } catch (error) {
+      console.error("Error checking connection:", error);
+      setConnected(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchConnectionStatus();
+  }, []);
+
+  const refresh = () => {
+    fetchConnectionStatus();
+  };
 
   const handleRefresh = () => {
     refresh();
