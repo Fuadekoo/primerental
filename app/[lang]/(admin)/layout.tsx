@@ -46,9 +46,10 @@ export default async function Layout({
   params,
 }: {
   children: React.ReactNode;
-  params: { lang: "en" | "am" };
+  params: Promise<{ lang: string }>;
 }) {
-  const lang = params.lang || "en";
+  const { lang: langParam } = await params;
+  const lang = (langParam === "am" ? "am" : "en") as "en" | "am";
   const t = translations[lang];
 
   const menu = [

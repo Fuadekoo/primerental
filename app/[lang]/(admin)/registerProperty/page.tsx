@@ -85,7 +85,7 @@ function RegisterPropertyPage() {
 
   useEffect(() => {
     fetchDashboard();
-  }, []);
+  }, [fetchDashboard]);
 
   const handleMarkVisited = async (id: string) => {
     const res = await markPropertyAsVisited(id);
