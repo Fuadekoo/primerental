@@ -29,6 +29,7 @@ import FilterProperty, { FilterValues } from "@/components/filterProperty";
 import Image from "next/image";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { useParams } from "next/navigation";
+import PropertyCard from "@/components/PropertyCard";
 // import { filterSchema } from "@/lib/zodSchema";
 
 // Type definitions
@@ -39,6 +40,7 @@ interface Property {
   currency: string;
   location: string;
   bedroom: number;
+  bathroom: number | null;
   kitchen: number;
   squareMeter: number;
   parking: number;
@@ -505,88 +507,54 @@ function Page() {
               {t.seeAll}
             </Link> */}
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {isLoadingAllHouse ? (
                 Array.from({ length: 4 }).map((_, i) => (
                   <div
                     key={i}
-                    className="flex gap-4 rounded-lg bg-white dark:bg-neutral-900 p-3 shadow-sm"
+                    className="flex flex-col rounded-[20px] bg-white dark:bg-neutral-900 overflow-hidden shadow-sm border border-slate-200 dark:border-neutral-800"
                   >
-                    <SkeletonLoader className="h-32 w-28 flex-shrink-0 rounded-md dark:bg-slate-800" />
-                    <div className="flex-grow space-y-2">
-                      <SkeletonLoader className="h-5 w-3/4 dark:bg-slate-800" />
-                      <SkeletonLoader className="h-4 w-1/2 dark:bg-slate-800" />
-                      <SkeletonLoader className="h-4 w-full dark:bg-slate-800" />
-                      <SkeletonLoader className="h-4 w-2/3 dark:bg-slate-800" />
-                      <div className="flex justify-between pt-2">
-                        <SkeletonLoader className="h-4 w-1/4 dark:bg-slate-800" />
-                        <SkeletonLoader className="h-6 w-1/3 dark:bg-slate-800" />
+                    <SkeletonLoader className="h-64 w-full" />
+                    <div className="p-5 space-y-3">
+                      <div className="flex justify-between">
+                        <SkeletonLoader className="h-6 w-3/4" />
+                        <SkeletonLoader className="h-6 w-1/4" />
                       </div>
+                      <SkeletonLoader className="h-4 w-1/2" />
+                      <div className="pt-2 h-px w-full bg-slate-100 dark:bg-neutral-800" />
+                      <div className="grid grid-cols-3 gap-4">
+                        <SkeletonLoader className="h-5 w-full" />
+                        <SkeletonLoader className="h-5 w-full" />
+                        <SkeletonLoader className="h-5 w-full" />
+                      </div>
+                      <SkeletonLoader className="h-10 w-full rounded-2xl mt-4" />
                     </div>
                   </div>
                 ))
               ) : allHouseData && allHouseData.length > 0 ? (
                 allHouseData.map((item) => (
-                  <Link
-                    href={`/${currentLang}/property/${item.id}`}
+                  <PropertyCard
                     key={item.id}
-                    className="block rounded-lg p-3 transition-all hover:shadow-lg hover:-translate-y-0.5 bg-white/80 dark:bg-neutral-900 shadow-sm border border-slate-200/70 dark:border-neutral-800"
-                  >
-                    <div className="flex gap-3 sm:gap-4">
-                      <Image
-                        src={`/api/filedata/${item.images[0]}`}
-                        alt={item.title}
-                        width={112}
-                        height={128}
-                        className="h-24 w-20 sm:h-32 sm:w-28 flex-shrink-0 rounded-md object-cover"
-                      />
-                      <div className="flex flex-col flex-grow min-w-0">
-                        <h3 className="font-bold text-gray-800 dark:text-slate-100 truncate text-sm sm:text-base">
-                          {item.title}
-                        </h3>
-                        <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 mt-1">
-                          <MapPin size={14} className="flex-shrink-0" />
-                          <span className="truncate">{item.location}</span>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-x-2 sm:gap-x-4 gap-y-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-2">
-                          <span className="flex items-center gap-1 sm:gap-1.5">
-                            <BedDouble
-                              size={12}
-                              className="sm:w-3.5 sm:h-3.5"
-                            />{" "}
-                            {item.bedroom} {t.beds}
-                          </span>
-                          <span className="flex items-center gap-1 sm:gap-1.5">
-                            <Ruler size={12} className="sm:w-3.5 sm:h-3.5" />{" "}
-                            {item.squareMeter} {t.m2}
-                          </span>
-                          <span className="flex items-center gap-1 sm:gap-1.5">
-                            <Car size={12} className="sm:w-3.5 sm:h-3.5" />{" "}
-                            {item.parking} {t.parking}
-                          </span>
-                          <span className="flex items-center gap-1 sm:gap-1.5">
-                            <Building2
-                              size={12}
-                              className="sm:w-3.5 sm:h-3.5"
-                            />{" "}
-                            {item.propertyType.name}
-                          </span>
-                        </div>
-
-                        <div className="flex items-end justify-between mt-auto pt-2">
-                          <div className="flex items-center gap-1 sm:gap-2">
-                            <span className="text-xs font-semibold px-1.5 sm:px-2 py-0.5 rounded-full capitalize bg-primary-500/10 text-primary-700 dark:bg-primary-400/10 dark:text-primary-300">
-                              {item.offer_type.toLowerCase()}
-                            </span>
-                          </div>
-                          <p className="text-sm sm:text-lg font-bold text-primary-600 dark:text-primary-400">
-                            ${item.price.toLocaleString()}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
+                    id={item.id}
+                    title={item.title}
+                    location={item.location}
+                    price={item.price}
+                    currency={item.currency}
+                    imageUrl={`/api/filedata/${item.images[0]}`}
+                    bedrooms={item.bedroom}
+                    bathrooms={item.bathroom ?? 0}
+                    area={item.squareMeter}
+                    // For demo purposes, alternating features or based on offer type can be simulated
+                    // In real app, these should come from DB
+                    isFeatured={item.offer_type === "RENT"}
+                    isFurnished={false}
+                    lang={currentLang}
+                    t={{
+                      perMonth: "per month",
+                      viewDetails: "View Details",
+                      beds: t.beds,
+                    }}
+                  />
                 ))
               ) : (
                 <EmptyState message={t.noProperties} />
