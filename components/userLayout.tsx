@@ -6,13 +6,22 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
+  User as UserAvatar,
 } from "@heroui/react";
-import { LogOutIcon, UserIcon } from "lucide-react";
+import {
+  LogOutIcon,
+  UserIcon,
+  Heart,
+  Bookmark,
+  MessageSquare,
+  Settings,
+  Search,
+} from "lucide-react";
 import { AlignLeft, WifiOff, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { logout } from "@/actions/common/authentication";
+import { logout, loginData } from "@/actions/common/authentication";
 import Link from "next/link";
 import NotificationBell from "./NotificationBell";
 import CustomerNotificationHandler from "./CustomerNotificationHandler";
@@ -36,26 +45,37 @@ export default function UserLayout({
   isManager?: boolean;
 }) {
   const [sidebar, setSidebar] = useState(false);
-  // Determine if a logged-in session exists (server verified)
-  const [loginUser] = useState<{ id: string } | null>(null);
-  const [isLoadingUser] = useState(false);
+  const [loginUser, setLoginUser] = useState<{
+    id: string;
+    name?: string | null;
+    phone?: string;
+    role?: string;
+    email?: string | null;
+    image?: string | null;
+  } | null>(null);
+  const [isLoadingUser, setIsLoadingUser] = useState(false);
 
-  // useEffect(() => {
-  //   const fetchUser = async () => {
-  //     setIsLoadingUser(true);
-  //     try {
-  //       const user = await getLoginUserId();
-  //       setLoginUser(user as { id: string } | null);
-  //     } catch (error) {
-  //       console.error("Error fetching user:", error);
-  //       setLoginUser(null);
-  //     } finally {
-  //       setIsLoadingUser(false);
-  //     }
-  //   };
+  useEffect(() => {
+    const fetchUser = async () => {
+      setIsLoadingUser(true);
+      try {
+        const user = await loginData();
+        if (typeof user === "string") {
+          setLoginUser(null);
+        } else {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          setLoginUser(user as any);
+        }
+      } catch (error) {
+        console.error("Error fetching user:", error);
+        setLoginUser(null);
+      } finally {
+        setIsLoadingUser(false);
+      }
+    };
 
-  //   fetchUser();
-  // }, []);
+    fetchUser();
+  }, []);
   const hasSession = Boolean(loginUser && loginUser.id);
   const isAdminSession = (() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -117,7 +137,12 @@ export default function UserLayout({
   }, [sidebar]);
 
   return (
-    <div className="h-dvh w-dvw grid lg:grid-cols-[auto_1fr] overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+    <div
+      className={cn(
+        "h-dvh w-dvw overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100",
+        isManager ? "grid lg:grid-cols-[auto_1fr]" : "flex flex-col"
+      )}
+    >
       <InstallPrompt />
       {/* --- Offline Popup --- */}
       {showOfflinePopup && (
@@ -165,12 +190,15 @@ export default function UserLayout({
         hasSession={hasSession}
         isAdminSession={isAdminSession}
         cookieSession={cookieSession}
+        isHiddenOnDesktop={!isManager}
       />
       <div className="grid grid-rows-[auto_1fr] h-full min-h-0 gap-2 overflow-hidden">
         <Header
           sidebar={sidebar}
           setSidebar={setSidebar}
           isManager={isManager}
+          menu={menu}
+          loginUser={loginUser}
         />
         <div className="m-0 rounded-xl overflow-y-auto min-h-0 h-full p-2 sm:p-4">
           {children}
@@ -188,6 +216,7 @@ function Sidebar({
   hasSession,
   isAdminSession,
   cookieSession,
+  isHiddenOnDesktop,
 }: {
   sidebar: boolean;
   setSidebar: React.Dispatch<React.SetStateAction<boolean>>;
@@ -200,6 +229,7 @@ function Sidebar({
   hasSession?: boolean;
   isAdminSession?: boolean;
   cookieSession?: boolean;
+  isHiddenOnDesktop?: boolean;
 }) {
   const pathname = usePathname() ?? "";
   const [, lang] = pathname.split("/");
@@ -220,7 +250,8 @@ function Sidebar({
     <aside
       className={cn(
         "z-50 relative accent3 grid grid-cols-[auto_1fr] h-full overflow-hidden",
-        sidebar ? "max-lg:absolute max-lg:inset-0" : "max-lg:hidden"
+        sidebar ? "max-lg:absolute max-lg:inset-0" : "max-lg:hidden",
+        isHiddenOnDesktop && "lg:hidden"
       )}
     >
       <div
@@ -353,13 +384,25 @@ function Sidebar({
 function Header({
   isManager,
   setSidebar,
+  menu,
+  loginUser,
 }: {
   sidebar: boolean;
   setSidebar: React.Dispatch<React.SetStateAction<boolean>>;
   isManager?: boolean;
+  menu?: {
+    label: string;
+    url: string;
+    icon: React.ReactNode;
+  }[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  loginUser?: any;
 }) {
+  const pathname = usePathname() ?? "";
+  const [, lang] = pathname.split("/");
+
   return (
-    <header className="sticky top-0 z-30 h-12 m-0 px-2 py-2 flex gap-4 items-center bg-white/70 dark:bg-neutral-900/70 backdrop-blur border-b border-slate-200 dark:border-neutral-800">
+    <header className="sticky top-0 z-30 h-16 m-0 px-2 py-2 flex gap-4 items-center bg-white/70 dark:bg-neutral-900/70 backdrop-blur border-b border-slate-200 dark:border-neutral-800">
       <Button
         isIconOnly
         variant="flat"
@@ -370,14 +413,55 @@ function Header({
         <AlignLeft className="size-7" />
       </Button>
 
-      <div className="flex justify-between items-center w-full">
-        <h1 className="text-sm sm:text-base font-semibold text-slate-800 dark:text-slate-200">
-          PrimeRental
-        </h1>
+      <div className="flex justify-between items-center w-full max-w-7xl mx-auto relative">
+        <div className="flex items-center gap-8">
+          <Link href={`/${lang}/home`} className="flex items-center gap-2">
+            <Image
+              src="/logo_with_bg.png"
+              alt="Prime"
+              width={40}
+              height={40}
+              className="rounded-full"
+            />
+            <h1 className="text-xl font-bold text-slate-800 dark:text-slate-200 hidden sm:block">
+              PrimeRental
+            </h1>
+          </Link>
+        </div>
+
+        {/* Desktop Navigation */}
+        {!isManager && menu && (
+          <nav className="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-6">
+            {menu
+              .filter(
+                (item) =>
+                  !["favorite", "savedSearch", "settings"].includes(item.url)
+              )
+              .map((item) => {
+                const active = pathname.endsWith(`/${item.url}`);
+                return (
+                  <Link
+                    key={item.url}
+                    href={`/${lang}/${item.url}`}
+                    className={cn(
+                      "text-sm font-medium transition-colors hover:text-primary-600 dark:hover:text-primary-400 relative py-1",
+                      active
+                        ? "text-primary-600 dark:text-primary-400 font-semibold after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-primary-600 dark:after:bg-primary-400 after:rounded-full"
+                        : "text-slate-600 dark:text-slate-300"
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+          </nav>
+        )}
+
         <div className="flex items-center gap-2">
           {isManager ? <AdminSocketConnected /> : <ClientSocketConnected />}
           {isManager ? <NotificationBell /> : <CustomerNotificationHandler />}
           <ThemeSwitcher />
+          {!isManager && <ProfileDropdown user={loginUser} />}
         </div>
       </div>
     </header>
@@ -475,6 +559,164 @@ function User({
           }}
         >
           <span className="text-red-600">Sign Out</span>
+        </DropdownItem>
+      </DropdownMenu>
+    </Dropdown>
+  );
+}
+
+function ProfileDropdown({
+  user,
+}: {
+  user: {
+    id: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+    role?: string | null;
+  } | null;
+}) {
+  const pathname = usePathname() ?? "";
+  const [, lang] = pathname.split("/");
+
+  if (!user) {
+    return (
+      <Dropdown placement="bottom-end">
+        <DropdownTrigger>
+          <UserAvatar
+            as="button"
+            avatarProps={{
+              isBordered: true,
+              color: "default",
+              size: "sm",
+            }}
+            className="transition-transform"
+            name="" // Required prop
+          />
+        </DropdownTrigger>
+        <DropdownMenu aria-label="Guest Actions" variant="flat">
+          <DropdownItem
+            key="favorites"
+            href={`/${lang}/favorite`}
+            as={Link}
+            textValue="Favorites"
+            startContent={<Heart className="size-4" />}
+          >
+            Favorites
+          </DropdownItem>
+          <DropdownItem
+            key="saved"
+            href={`/${lang}/savedSearch`}
+            as={Link}
+            textValue="Saved Search"
+            startContent={<Search className="size-4" />}
+          >
+            Saved Search
+          </DropdownItem>
+          <DropdownItem
+            key="settings"
+            href={`/${lang}/settings`}
+            as={Link}
+            textValue="Settings"
+            startContent={<Settings className="size-4" />}
+          >
+            Settings
+          </DropdownItem>
+        </DropdownMenu>
+      </Dropdown>
+    );
+  }
+
+  return (
+    <Dropdown placement="bottom-end">
+      <DropdownTrigger>
+        <UserAvatar
+          as="button"
+          avatarProps={{
+            isBordered: true,
+            src: user.image || undefined,
+            color: "primary",
+            size: "sm",
+          }}
+          className="transition-transform"
+          description={user.role || "User"}
+          name={user.name || "User"}
+        />
+      </DropdownTrigger>
+      <DropdownMenu aria-label="User Actions" variant="flat">
+        <DropdownItem
+          key="profile"
+          className="h-14 gap-2"
+          textValue="Signed in as"
+        >
+          <p className="font-semibold">Signed in as</p>
+          <p className="font-semibold">{user.email}</p>
+        </DropdownItem>
+        <DropdownItem
+          key="my_profile"
+          href={`/${lang}/profile`}
+          as={Link}
+          textValue="Profile"
+          startContent={<UserIcon className="size-4" />}
+        >
+          Profile
+        </DropdownItem>
+        <DropdownItem
+          key="favorites"
+          href={`/${lang}/profile?tab=favorites`}
+          as={Link}
+          textValue="Favorites"
+          startContent={<Heart className="size-4" />}
+        >
+          Favorites
+        </DropdownItem>
+        <DropdownItem
+          key="saved"
+          href={`/${lang}/profile?tab=saved`}
+          as={Link}
+          textValue="Saved"
+          startContent={<Bookmark className="size-4" />}
+        >
+          Saved
+        </DropdownItem>
+        <DropdownItem
+          key="savedSearch"
+          href={`/${lang}/savedSearch`}
+          as={Link}
+          textValue="Saved Search"
+          startContent={<Search className="size-4" />}
+        >
+          Saved Search
+        </DropdownItem>
+        <DropdownItem
+          key="messages"
+          href={`/${lang}/profile?tab=messages`}
+          as={Link}
+          textValue="Messages"
+          startContent={<MessageSquare className="size-4" />}
+        >
+          Messages
+        </DropdownItem>
+        <DropdownItem
+          key="settings"
+          href={`/${lang}/settings`}
+          as={Link}
+          textValue="Settings"
+          startContent={<Settings className="size-4" />}
+        >
+          Settings
+        </DropdownItem>
+        <DropdownItem
+          key="logout"
+          color="danger"
+          className="text-danger"
+          textValue="Log Out"
+          startContent={<LogOutIcon className="size-4" />}
+          onPress={async () => {
+            await logout();
+          }}
+        >
+          Log Out
         </DropdownItem>
       </DropdownMenu>
     </Dropdown>
