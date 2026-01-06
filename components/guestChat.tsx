@@ -274,7 +274,7 @@ export default function GuestChatPopup() {
           }`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-3 rounded-t-xl text-white bg-gradient-to-r from-primary-600 to-primary-500 dark:from-primary-500 dark:to-primary-400">
+        <div className="flex items-center justify-between p-3 rounded-t-xl text-white bg-gradient-to-r from-orange-600 to-orange-500 dark:from-orange-600 dark:to-orange-500">
           <h3 className="font-bold flex-1 text-center">Chat with Support</h3>
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1 text-xs bg-white/15 px-2 py-0.5 rounded-full">
@@ -311,7 +311,7 @@ export default function GuestChatPopup() {
                       className={`max-w-xs px-3 py-2 rounded-lg text-sm shadow
                         ${
                           msg.self
-                            ? "bg-primary-600 dark:bg-primary-500 text-white rounded-br-none"
+                            ? "bg-orange-500 dark:bg-orange-600 text-white rounded-br-none"
                             : "bg-white dark:bg-neutral-800 text-slate-900 dark:text-slate-100 rounded-bl-none border border-slate-200 dark:border-neutral-700"
                         }`}
                     >
@@ -320,7 +320,7 @@ export default function GuestChatPopup() {
                         className={`flex items-center justify-end gap-1 text-xs mt-1
                           ${
                             msg.self
-                              ? "text-primary-100"
+                              ? "text-orange-100"
                               : "text-slate-400 dark:text-slate-500"
                           }`}
                       >
@@ -359,12 +359,12 @@ export default function GuestChatPopup() {
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder="Type your message..."
-                className="flex-1 w-full rounded-md border border-slate-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 py-2 px-3 shadow-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-500/30 outline-none"
+                className="flex-1 w-full rounded-md border border-slate-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 py-2 px-3 shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30 outline-none"
                 disabled={!guestId || !adminId}
               />
               <button
                 type="submit"
-                className="p-2 rounded-full text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-400 transition-colors flex-shrink-0 disabled:bg-primary-400/60 disabled:cursor-not-allowed"
+                className="p-2 rounded-full text-white bg-orange-600 hover:bg-orange-700 dark:bg-orange-600 dark:hover:bg-orange-500 transition-colors flex-shrink-0 disabled:bg-orange-400/60 disabled:cursor-not-allowed"
                 aria-label="Send Message"
                 disabled={!newMessage.trim() || !guestId || !adminId}
               >
@@ -378,7 +378,7 @@ export default function GuestChatPopup() {
       {/* Toggle button */}
       <button
         onClick={toggleChat}
-        className="mt-4 float-right p-3 rounded-full text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-400 shadow-lg ring-2 ring-white/60 dark:ring-neutral-800 transition-transform duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-0 relative"
+        className="mt-4 float-right p-3 rounded-full text-white bg-orange-600 hover:bg-orange-700 dark:bg-orange-600 dark:hover:bg-orange-500 shadow-lg ring-2 ring-white/60 dark:ring-neutral-800 transition-transform duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-0 relative"
         aria-label="Toggle Chat"
       >
         <MessageSquare size={24} />

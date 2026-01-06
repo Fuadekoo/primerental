@@ -20,7 +20,7 @@ export default function Footer() {
           <div className="flex flex-col max-w-lg">
             {/* Logo Section */}
             <div className="flex items-center gap-3 mb-6">
-              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-green-600 text-white shadow-lg shadow-green-900/20">
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-black dark:bg-white text-white dark:text-black shadow-lg shadow-black/20 dark:shadow-white/20">
                 <span className="font-bold text-xl">P</span>
               </div>
               <div className="flex flex-col">
@@ -83,7 +83,7 @@ export default function Footer() {
                     className="h-12 w-full bg-white dark:bg-slate-700/50 border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white placeholder:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700/70 focus-within:bg-slate-50 dark:focus-within:bg-slate-700/70"
                   />
                 </div>
-                <Button className="bg-green-600 text-white font-semibold h-12 px-6 rounded-xl hover:bg-green-500 shadow-lg shadow-green-900/20">
+                <Button className="bg-black dark:bg-white text-white dark:text-black font-semibold h-12 px-6 rounded-xl hover:bg-neutral-800 dark:hover:bg-neutral-200 shadow-lg shadow-black/20 dark:shadow-white/10">
                   Subscribe <Send size={16} className="ml-2" />
                 </Button>
               </form>
