@@ -454,10 +454,208 @@ function Page() {
     youtubeLink,
   } = propertyData;
 
+  const amenitiesList = [
+    { icon: <BedDouble size={20} />, label: t.bedrooms, value: bedroom },
+    { icon: <Bath size={20} />, label: t.bathrooms, value: bathroom },
+    { icon: <Ruler size={20} />, label: t.m2, value: squareMeter },
+    { icon: <Car size={20} />, label: t.parking, value: parking },
+    { icon: <Building2 size={20} />, label: "Type", value: propertyType.name },
+  ];
+
   return (
     <div className="h-full pb-8 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
-      {/* --- Image and Header --- */}
-      <div className="relative">
+      {/* --- Desktop Layout Grid --- */}
+      <div className="max-w-[1400px] mx-auto hidden lg:grid grid-cols-[1fr_380px] gap-8 p-6">
+        {/* Left Column: Media & Details */}
+        <div className="space-y-6">
+          {/* Main Gallery Section */}
+          <div className="bg-white dark:bg-neutral-900 rounded-2xl overflow-hidden border border-slate-200 dark:border-neutral-800 shadow-sm">
+            <div className="relative h-[500px] w-full group">
+              <Image
+                src={`/api/filedata/${images[0]}`}
+                alt={title}
+                fill
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                priority
+              />
+              <div className="absolute top-4 left-4 flex gap-2">
+                <span className="px-4 py-1.5 bg-green-600 text-white text-sm font-bold rounded-full shadow-lg">
+                  Photos
+                </span>
+                {youtubeLink && (
+                  <span className="px-4 py-1.5 bg-white text-black text-sm font-bold rounded-full shadow-lg flex items-center gap-1">
+                    3D Tour
+                  </span>
+                )}
+              </div>
+            </div>
+            {/* Thumbnails Row */}
+            <div className="grid grid-cols-4 gap-2 p-2 bg-white dark:bg-neutral-900">
+              {images.slice(1, 5).map((img, idx) => (
+                <div
+                  key={idx}
+                  className="relative h-28 rounded-xl overflow-hidden cursor-pointer hover:opacity-90 transition"
+                >
+                  <Image
+                    src={`/api/filedata/${img}`}
+                    alt="thumbnail"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* About Property */}
+          <div className="bg-white dark:bg-neutral-900 p-8 rounded-2xl border border-slate-200 dark:border-neutral-800 shadow-sm">
+            <h2 className="text-xl font-bold mb-4 border-b pb-2 border-slate-100 dark:border-neutral-800">
+              {t.description}
+            </h2>
+            <p className="text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line">
+              {description}
+            </p>
+          </div>
+
+          {/* Features Grid */}
+          <div className="bg-white dark:bg-neutral-900 p-8 rounded-2xl border border-slate-200 dark:border-neutral-800 shadow-sm">
+            <h2 className="text-xl font-bold mb-6 border-b pb-2 border-slate-100 dark:border-neutral-800">
+              {t.amenities}
+            </h2>
+            <div className="grid grid-cols-3 gap-6">
+              {amenitiesList.map((item, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center gap-3 p-4 rounded-xl bg-slate-50 dark:bg-neutral-800/50"
+                >
+                  <div className="text-green-600 dark:text-green-500">
+                    {item.icon}
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-slate-900 dark:text-white">
+                      {item.value}
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      {item.label}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Sidebar */}
+        <div className="space-y-6">
+          {/* Price & Title Card */}
+          <div className="bg-white dark:bg-neutral-900 p-6 rounded-2xl border border-slate-200 dark:border-neutral-800 shadow-sm sticky top-24">
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
+              {title}
+            </h1>
+            <p className="text-slate-500 text-sm mb-6 flex items-center gap-1">
+              <MapPin size={14} /> {location}
+            </p>
+
+            <div className="flex flex-wrap gap-2 mb-6">
+              <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-lg uppercase tracking-wider">
+                {offer_type}
+              </span>
+              {propertyType && (
+                <span className="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold rounded-lg uppercase tracking-wider">
+                  {propertyType.name}
+                </span>
+              )}
+            </div>
+
+            <div className="bg-slate-50 dark:bg-neutral-800 rounded-xl p-5 mb-6 border border-slate-100 dark:border-neutral-700 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-green-500/5 rounded-full -mr-10 -mt-10 group-hover:bg-green-500/10 transition-colors"></div>
+              <p className="text-xs text-slate-500 uppercase font-bold mb-1">
+                Total Price
+              </p>
+              <p className="text-3xl font-extrabold text-slate-900 dark:text-white relative z-10">
+                {price.toLocaleString()}{" "}
+                <span className="text-lg text-slate-500 font-medium">
+                  {currency}
+                </span>
+              </p>
+              <p className="text-xs text-slate-400 mt-1 relative z-10">
+                {(price / squareMeter).toFixed(0)} {currency} per m²
+              </p>
+            </div>
+
+            {/* Agent / Marketing Section */}
+            <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-100 dark:border-blue-900/30 flex items-center gap-4">
+              <div className="w-12 h-12 bg-white dark:bg-neutral-800 rounded-full flex items-center justify-center shadow-sm p-1">
+                <Image
+                  src="/logo_with_bg.png"
+                  width={40}
+                  height={40}
+                  alt="Prime"
+                  className="rounded-full"
+                />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-slate-900 dark:text-white">
+                  Prime Rental
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Verified Listing Partner
+                </p>
+              </div>
+            </div>
+
+            {/* Access Buttons */}
+            <p className="text-xs font-bold text-slate-400 uppercase mb-3 px-1">
+              Contact for Booking
+            </p>
+            <div className="grid grid-cols-4 gap-2">
+              <Link
+                href="https://wa.me/qr/XFZIVZ2X5SKWF1"
+                className="flex flex-col items-center justify-center gap-1 py-3 bg-slate-50 hover:bg-green-50 dark:bg-neutral-800 dark:hover:bg-green-900/20 rounded-xl border border-slate-200 dark:border-neutral-700 transition hover:scale-105"
+                title="WhatsApp"
+              >
+                <div className="w-8 h-8 flex items-center justify-center bg-white dark:bg-neutral-700 rounded-full shadow-sm text-green-500">
+                  <Image src={wa} alt="WhatsApp" width={20} height={20} />
+                </div>
+              </Link>
+              <Link
+                href="https://www.instagram.com/prime_rental1/profilecard/?igsh=bXEzZTNuZnY1dmdy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center justify-center gap-1 py-3 bg-slate-50 hover:bg-pink-50 dark:bg-neutral-800 dark:hover:bg-pink-900/20 rounded-xl border border-slate-200 dark:border-neutral-700 transition hover:scale-105"
+                title="Instagram"
+              >
+                <div className="w-8 h-8 flex items-center justify-center bg-white dark:bg-neutral-700 rounded-full shadow-sm text-pink-500">
+                  <Image src={insta} alt="Instagram" width={20} height={20} />
+                </div>
+              </Link>
+              <Link
+                href="https://t.me/Rental_house"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center justify-center gap-1 py-3 bg-slate-50 hover:bg-blue-50 dark:bg-neutral-800 dark:hover:bg-blue-900/20 rounded-xl border border-slate-200 dark:border-neutral-700 transition hover:scale-105"
+                title="Telegram"
+              >
+                <div className="w-8 h-8 flex items-center justify-center bg-white dark:bg-neutral-700 rounded-full shadow-sm text-blue-500">
+                  <Image src={tg} alt="Telegram" width={20} height={20} />
+                </div>
+              </Link>
+              <Link
+                href="tel:+251933571691"
+                className="flex flex-col items-center justify-center gap-1 py-3 bg-slate-50 hover:bg-indigo-50 dark:bg-neutral-800 dark:hover:bg-indigo-900/20 rounded-xl border border-slate-200 dark:border-neutral-700 transition hover:scale-105"
+                title="Call"
+              >
+                <div className="w-8 h-8 flex items-center justify-center bg-white dark:bg-neutral-700 rounded-full shadow-sm text-indigo-500">
+                  <Phone size={18} />
+                </div>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* --- Mobile Layout (Original) --- */}
+      <div className="lg:hidden relative">
         <MediaScroller
           images={images}
           youtubeLink={youtubeLink ?? undefined}
@@ -495,8 +693,8 @@ function Page() {
         </div>
       </div>
 
-      {/* --- Primary Info --- */}
-      <div className="p-4 bg-white/80 dark:bg-neutral-900 rounded-b-xl shadow-sm border border-slate-200/70 dark:border-neutral-800">
+      {/* --- Mobile Primary Info --- */}
+      <div className="lg:hidden p-4 bg-white/80 dark:bg-neutral-900 rounded-b-xl shadow-sm border border-slate-200/70 dark:border-neutral-800">
         <h1 className="text-2xl font-bold">{title}</h1>
         <p className="text-slate-600 dark:text-slate-400 flex items-center gap-1.5 mt-1">
           <MapPin size={14} /> {location}
@@ -516,7 +714,7 @@ function Page() {
         </p>
       </div>
 
-      <div className="p-4 space-y-6">
+      <div className="lg:hidden p-4 space-y-6">
         {/* --- Details Section --- */}
         <div className="bg-white/80 dark:bg-neutral-900 p-4 rounded-xl shadow-sm border border-slate-200/70 dark:border-neutral-800">
           <h2 className="text-xl font-bold mb-2">{t.detailsTitle}</h2>
@@ -593,35 +791,46 @@ function Page() {
         </div>
 
         {/* --- Contact Shortcuts --- */}
-        <div className="bottom-0 left-0 w-full bg-white/90 dark:bg-neutral-900/90 border-t border-slate-200 dark:border-neutral-800 p-3 backdrop-blur-sm">
-          <div className="flex justify-between items-center gap-3">
+        <div className="bottom-0 left-0 w-full bg-white/95 dark:bg-neutral-900/95 border-t border-slate-200 dark:border-neutral-800 p-4 backdrop-blur-md rounded-t-2xl shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.1)]">
+          <p className="text-xs font-bold text-slate-400 uppercase mb-3 px-1 text-center tracking-widest">
+            Contact for Booking
+          </p>
+          <div className="grid grid-cols-4 gap-3">
             <Link
               href="https://wa.me/qr/XFZIVZ2X5SKWF1"
-              className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-500 text-white rounded-lg font-semibold"
+              className="flex flex-col items-center justify-center gap-1 py-3 bg-slate-50 active:scale-95 dark:bg-neutral-800 rounded-xl border border-slate-200 dark:border-neutral-700 transition"
             >
-              <Image src={wa} alt="WhatsApp" width={20} height={20} />
+              <div className="w-8 h-8 flex items-center justify-center bg-white dark:bg-neutral-700 rounded-full shadow-sm text-green-500">
+                <Image src={wa} alt="WhatsApp" width={22} height={22} />
+              </div>
             </Link>
             <Link
               href="https://www.instagram.com/prime_rental1/profilecard/?igsh=bXEzZTNuZnY1dmdy"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 flex items-center justify-center gap-2 py-3 bg-pink-500 text-white rounded-lg font-semibold"
+              className="flex flex-col items-center justify-center gap-1 py-3 bg-slate-50 active:scale-95 dark:bg-neutral-800 rounded-xl border border-slate-200 dark:border-neutral-700 transition"
             >
-              <Image src={insta} alt="Instagram" width={20} height={20} />
+              <div className="w-8 h-8 flex items-center justify-center bg-white dark:bg-neutral-700 rounded-full shadow-sm text-pink-500">
+                <Image src={insta} alt="Instagram" width={22} height={22} />
+              </div>
             </Link>
             <Link
               href="https://t.me/Rental_house"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-400 text-white rounded-lg font-semibold"
+              className="flex flex-col items-center justify-center gap-1 py-3 bg-slate-50 active:scale-95 dark:bg-neutral-800 rounded-xl border border-slate-200 dark:border-neutral-700 transition"
             >
-              <Image src={tg} alt="Telegram" width={20} height={20} />
+              <div className="w-8 h-8 flex items-center justify-center bg-white dark:bg-neutral-700 rounded-full shadow-sm text-blue-500">
+                <Image src={tg} alt="Telegram" width={22} height={22} />
+              </div>
             </Link>
             <Link
               href="tel:+251933571691"
-              className="flex-1 flex items-center justify-center gap-2 py-3 bg-green-400 text-white rounded-lg font-semibold"
+              className="flex flex-col items-center justify-center gap-1 py-3 bg-slate-50 active:scale-95 dark:bg-neutral-800 rounded-xl border border-slate-200 dark:border-neutral-700 transition"
             >
-              <Phone size={20} />
+              <div className="w-8 h-8 flex items-center justify-center bg-white dark:bg-neutral-700 rounded-full shadow-sm text-indigo-500">
+                <Phone size={18} />
+              </div>
             </Link>
           </div>
         </div>
