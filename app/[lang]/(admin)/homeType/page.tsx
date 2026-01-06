@@ -9,8 +9,9 @@ import {
   updatePropertyType,
 } from "@/actions/admin/propertyType";
 import CustomTable from "@/components/custom-table";
-import { Button, Input } from "@heroui/react";
-import { addToast } from "@heroui/toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -90,17 +91,14 @@ function HomeTypePage() {
     errorMessage: string
   ) => {
     if (response) {
-      addToast({ title: "Success", description: successMessage });
+      toast.success(successMessage);
       refreshPropertyTypes();
       if (showModal) {
         setShowModal(false);
         resetForm();
       }
     } else {
-      addToast({
-        title: "Error",
-        description: errorMessage,
-      });
+      toast.error(errorMessage);
     }
   };
 
@@ -112,28 +110,34 @@ function HomeTypePage() {
     pageSize
   );
 
-  const [executeDelete, isLoadingDelete] = useMutation(deletePropertyType, (res) =>
-    handleActionCompletion(
-      res,
-      "Home type deleted successfully.",
-      "Failed to delete home type."
-    )
+  const [executeDelete, isLoadingDelete] = useMutation(
+    deletePropertyType,
+    (res) =>
+      handleActionCompletion(
+        res,
+        "Home type deleted successfully.",
+        "Failed to delete home type."
+      )
   );
 
-  const [executeCreate, isLoadingCreate] = useMutation(createPropertyType, (res) =>
-    handleActionCompletion(
-      res,
-      "Home type created successfully.",
-      "Failed to create home type."
-    )
+  const [executeCreate, isLoadingCreate] = useMutation(
+    createPropertyType,
+    (res) =>
+      handleActionCompletion(
+        res,
+        "Home type created successfully.",
+        "Failed to create home type."
+      )
   );
 
-  const [executeUpdate, isLoadingUpdate] = useMutation(updatePropertyType, (res) =>
-    handleActionCompletion(
-      res,
-      "Home type updated successfully.",
-      "Failed to update home type."
-    )
+  const [executeUpdate, isLoadingUpdate] = useMutation(
+    updatePropertyType,
+    (res) =>
+      handleActionCompletion(
+        res,
+        "Home type updated successfully.",
+        "Failed to update home type."
+      )
   );
 
   const handleDelete = (id: string) => {
@@ -329,18 +333,16 @@ function HomeTypePage() {
         <div className="flex items-center gap-2">
           <Button
             size="sm"
-            color="primary"
-            variant="flat"
-            onPress={() => handleEdit(item as HomeTypeItem)}
+            variant="outline"
+            onClick={() => handleEdit(item as HomeTypeItem)}
           >
             Edit
           </Button>
           <Button
             size="sm"
-            color="danger"
-            variant="flat"
-            onPress={() => handleDelete(item.id)}
-            isLoading={pendingDeleteId === item.id && isLoadingDelete}
+            variant="destructive"
+            onClick={() => handleDelete(item.id)}
+            disabled={pendingDeleteId === item.id && isLoadingDelete}
           >
             <Trash2 size={16} />
           </Button>
@@ -359,7 +361,7 @@ function HomeTypePage() {
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
           Manage Home Types
         </h1>
-        <Button color="primary" onPress={handleAdd}>
+        <Button onClick={handleAdd}>
           <Plus size={20} className="mr-2" />
           Add Home Type
         </Button>
@@ -468,7 +470,7 @@ function HomeTypePage() {
                           <Button
                             size="sm"
                             variant="ghost"
-                            onPress={() => removePhoto()}
+                            onClick={() => removePhoto()}
                             disabled={upload.progress === 100}
                           >
                             <X size={16} />
@@ -501,9 +503,9 @@ function HomeTypePage() {
                       />
                       <Button
                         size="sm"
-                        color="danger"
+                        variant="destructive"
                         className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onPress={() => removePhoto()}
+                        onClick={() => removePhoto()}
                       >
                         <X size={14} />
                       </Button>
@@ -530,18 +532,13 @@ function HomeTypePage() {
                 <Button
                   variant="ghost"
                   type="button"
-                  onPress={() => setShowModal(false)}
+                  onClick={() => setShowModal(false)}
                   disabled={disableSubmit}
                   className="dark:text-white dark:hover:bg-primary-500/10"
                 >
                   Cancel
                 </Button>
-                <Button
-                  color="primary"
-                  type="submit"
-                  isLoading={disableSubmit}
-                  disabled={disableSubmit}
-                >
+                <Button type="submit" disabled={disableSubmit}>
                   {disableSubmit ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
                   ) : editHomeType ? (

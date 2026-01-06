@@ -158,17 +158,15 @@ export default function UserLayout({
             <div className="flex gap-3 w-full">
               <Button
                 className="flex-1"
-                color="secondary"
-                variant="flat"
-                onPress={() => setShowOfflinePopup(false)}
+                variant="secondary"
+                onClick={() => setShowOfflinePopup(false)}
               >
                 Cancel
               </Button>
               <Button
                 className="flex-1"
-                color="primary"
-                variant="solid"
-                onPress={() => {
+                variant="default"
+                onClick={() => {
                   if (navigator.onLine) {
                     setIsOnline(true);
                     setShowOfflinePopup(false);
@@ -262,13 +260,10 @@ function Sidebar({
       >
         {/* Sidebar toggle button with both icons in a larger circle */}
         <Button
-          isIconOnly
           variant="ghost"
-          color="primary"
           size="sm"
-          radius="full"
-          className="z-[100] absolute top-8 -right-5 w-11 h-11 flex items-center justify-center bg-white/80 dark:bg-neutral-900 border border-slate-200 dark:border-neutral-700 shadow"
-          onPress={() => setSidebar((prev) => !prev)}
+          className="z-[100] absolute top-8 -right-5 w-11 h-11 rounded-full flex items-center justify-center bg-white/80 dark:bg-neutral-900 border border-slate-200 dark:border-neutral-700 shadow"
+          onClick={() => setSidebar((prev) => !prev)}
         >
           <span className="relative w-full h-full flex items-center justify-center">
             <AlignLeft
@@ -311,9 +306,7 @@ function Sidebar({
             return (
               <Button
                 key={`menu-${i}`}
-                isIconOnly={false}
-                color={active ? "primary" : "default"}
-                variant={active ? "solid" : "light"}
+                variant={active ? "default" : "ghost"}
                 className={`
                   w-full px-3 inline-flex gap-5 justify-start items-center
                   transition-all duration-200 rounded-lg
@@ -326,22 +319,25 @@ function Sidebar({
                   hover:border-primary-400 hover:bg-primary-50/70 dark:hover:bg-neutral-800 hover:text-primary-700 dark:hover:text-primary-300
                   hover:scale-[1.01] active:scale-95
                 `}
-                as={Link}
-                href={`/${lang}/${item.url}`}
+                asChild
                 onClick={handleMenuClick}
               >
-                <span
-                  className={`${
-                    active
-                      ? "text-primary-600 dark:text-primary-300"
-                      : "text-slate-500 dark:text-slate-400"
-                  }`}
-                >
-                  {item.icon}
-                </span>
-                {sidebar && (
-                  <span className="px-5 capitalize truncate">{item.label}</span>
-                )}
+                <Link href={`/${lang}/${item.url}`}>
+                  <span
+                    className={`${
+                      active
+                        ? "text-primary-600 dark:text-primary-300"
+                        : "text-slate-500 dark:text-slate-400"
+                    }`}
+                  >
+                    {item.icon}
+                  </span>
+                  {sidebar && (
+                    <span className="px-5 capitalize truncate">
+                      {item.label}
+                    </span>
+                  )}
+                </Link>
               </Button>
             );
           })}
@@ -358,14 +354,8 @@ function Sidebar({
               onSwitchToAdmin={switchToAdmin}
             />
           ) : cookieSession ? (
-            <Button
-              as={Link}
-              href="/en/dashboard"
-              color="primary"
-              variant="solid"
-              className="w-full"
-            >
-              Go to Admin
+            <Button asChild variant="secondary" className="w-full">
+              <Link href="/en/dashboard">Go to Admin</Link>
             </Button>
           ) : null}
         </div>
@@ -404,11 +394,10 @@ function Header({
   return (
     <header className="sticky top-0 z-30 h-16 m-0 px-2 py-2 flex gap-4 items-center bg-white/70 dark:bg-neutral-900/70 backdrop-blur border-b border-slate-200 dark:border-neutral-800">
       <Button
-        isIconOnly
-        variant="flat"
-        color="primary"
+        variant="outline"
+        size="icon"
         className="lg:hidden"
-        onPress={() => setSidebar((prev) => !prev)}
+        onClick={() => setSidebar((prev) => !prev)}
       >
         <AlignLeft className="size-7" />
       </Button>
@@ -640,7 +629,7 @@ function ProfileDropdown({
               {user.name?.slice(0, 2).toUpperCase() || "U"}
             </AvatarFallback>
           </Avatar>
-          <div className="flex flex-col items-start text-xs hidden md:flex">
+          <div className="hidden md:flex flex-col items-start text-xs">
             <span className="font-semibold truncate max-w-[100px]">
               {user.name || "User"}
             </span>

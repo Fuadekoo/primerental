@@ -1,140 +1,49 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@plugin '../lib/hero.ts';
-@source '../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
+
 @custom-variant dark (&:is(.dark *));
 
-/* React Select Dark Mode Styles */
-.react-select-container .react-select__control {
-  @apply bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600;
-  @apply hover:border-gray-400 dark:hover:border-gray-500;
-  @apply focus:border-blue-500 dark:focus:border-blue-400;
-  @apply focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800;
-  @apply transition-all duration-200 ease-in-out;
-  @apply min-h-[44px] rounded-lg;
-}
-
-.react-select-container .react-select__control--is-focused {
-  @apply border-blue-500 dark:border-blue-400;
-  @apply ring-2 ring-blue-200 dark:ring-blue-800;
-}
-
-.react-select-container .react-select__control--is-disabled {
-  @apply bg-gray-50 dark:bg-gray-700;
-  @apply cursor-not-allowed;
-}
-
-.react-select-container .react-select__value-container {
-  @apply px-3 py-2;
-}
-
-.react-select-container .react-select__input {
-  @apply text-gray-900 dark:text-gray-100;
-}
-
-.react-select-container .react-select__placeholder {
-  @apply text-gray-500 dark:text-gray-400;
-}
-
-.react-select-container .react-select__single-value {
-  @apply text-gray-900 dark:text-gray-100;
-}
-
-.react-select-container .react-select__menu {
-  @apply bg-white dark:bg-gray-800;
-  @apply border border-gray-200 dark:border-gray-700;
-  @apply shadow-lg dark:shadow-2xl;
-  @apply rounded-lg;
-  @apply z-50;
-}
-
-.react-select-container .react-select__option {
-  @apply text-gray-900 dark:text-gray-100;
-  @apply hover:bg-gray-100 dark:hover:bg-gray-700;
-  @apply transition-colors duration-150;
-  @apply px-4 py-2;
-}
-
-.react-select-container .react-select__option--is-selected {
-  @apply bg-blue-500 text-white;
-}
-
-.react-select-container .react-select__option--is-focused {
-  @apply bg-gray-100 dark:bg-gray-700;
-}
-
-.react-select-container .react-select__indicator-separator {
-  @apply bg-gray-300 dark:bg-gray-600;
-}
-
-.react-select-container .react-select__dropdown-indicator {
-  @apply text-gray-500 dark:text-gray-400;
-  @apply hover:text-gray-700 dark:hover:text-gray-200;
-}
-
-.react-select-container .react-select__loading-indicator {
-  @apply text-gray-500 dark:text-gray-400;
-}
-
-.react-select-container .react-select__menu-notice {
-  @apply text-gray-500 dark:text-gray-400;
-}
-
-.react-select-container .react-select__menu-list {
-  @apply max-h-60 overflow-y-auto;
-}
-
-.react-select-container .react-select__option:first-child {
-  @apply rounded-t-lg;
-}
-
-.react-select-container .react-select__option:last-child {
-  @apply rounded-b-lg;
-}
-
 @theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
 }
-
 :root {
-  --radius: 0.625rem;
+  --radius: 0.65rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -158,6 +67,7 @@
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
+  --radius: 0.625rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -209,4 +119,102 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+@layer components {
+  * {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  *::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Print styles for ID Card */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 0;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  #id-card-section,
+  #id-card-section * {
+    visibility: visible;
+  }
+
+  #id-card-section {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+  }
+
+  /* Hide all other elements */
+  header,
+  nav,
+  aside,
+  footer {
+    display: none !important;
+  }
+
+  /* Hide elements with print:hidden class */
+  [class*="print:hidden"] {
+    display: none !important;
+  }
+
+  /* Ensure ID card prints correctly */
+  #id-card-section .card {
+    border: none;
+    box-shadow: none;
+    background: white;
+  }
+
+  /* Prevent page breaks inside ID card */
+  #id-card-section * {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+}
+
+/* Sonner Toast Custom Colors */
+[data-sonner-toast][data-type="success"] {
+  background-color: hsl(142, 76%, 36%) !important;
+  color: hsl(0, 0%, 100%) !important;
+  border-color: hsl(142, 76%, 30%) !important;
+}
+
+[data-sonner-toast][data-type="success"] [data-icon] {
+  color: hsl(0, 0%, 100%) !important;
+}
+
+.dark [data-sonner-toast][data-type="success"] {
+  background-color: hsl(142, 71%, 45%) !important;
+  color: hsl(0, 0%, 100%) !important;
+  border-color: hsl(142, 71%, 40%) !important;
+}
+
+[data-sonner-toast][data-type="error"] {
+  background-color: hsl(0, 84%, 60%) !important;
+  color: hsl(0, 0%, 100%) !important;
+  border-color: hsl(0, 84%, 55%) !important;
+}
+
+[data-sonner-toast][data-type="error"] [data-icon] {
+  color: hsl(0, 0%, 100%) !important;
+}
+
+.dark [data-sonner-toast][data-type="error"] {
+  background-color: hsl(0, 72%, 51%) !important;
+  color: hsl(0, 0%, 100%) !important;
+  border-color: hsl(0, 72%, 46%) !important;
 }

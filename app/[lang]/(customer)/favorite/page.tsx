@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { allFavorite } from "@/actions/customer/favorite";
 import { useFavoriteStore } from "@/hooks/useFavoriteStore";
-import { addToast } from "@heroui/toast";
+import { toast } from "sonner";
 import { useParams } from "next/navigation";
 import {
   MapPin,
@@ -102,7 +102,7 @@ function Page() {
     e.preventDefault(); // Prevent navigating to the property page
     e.stopPropagation();
     toggleFavorite(id);
-    addToast({ description: t.removedToast });
+    toast.success(t.removedToast);
   };
 
   const hasFavorites = favorites.length > 0;

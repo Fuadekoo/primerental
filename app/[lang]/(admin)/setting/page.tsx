@@ -4,9 +4,21 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { useRouter, useParams } from "next/navigation";
-import { Accordion, AccordionItem } from "@heroui/react";
-import { Select, SelectItem, Avatar } from "@heroui/react";
-import { Button } from "@heroui/button";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   Sun,
   Moon,
@@ -102,15 +114,6 @@ const FontSwitcher = ({
     localStorage.setItem("fontTheme", cls);
     setCurrent(cls);
   };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleSelectChange = (keys: any) => {
-    const key = Array.from(keys as Set<React.Key>)[0] as
-      | "font-theme-1"
-      | "font-theme-2"
-      | "font-theme-3"
-      | undefined;
-    if (key) applyFont(key);
-  };
 
   if (!mounted) {
     return (
@@ -131,20 +134,22 @@ const FontSwitcher = ({
           </span>
         </div>
 
-        <Select
-          aria-label={t.fontStyle}
-          className="w-full sm:w-72"
-          variant="flat"
-          label={t.fontStyle}
-          labelPlacement="outside-left"
-          selectedKeys={new Set([current])}
-          onSelectionChange={handleSelectChange}
-          disallowEmptySelection
-        >
-          <SelectItem key="font-theme-1">{t.fontTheme1}</SelectItem>
-          <SelectItem key="font-theme-2">{t.fontTheme2}</SelectItem>
-          <SelectItem key="font-theme-3">{t.fontTheme3}</SelectItem>
-        </Select>
+        <div className="w-full sm:w-72 flex flex-col gap-2">
+          <span className="sr-only">{t.fontStyle}</span>
+          <Select
+            value={current}
+            onValueChange={(val) => applyFont(val as any)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={t.fontStyle} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="font-theme-1">{t.fontTheme1}</SelectItem>
+              <SelectItem value="font-theme-2">{t.fontTheme2}</SelectItem>
+              <SelectItem value="font-theme-3">{t.fontTheme3}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Live preview */}
@@ -236,13 +241,6 @@ const LanguageSelector = ({
         "NEXT_LOCALE=en; path=/; max-age=31536000; samesite=lax";
     }
   }, []);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleSelectChange = (keys: any) => {
-    const key = Array.from(keys as Set<React.Key>)[0];
-    const newLang = String(key || "en");
-    document.cookie = `NEXT_LOCALE=${newLang}; path=/; max-age=31536000; samesite=lax`;
-    router.push(`/${newLang}/setting`);
-  };
 
   return (
     <div className="flex flex-col items-start gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -253,41 +251,40 @@ const LanguageSelector = ({
         </span>
       </div>
 
-      <Select
-        label={t.selectLanguage}
-        labelPlacement="outside-left"
-        className="w-full sm:w-64"
-        selectedKeys={new Set([currentLang])}
-        onSelectionChange={handleSelectChange}
-        disallowEmptySelection
-        variant="flat"
-      >
-        <SelectItem
-          key="en"
-          startContent={
-            <Avatar
-              alt="English"
-              className="w-6 h-6"
-              src="https://flagcdn.com/gb.svg"
-            />
-          }
+      <div className="w-full sm:w-64 flex flex-col gap-2">
+        <span className="sr-only">{t.selectLanguage}</span>
+        <Select
+          value={currentLang}
+          onValueChange={(val) => {
+            document.cookie = `NEXT_LOCALE=${val}; path=/; max-age=31536000; samesite=lax`;
+            router.push(`/${val}/setting`);
+          }}
         >
-          English
-        </SelectItem>
-
-        <SelectItem
-          key="am"
-          startContent={
-            <Avatar
-              alt="Amharic"
-              className="w-6 h-6"
-              src="https://flagcdn.com/et.svg"
-            />
-          }
-        >
-          አማርኛ
-        </SelectItem>
-      </Select>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="en">
+              <div className="flex items-center gap-2">
+                <Avatar className="w-6 h-6">
+                  <AvatarImage src="https://flagcdn.com/gb.svg" alt="English" />
+                  <AvatarFallback>EN</AvatarFallback>
+                </Avatar>
+                <span>English</span>
+              </div>
+            </SelectItem>
+            <SelectItem value="am">
+              <div className="flex items-center gap-2">
+                <Avatar className="w-6 h-6">
+                  <AvatarImage src="https://flagcdn.com/et.svg" alt="Amharic" />
+                  <AvatarFallback>AM</AvatarFallback>
+                </Avatar>
+                <span>አማርኛ</span>
+              </div>
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
     </div>
   );
 };
@@ -300,33 +297,36 @@ const InfoAccordion = ({
 }) => {
   return (
     <Accordion
-      selectionMode="multiple"
-      className="p-2"
-      defaultSelectedKeys={["about", "terms", "privacy"]}
+      type="multiple"
+      className="p-2 w-full"
+      defaultValue={["about", "terms", "privacy"]}
     >
-      <AccordionItem
-        key="about"
-        aria-label={t.aboutTitle}
-        title={t.aboutTitle}
-        indicator={<Info />}
-      >
-        {t.aboutContent}
+      <AccordionItem value="about">
+        <AccordionTrigger>
+          <div className="flex items-center gap-2">
+            <Info className="h-4 w-4" />
+            <span>{t.aboutTitle}</span>
+          </div>
+        </AccordionTrigger>
+        <AccordionContent>{t.aboutContent}</AccordionContent>
       </AccordionItem>
-      <AccordionItem
-        key="terms"
-        aria-label={t.termsTitle}
-        title={t.termsTitle}
-        indicator={<FileText />}
-      >
-        {t.termsContent}
+      <AccordionItem value="terms">
+        <AccordionTrigger>
+          <div className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            <span>{t.termsTitle}</span>
+          </div>
+        </AccordionTrigger>
+        <AccordionContent>{t.termsContent}</AccordionContent>
       </AccordionItem>
-      <AccordionItem
-        key="privacy"
-        aria-label={t.privacyTitle}
-        title={t.privacyTitle}
-        indicator={<Shield />}
-      >
-        {t.privacyContent}
+      <AccordionItem value="privacy">
+        <AccordionTrigger>
+          <div className="flex items-center gap-2">
+            <Shield className="h-4 w-4" />
+            <span>{t.privacyTitle}</span>
+          </div>
+        </AccordionTrigger>
+        <AccordionContent>{t.privacyContent}</AccordionContent>
       </AccordionItem>
     </Accordion>
   );
@@ -377,13 +377,8 @@ function Setting() {
                     Switch to customer (guest) view
                   </p>
                 </div>
-                <Button
-                  as={Link}
-                  href={`/${currentLang}/home`}
-                  color="primary"
-                  variant="solid"
-                >
-                  Change to Guest
+                <Button asChild>
+                  <Link href={`/${currentLang}/home`}>Change to Guest</Link>
                 </Button>
               </div>
             </div>

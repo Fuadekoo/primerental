@@ -17,7 +17,7 @@ import {
   User as UserIcon,
   Loader2,
 } from "lucide-react";
-import { Button } from "@heroui/react";
+import { Button } from "@/components/ui/button";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -294,8 +294,8 @@ export default function Page() {
               </h2>
               <div className="mt-4 flex flex-col gap-3 sm:flex-row">
                 <Button
-                  variant="solid"
-                  onPress={() => {
+                  variant="default"
+                  onClick={() => {
                     resetEdit({ name: profileData?.name ?? "", phone: "" });
                     setShowEditModal(true);
                   }}
@@ -304,8 +304,8 @@ export default function Page() {
                   {t.editProfile}
                 </Button>
                 <Button
-                  variant="solid"
-                  onPress={() => setShowPasswordModal(true)}
+                  variant="default"
+                  onClick={() => setShowPasswordModal(true)}
                 >
                   <KeyRound className="h-4 w-4 mr-2" />
                   {t.changePassword}
@@ -396,16 +396,14 @@ export default function Page() {
                 <Button
                   variant="ghost"
                   type="button"
-                  onPress={() => setShowEditModal(false)}
+                  onClick={() => setShowEditModal(false)}
                   disabled={isEditSubmitting || isLoadingProfileUpdate}
                   className="dark:text-white dark:hover:bg-primary-500/10"
                 >
                   Cancel
                 </Button>
                 <Button
-                  color="primary"
                   type="submit"
-                  isLoading={isLoadingProfileUpdate}
                   disabled={isEditSubmitting || isLoadingProfileUpdate}
                 >
                   {isLoadingProfileUpdate ? (
@@ -496,7 +494,7 @@ export default function Page() {
                 <Button
                   variant="ghost"
                   type="button"
-                  onPress={() => {
+                  onClick={() => {
                     resetPwd();
                     setShowPasswordModal(false);
                   }}
@@ -506,9 +504,7 @@ export default function Page() {
                   Cancel
                 </Button>
                 <Button
-                  color="primary"
                   type="submit"
-                  isLoading={isLoadingChange}
                   disabled={isPwdSubmitting || isLoadingChange}
                 >
                   {isLoadingChange ? (

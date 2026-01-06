@@ -11,8 +11,10 @@ import {
 } from "@/actions/admin/property";
 import { getPropertyType } from "@/actions/admin/propertyType";
 import CustomTable from "@/components/custom-table";
-import { Button, Form, Input, Textarea } from "@heroui/react";
-import { addToast } from "@heroui/toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 import { z } from "zod";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -114,27 +116,25 @@ const PropertyCard = ({
         <div className="flex items-center justify-end gap-2 mt-4">
           <Button
             size="sm"
-            variant="flat"
-            color={isActive ? "success" : "warning"}
-            onPress={() => onToggleStatus(item.id, !isActive)}
-            isLoading={isTogglingStatus}
+            variant="secondary"
+            className={
+              isActive
+                ? "bg-green-500 hover:bg-green-600 text-white"
+                : "bg-yellow-500 hover:bg-yellow-600 text-white"
+            }
+            onClick={() => onToggleStatus(item.id, !isActive)}
+            disabled={isTogglingStatus}
           >
             {isActive ? "Active" : "Inactive"}
           </Button>
-          <Button
-            size="sm"
-            color="primary"
-            variant="flat"
-            onPress={() => onEdit(item)}
-          >
+          <Button size="sm" variant="outline" onClick={() => onEdit(item)}>
             Edit
           </Button>
           <Button
             size="sm"
-            color="danger"
-            variant="flat"
-            onPress={() => onDelete(item.id)}
-            isLoading={isDeleting}
+            variant="destructive"
+            onClick={() => onDelete(item.id)}
+            disabled={isDeleting}
           >
             <Trash2 size={16} />
           </Button>
@@ -222,20 +222,10 @@ function PropertyPage() {
   }, [propertyTypeResponse]);
 
   const toastSuccess = (description: string, title = "Success") =>
-    addToast({
-      title,
-      description,
-      color: "secondary",
-      variant: "flat",
-    });
+    toast.success(title, { description });
 
   const toastError = (description: string, title = "Error") =>
-    addToast({
-      title,
-      description,
-      color: "primary",
-      variant: "flat",
-    });
+    toast.error(title, { description });
 
   const handleActionCompletion = (
     response: { error?: string; message?: string } | null | undefined,
@@ -479,10 +469,10 @@ function PropertyPage() {
         return (
           <Button
             size="sm"
-            variant="flat"
-            color={isActive ? "success" : "warning"}
-            onPress={() => handleToggleStatus(item.id, !isActive)}
-            isLoading={
+            variant="secondary"
+            className={`${isActive ? "text-green-600 bg-green-100 hover:bg-green-200" : "text-yellow-600 bg-yellow-100 hover:bg-yellow-200"}`}
+            onClick={() => handleToggleStatus(item.id, !isActive)}
+            disabled={
               pendingToggleId === item.id && isLoadingChangeAvailability
             }
           >
@@ -498,18 +488,16 @@ function PropertyPage() {
         <div className="flex items-center gap-2">
           <Button
             size="sm"
-            color="primary"
-            variant="flat"
-            onPress={() => handleEdit(item as PropertyItem)}
+            variant="default"
+            onClick={() => handleEdit(item as PropertyItem)}
           >
             Edit
           </Button>
           <Button
             size="sm"
-            color="danger"
-            variant="flat"
-            onPress={() => handleDelete(item.id)}
-            isLoading={pendingDeleteId === item.id && isLoadingDelete}
+            variant="destructive"
+            onClick={() => handleDelete(item.id)}
+            disabled={pendingDeleteId === item.id && isLoadingDelete}
           >
             <Trash2 size={16} />
           </Button>
@@ -543,23 +531,21 @@ function PropertyPage() {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
             <Button
-              variant={viewMode === "table" ? "solid" : "ghost"}
-              color="primary"
+              variant={viewMode === "table" ? "default" : "ghost"}
               size="sm"
-              onPress={() => setViewMode("table")}
+              onClick={() => setViewMode("table")}
             >
               <List className="h-5 w-5" />
             </Button>
             <Button
-              variant={viewMode === "card" ? "solid" : "ghost"}
-              color="primary"
+              variant={viewMode === "card" ? "default" : "ghost"}
               size="sm"
-              onPress={() => setViewMode("card")}
+              onClick={() => setViewMode("card")}
             >
               <Grid className="h-5 w-5" />
             </Button>
           </div>
-          <Button color="primary" onPress={handleAdd}>
+          <Button onClick={handleAdd}>
             <Plus size={20} className="mr-2" />
             Add Property
           </Button>
@@ -611,7 +597,7 @@ function PropertyPage() {
             <h2 className="text-xl font-semibold mb-4">
               {editProperty ? "Edit Property" : "Add Property"}
             </h2>
-            <Form
+            <form
               onSubmit={handleSubmit(onSubmit)}
               className="grid grid-cols-1 md:grid-cols-2 gap-4"
             >
@@ -762,7 +748,7 @@ function PropertyPage() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onPress={() => removeUploadingFile(upload.uuid)}
+                          onClick={() => removeUploadingFile(upload.uuid)}
                           disabled={upload.progress === 100}
                         >
                           <X size={16} />
@@ -790,9 +776,9 @@ function PropertyPage() {
                           />
                           <Button
                             size="sm"
-                            color="danger"
+                            variant="destructive"
                             className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                            onPress={() => removeImage(index)}
+                            onClick={() => removeImage(index)}
                           >
                             <X size={14} />
                           </Button>
@@ -813,17 +799,12 @@ function PropertyPage() {
                 <Button
                   variant="ghost"
                   type="button"
-                  onPress={() => setShowModal(false)}
+                  onClick={() => setShowModal(false)}
                   disabled={disableSubmit}
                 >
                   Cancel
                 </Button>
-                <Button
-                  color="primary"
-                  type="submit"
-                  isLoading={disableSubmit}
-                  disabled={disableSubmit}
-                >
+                <Button type="submit" disabled={disableSubmit}>
                   {disableSubmit ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
                   ) : editProperty ? (
@@ -833,7 +814,7 @@ function PropertyPage() {
                   )}
                 </Button>
               </div>
-            </Form>
+            </form>
           </div>
         </div>
       )}
@@ -877,7 +858,6 @@ any) => (
         disabled={disabled}
         placeholder={placeholder}
         minRows={3}
-        error={!!errors?.[props.name]}
         className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
       />
     ) : (
@@ -885,7 +865,6 @@ any) => (
         {...props}
         disabled={disabled}
         placeholder={placeholder}
-        error={!!errors?.[props.name]}
         className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
       />
     )}

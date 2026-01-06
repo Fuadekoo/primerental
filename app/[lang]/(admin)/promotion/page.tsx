@@ -10,8 +10,9 @@ import {
   changeStatusPromotion,
 } from "@/actions/admin/promotion";
 import CustomTable from "@/components/custom-table";
-import { Button, Input } from "@heroui/react";
-import { addToast } from "@heroui/toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -91,17 +92,14 @@ function Page() {
     errorMessage: string
   ) => {
     if (response) {
-      addToast({ title: "Success", description: successMessage });
+      toast.success(successMessage);
       refreshPromotions();
       if (showModal) {
         setShowModal(false);
         resetForm();
       }
     } else {
-      addToast({
-        title: "Error",
-        description: errorMessage,
-      });
+      toast.error(errorMessage);
     }
   };
 
@@ -139,16 +137,10 @@ function Page() {
 
   const [executeChangeStatus] = useMutation(changeStatusPromotion, (res) => {
     if (res) {
-      addToast({
-        title: "Success",
-        description: "Promotion status updated successfully.",
-      });
+      toast.success("Promotion status updated successfully.");
       refreshPromotions();
     } else {
-      addToast({
-        title: "Error",
-        description: "Failed to update promotion status.",
-      });
+      toast.error("Failed to update promotion status.");
     }
   });
 
@@ -231,9 +223,8 @@ function Page() {
       });
 
       if (!res.ok) {
-        addToast({
-          title: "Upload Error",
-          description: "Upload failed. Try again.",
+        toast.error("Upload failed. Try again.", {
+          description: "Upload Error",
         });
         setIsUploading(false);
         return;
@@ -344,26 +335,23 @@ function Page() {
         <div className="flex items-center gap-2">
           <Button
             size="sm"
-            color="primary"
-            variant="flat"
-            onPress={() => handleEdit(item as PromotionItem)}
+            variant="secondary"
+            onClick={() => handleEdit(item as PromotionItem)}
           >
             <Edit size={16} />
           </Button>
           <Button
             size="sm"
-            color={item.isActive ? "default" : "primary"}
-            variant="flat"
-            onPress={() => handleToggleActive(item as PromotionItem)}
+            variant={item.isActive ? "ghost" : "default"}
+            onClick={() => handleToggleActive(item as PromotionItem)}
           >
             {item.isActive ? <EyeOff size={16} /> : <Eye size={16} />}
           </Button>
           <Button
             size="sm"
-            color="danger"
-            variant="flat"
-            onPress={() => handleDelete(item.id)}
-            isLoading={pendingDeleteId === item.id && isLoadingDelete}
+            variant="destructive"
+            onClick={() => handleDelete(item.id)}
+            disabled={pendingDeleteId === item.id && isLoadingDelete}
           >
             <Trash2 size={16} />
           </Button>
@@ -381,7 +369,7 @@ function Page() {
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
           Manage Promotions
         </h1>
-        <Button color="primary" onPress={handleAdd}>
+        <Button onClick={handleAdd}>
           <Plus size={20} className="mr-2" />
           Add Promotion
         </Button>
@@ -526,18 +514,13 @@ function Page() {
                 <Button
                   variant="ghost"
                   type="button"
-                  onPress={() => setShowModal(false)}
+                  onClick={() => setShowModal(false)}
                   disabled={disableSubmit || isUploading}
                   className="dark:text-white dark:hover:bg-primary-500/10"
                 >
                   Cancel
                 </Button>
-                <Button
-                  color="primary"
-                  type="submit"
-                  isLoading={disableSubmit || isUploading}
-                  disabled={disableSubmit || isUploading}
-                >
+                <Button type="submit" disabled={disableSubmit || isUploading}>
                   {disableSubmit || isUploading ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
                   ) : editPromotion ? (

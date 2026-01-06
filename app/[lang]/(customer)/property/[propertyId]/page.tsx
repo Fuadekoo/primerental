@@ -389,7 +389,7 @@ function Page() {
   const handleToggleFavorite = () => {
     toggleFavorite(propertyId);
     if (!isFav) {
-      addToast({ description: t.addedToFavorites });
+      toast.success(t.addedToFavorites);
     } else {
       toast.info(t.removedFromFavorites);
     }
