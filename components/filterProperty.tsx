@@ -1,10 +1,11 @@
 "use client";
 import React, { useEffect } from "react";
-import { Button, Input, ButtonGroup } from "@heroui/react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { X } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 
 export type FilterValues = {
   propertyType: string;
@@ -139,9 +140,11 @@ export default function FilterProperty({
                 <Button
                   key={opt.value}
                   size="sm"
-                  variant={values.propertyType === opt.value ? "solid" : "flat"}
-                  color="primary"
-                  onPress={() => pick("propertyType", opt.value)}
+                  variant={
+                    values.propertyType === opt.value ? "default" : "secondary"
+                  }
+                  onClick={() => pick("propertyType", opt.value)}
+                  type="button"
                 >
                   {opt.label}
                 </Button>
@@ -152,20 +155,22 @@ export default function FilterProperty({
           {/* Offer Type */}
           <div>
             <h3 className="font-semibold mb-2">Offer Type</h3>
-            <ButtonGroup radius="lg" variant="flat" className="gap-2">
+            <div className="flex gap-2">
               <Button
-                color={values.offerType === "SALE" ? "primary" : "default"}
-                onPress={() => pick("offerType", "SALE")}
+                variant={values.offerType === "SALE" ? "default" : "outline"}
+                onClick={() => pick("offerType", "SALE")}
+                type="button"
               >
                 For Sale
               </Button>
               <Button
-                color={values.offerType === "RENT" ? "primary" : "default"}
-                onPress={() => pick("offerType", "RENT")}
+                variant={values.offerType === "RENT" ? "default" : "outline"}
+                onClick={() => pick("offerType", "RENT")}
+                type="button"
               >
                 For Rent
               </Button>
-            </ButtonGroup>
+            </div>
           </div>
 
           {/* Price Range */}
@@ -200,9 +205,9 @@ export default function FilterProperty({
                 <Button
                   key={b}
                   size="sm"
-                  variant={values.bedrooms === b ? "solid" : "flat"}
-                  color="primary"
-                  onPress={() => pick("bedrooms", b)}
+                  variant={values.bedrooms === b ? "default" : "secondary"}
+                  onClick={() => pick("bedrooms", b)}
+                  type="button"
                 >
                   {b}
                 </Button>
@@ -218,9 +223,9 @@ export default function FilterProperty({
                 <Button
                   key={b}
                   size="sm"
-                  variant={values.bathrooms === b ? "solid" : "flat"}
-                  color="primary"
-                  onPress={() => pick("bathrooms", b)}
+                  variant={values.bathrooms === b ? "default" : "secondary"}
+                  onClick={() => pick("bathrooms", b)}
+                  type="button"
                 >
                   {b}
                 </Button>
@@ -233,19 +238,15 @@ export default function FilterProperty({
         <div className="fixed left-0 right-0 bottom-0 sm:static bg-white/90 dark:bg-neutral-950/90 border-t border-slate-200 dark:border-neutral-800 p-4 flex gap-4">
           <Button
             type="button"
-            onPress={onReset}
-            variant="bordered"
+            onClick={onReset}
+            variant="outline"
             className="flex-1"
             disabled={isSubmitting}
           >
             Reset
           </Button>
-          <Button
-            type="submit"
-            color="primary"
-            className="flex-1"
-            isLoading={isSubmitting}
-          >
+          <Button type="submit" className="flex-1" disabled={isSubmitting}>
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Apply Filters
           </Button>
         </div>

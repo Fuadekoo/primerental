@@ -1,7 +1,7 @@
 "use client";
 import Footer from "@/components/Footer";
 import React, { useState, useEffect, useCallback } from "react";
-import { Input } from "@heroui/react";
+import { Input } from "@/components/ui/input";
 import {
   SlidersHorizontal,
   ChevronLeft,
@@ -328,8 +328,6 @@ function Page() {
           <div className="relative mb-4">
             <Input
               type="text"
-              variant="faded"
-              color="primary"
               placeholder={t.searchPlaceholder}
               value={search}
               onChange={(e) => setSearch(e.target.value)}

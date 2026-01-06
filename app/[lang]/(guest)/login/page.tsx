@@ -6,13 +6,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import useMutation from "@/hooks/useMutation";
 import { authenticate } from "@/actions/common/authentication";
-import { Input } from "@heroui/input";
-import { Button, Select, SelectItem, Avatar } from "@heroui/react"; // Assuming Select components are from here
-import Loading from "@/components/loading";
-import { addToast } from "@heroui/toast";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Loader2, ArrowRight } from "lucide-react";
+import { toast } from "sonner";
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
-import { ArrowRight } from "lucide-react";
 
 // i18n translations
 const translations = {
@@ -62,10 +69,8 @@ const LanguageSelector = () => {
   const params = useParams() || {};
   const currentLang = (params.lang || "en") as "en" | "am";
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleSelectChange = (keys: any) => {
-    const key = Array.from(keys as Set<React.Key>)[0];
-    const newLang = String(key || "en");
+  const handleSelectChange = (val: string) => {
+    const newLang = val || "en";
     document.cookie = `NEXT_LOCALE=${newLang}; path=/; max-age=31536000; samesite=lax`;
     // Get current path and replace the language part
     const currentPath = window.location.pathname;
@@ -75,39 +80,30 @@ const LanguageSelector = () => {
 
   return (
     <div className="absolute top-4 right-4 z-20">
-      <Select
-        aria-label="Select Language"
-        className="w-40"
-        selectedKeys={new Set([currentLang])}
-        onSelectionChange={handleSelectChange}
-        disallowEmptySelection
-        variant="bordered"
-        size="sm"
-      >
-        <SelectItem
-          key="en"
-          startContent={
-            <Avatar
-              alt="English"
-              className="w-5 h-5"
-              src="https://flagcdn.com/gb.svg"
-            />
-          }
-        >
-          English
-        </SelectItem>
-        <SelectItem
-          key="am"
-          startContent={
-            <Avatar
-              alt="Amharic"
-              className="w-5 h-5"
-              src="https://flagcdn.com/et.svg"
-            />
-          }
-        >
-          አማርኛ
-        </SelectItem>
+      <Select value={currentLang} onValueChange={handleSelectChange}>
+        <SelectTrigger className="w-40 h-8">
+          <SelectValue placeholder="Language" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="en">
+            <div className="flex items-center gap-2">
+              <Avatar className="w-5 h-5">
+                <AvatarImage src="https://flagcdn.com/gb.svg" alt="English" />
+                <AvatarFallback>EN</AvatarFallback>
+              </Avatar>
+              English
+            </div>
+          </SelectItem>
+          <SelectItem value="am">
+            <div className="flex items-center gap-2">
+              <Avatar className="w-5 h-5">
+                <AvatarImage src="https://flagcdn.com/et.svg" alt="Amharic" />
+                <AvatarFallback>AM</AvatarFallback>
+              </Avatar>
+              አማርኛ
+            </div>
+          </SelectItem>
+        </SelectContent>
       </Select>
     </div>
   );
@@ -129,10 +125,7 @@ function Page() {
 
   const [action, loading] = useMutation(authenticate, (response) => {
     if (response) {
-      addToast({
-        title: t.loginErrorToastTitle,
-        description: response.message,
-      });
+      toast.error(response.message || t.loginErrorToastTitle);
     }
     // Always redirect to dashboard on attempt
     router.push(`/${lang}/dashboard`);
@@ -206,7 +199,6 @@ function Page() {
                   <Input
                     id="email"
                     type="text"
-                    variant="bordered"
                     placeholder={t.emailOrPhonePlaceholder}
                     {...register("email")}
                     className="w-full"
@@ -230,7 +222,6 @@ function Page() {
                   <Input
                     id="password"
                     type="password"
-                    variant="bordered"
                     placeholder="••••••••"
                     {...register("password")}
                     className="w-full"
@@ -243,14 +234,12 @@ function Page() {
                 </div>
 
                 <Button
-                  isDisabled={loading}
-                  color="primary"
-                  variant="solid"
+                  disabled={loading}
                   type="submit"
                   className="w-full font-semibold"
                 >
                   {loading ? (
-                    <Loading />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     <>
                       {t.signInButton} <ArrowRight className="ml-2 h-4 w-4" />

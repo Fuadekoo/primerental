@@ -1,13 +1,13 @@
 "use client";
-import { Button } from "@heroui/button";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
-  cn,
-  Dropdown,
-  DropdownItem,
   DropdownMenu,
-  DropdownTrigger,
-  User as UserAvatar,
-} from "@heroui/react";
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   LogOutIcon,
   UserIcon,
@@ -513,8 +513,8 @@ function User({
   const [, lang] = pathname.split("/");
 
   return (
-    <Dropdown className="overflow-hidden">
-      <DropdownTrigger>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
         <div
           className={cn(
             "flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg transition-colors",
@@ -529,39 +529,39 @@ function User({
           <UserIcon className="size-5 text-white" />
           {sidebar && <span className="text-white font-medium">Account</span>}
         </div>
-      </DropdownTrigger>
-      <DropdownMenu color="primary" variant="flat">
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
         {isManager ? (
-          <DropdownItem
+          <DropdownMenuItem
             key="switchToGuest"
-            className="font-semibold"
+            className="font-semibold cursor-pointer"
             onClick={() => onSwitchToGuest?.()}
           >
             Switch to Guest
-          </DropdownItem>
+          </DropdownMenuItem>
         ) : null}
         {!isManager && hasSession && isAdminSession ? (
-          <DropdownItem
+          <DropdownMenuItem
             key="switchToAdmin"
-            className="font-semibold"
+            className="font-semibold cursor-pointer"
             onClick={() => onSwitchToAdmin?.()}
           >
             Switch to Admin
-          </DropdownItem>
+          </DropdownMenuItem>
         ) : null}
-        <DropdownItem
+        <DropdownMenuItem
           key={"signout"}
-          startContent={<LogOutIcon className="size-4 text-red-600" />}
-          className="!text-red-600 font-semibold rounded-md border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+          className="!text-red-600 font-semibold rounded-md border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors cursor-pointer"
           onClick={async () => {
             await logout();
             window.location.href = `/${lang}/login`;
           }}
         >
+          <LogOutIcon className="size-4 text-red-600 mr-2" />
           <span className="text-red-600">Sign Out</span>
-        </DropdownItem>
-      </DropdownMenu>
-    </Dropdown>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -581,144 +581,145 @@ function ProfileDropdown({
 
   if (!user) {
     return (
-      <Dropdown placement="bottom-end">
-        <DropdownTrigger>
-          <UserAvatar
-            as="button"
-            avatarProps={{
-              isBordered: true,
-              color: "default",
-              size: "sm",
-            }}
-            className="transition-transform"
-            name="" // Required prop
-          />
-        </DropdownTrigger>
-        <DropdownMenu aria-label="Guest Actions" variant="flat">
-          <DropdownItem
-            key="favorites"
-            href={`/${lang}/favorite`}
-            as={Link}
-            textValue="Favorites"
-            startContent={<Heart className="size-4" />}
-          >
-            Favorites
-          </DropdownItem>
-          <DropdownItem
-            key="saved"
-            href={`/${lang}/savedSearch`}
-            as={Link}
-            textValue="Saved Search"
-            startContent={<Search className="size-4" />}
-          >
-            Saved Search
-          </DropdownItem>
-          <DropdownItem
-            key="settings"
-            href={`/${lang}/settings`}
-            as={Link}
-            textValue="Settings"
-            startContent={<Settings className="size-4" />}
-          >
-            Settings
-          </DropdownItem>
-        </DropdownMenu>
-      </Dropdown>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+            <Avatar className="h-8 w-8">
+              <AvatarFallback>
+                <UserIcon className="h-4 w-4" />
+              </AvatarFallback>
+            </Avatar>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem asChild>
+            <Link
+              href={`/${lang}/favorite`}
+              className="cursor-pointer flex w-full items-center"
+            >
+              <Heart className="mr-2 h-4 w-4" />
+              <span>Favorites</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link
+              href={`/${lang}/savedSearch`}
+              className="cursor-pointer flex w-full items-center"
+            >
+              <Search className="mr-2 h-4 w-4" />
+              <span>Saved Search</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link
+              href={`/${lang}/settings`}
+              className="cursor-pointer flex w-full items-center"
+            >
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Settings</span>
+            </Link>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     );
   }
 
   return (
-    <Dropdown placement="bottom-end">
-      <DropdownTrigger>
-        <UserAvatar
-          as="button"
-          avatarProps={{
-            isBordered: true,
-            src: user.image || undefined,
-            color: "primary",
-            size: "sm",
-          }}
-          className="transition-transform"
-          description={user.role || "User"}
-          name={user.name || "User"}
-        />
-      </DropdownTrigger>
-      <DropdownMenu aria-label="User Actions" variant="flat">
-        <DropdownItem
-          key="profile"
-          className="h-14 gap-2"
-          textValue="Signed in as"
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          className="relative h-10 w-auto justify-start gap-2 overflow-hidden px-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800"
         >
-          <p className="font-semibold">Signed in as</p>
-          <p className="font-semibold">{user.email}</p>
-        </DropdownItem>
-        <DropdownItem
-          key="my_profile"
-          href={`/${lang}/profile`}
-          as={Link}
-          textValue="Profile"
-          startContent={<UserIcon className="size-4" />}
-        >
-          Profile
-        </DropdownItem>
-        <DropdownItem
-          key="favorites"
-          href={`/${lang}/profile?tab=favorites`}
-          as={Link}
-          textValue="Favorites"
-          startContent={<Heart className="size-4" />}
-        >
-          Favorites
-        </DropdownItem>
-        <DropdownItem
-          key="saved"
-          href={`/${lang}/profile?tab=saved`}
-          as={Link}
-          textValue="Saved"
-          startContent={<Bookmark className="size-4" />}
-        >
-          Saved
-        </DropdownItem>
-        <DropdownItem
-          key="savedSearch"
-          href={`/${lang}/savedSearch`}
-          as={Link}
-          textValue="Saved Search"
-          startContent={<Search className="size-4" />}
-        >
-          Saved Search
-        </DropdownItem>
-        <DropdownItem
-          key="messages"
-          href={`/${lang}/profile?tab=messages`}
-          as={Link}
-          textValue="Messages"
-          startContent={<MessageSquare className="size-4" />}
-        >
-          Messages
-        </DropdownItem>
-        <DropdownItem
-          key="settings"
-          href={`/${lang}/settings`}
-          as={Link}
-          textValue="Settings"
-          startContent={<Settings className="size-4" />}
-        >
-          Settings
-        </DropdownItem>
-        <DropdownItem
-          key="logout"
-          color="danger"
-          className="text-danger"
-          textValue="Log Out"
-          startContent={<LogOutIcon className="size-4" />}
-          onPress={async () => {
+          <Avatar className="h-8 w-8">
+            <AvatarImage
+              src={user.image || undefined}
+              alt={user.name || "User"}
+            />
+            <AvatarFallback>
+              {user.name?.slice(0, 2).toUpperCase() || "U"}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col items-start text-xs hidden md:flex">
+            <span className="font-semibold truncate max-w-[100px]">
+              {user.name || "User"}
+            </span>
+            <span className="text-slate-500">{user.role || "User"}</span>
+          </div>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuItem className="flex-col items-start">
+          <p className="font-semibold text-sm">Signed in as</p>
+          <p className="text-xs text-muted-foreground truncate w-full">
+            {user.email}
+          </p>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link
+            href={`/${lang}/profile`}
+            className="cursor-pointer flex w-full items-center"
+          >
+            <UserIcon className="mr-2 h-4 w-4" />
+            Profile
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link
+            href={`/${lang}/profile?tab=favorites`}
+            className="cursor-pointer flex w-full items-center"
+          >
+            <Heart className="mr-2 h-4 w-4" />
+            Favorites
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link
+            href={`/${lang}/profile?tab=saved`}
+            className="cursor-pointer flex w-full items-center"
+          >
+            <Bookmark className="mr-2 h-4 w-4" />
+            Saved
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link
+            href={`/${lang}/savedSearch`}
+            className="cursor-pointer flex w-full items-center"
+          >
+            <Search className="mr-2 h-4 w-4" />
+            Saved Search
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link
+            href={`/${lang}/profile?tab=messages`}
+            className="cursor-pointer flex w-full items-center"
+          >
+            <MessageSquare className="mr-2 h-4 w-4" />
+            Messages
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link
+            href={`/${lang}/settings`}
+            className="cursor-pointer flex w-full items-center"
+          >
+            <Settings className="mr-2 h-4 w-4" />
+            Settings
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className="text-red-600 focus:text-red-600 cursor-pointer"
+          onClick={async () => {
             await logout();
+            window.location.reload();
           }}
         >
+          <LogOutIcon className="mr-2 h-4 w-4" />
           Log Out
-        </DropdownItem>
-      </DropdownMenu>
-    </Dropdown>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

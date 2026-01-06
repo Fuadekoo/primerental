@@ -9,10 +9,12 @@ import useMutation from "@/hooks/useMutation";
 import { getPropertyTypes } from "@/actions/customer/propertyType";
 import { propertyRegister } from "@/actions/customer/registerProperty";
 import { propertyRegisterSchema } from "@/lib/zodSchema";
-import { Input, Button, Textarea } from "@heroui/react";
-import { addToast } from "@heroui/toast";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 import { useRouter, useParams } from "next/navigation";
-import { KeyRound, Building, Send } from "lucide-react";
+import { KeyRound, Building, Send, Loader2 } from "lucide-react";
 import requestBg from "@/public/cover.jpg";
 import Loading from "@/components/loading";
 
@@ -103,9 +105,7 @@ function PropertyRegisterPage() {
   const propertyTypes = propertyTypesResult;
 
   const [action, loading] = useMutation(propertyRegister, () => {
-    addToast({
-      description: t.successMessage,
-    });
+    toast.success(t.successMessage);
     router.push(`/${lang}/home`);
   });
 
@@ -348,12 +348,15 @@ function PropertyRegisterPage() {
           <div className="col-span-1 sm:col-span-2 flex justify-end pt-4">
             <Button
               type="submit"
-              color="primary"
               size="lg"
               className="w-full sm:w-auto"
               disabled={loading}
             >
-              <Send className="h-5 w-5 mr-2" />
+              {loading ? (
+                <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+              ) : (
+                <Send className="h-5 w-5 mr-2" />
+              )}
               {loading ? t.submitting : t.submitButton}
             </Button>
           </div>

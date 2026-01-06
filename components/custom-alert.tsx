@@ -1,5 +1,8 @@
 import React from "react";
-import { Alert, Button } from "@heroui/react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 
 type Props = {
   title?: React.ReactNode;
@@ -22,12 +25,9 @@ type Props = {
   classNames?: Record<string, string>;
 };
 
-const cn = (...c: Array<string | false | null | undefined>) =>
-  c.filter(Boolean).join(" ");
-
 const CustomAlert = React.forwardRef<
   HTMLDivElement,
-  React.ComponentProps<typeof Alert> & Props
+  React.HTMLAttributes<HTMLDivElement> & Props
 >(
   (
     {
@@ -41,77 +41,61 @@ const CustomAlert = React.forwardRef<
       isConfirmLoading = false,
       isCancelDisabled = false,
       color = "warning",
-      variant = "faded",
       className,
-      classNames = {},
       ...props
     },
     ref
   ) => {
-    const colorClass = React.useMemo(() => {
-      switch (color) {
-        case "default":
-          return "before:bg-default-300";
-        case "primary":
-          return "before:bg-primary";
-        case "secondary":
-          return "before:bg-secondary";
+    const getColorClasses = (c: string) => {
+      switch (c) {
         case "success":
-          return "before:bg-success";
+          return "border-green-500 text-green-800 dark:text-green-400 [&>svg]:text-green-800 dark:[&>svg]:text-green-400 bg-green-50 dark:bg-green-900/10";
         case "warning":
-          return "before:bg-warning";
+          return "border-yellow-500 text-yellow-800 dark:text-yellow-400 [&>svg]:text-yellow-800 dark:[&>svg]:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/10";
         case "danger":
-          return "before:bg-danger";
+          return "border-red-500 text-red-800 dark:text-red-400 [&>svg]:text-red-800 dark:[&>svg]:text-red-400 bg-red-50 dark:bg-red-900/10";
+        case "primary":
+          return "border-blue-500 text-blue-800 dark:text-blue-400 [&>svg]:text-blue-800 dark:[&>svg]:text-blue-400 bg-blue-50 dark:bg-blue-900/10";
         default:
-          return "before:bg-default-200";
+          return "";
       }
-    }, [color]);
+    };
 
     return (
       <Alert
         ref={ref}
-        color={color}
-        variant={variant}
-        title={title}
-        classNames={{
-          ...classNames,
-          base: cn(
-            "bg-default-50 dark:bg-background shadow-sm",
-            "border-1 border-default-200 dark:border-default-100",
-            "relative before:content-[''] before:absolute before:z-10",
-            "before:left-0 before:top-[-1px] before:bottom-[-1px] before:w-1",
-            "rounded-l-none border-l-0",
-            colorClass,
-            classNames?.base,
-            className
-          ),
-          mainWrapper: cn("pt-1", classNames?.mainWrapper),
-          iconWrapper: cn("dark:bg-transparent", classNames?.iconWrapper),
-        }}
+        className={cn(getColorClasses(color as string), className)}
         {...props}
       >
-        {description ? (
-          <p className="text-sm text-default-600">{description}</p>
-        ) : (
-          children
-        )}
-        <div className="flex justify-end gap-2 mt-4">
-          <Button
-            variant="light"
-            onPress={onCancel}
-            disabled={isCancelDisabled || isConfirmLoading}
-          >
-            {cancelText}
-          </Button>
-          <Button
-            color="primary"
-            onPress={onConfirm}
-            isLoading={isConfirmLoading}
-            disabled={isConfirmLoading}
-          >
-            {confirmText}
-          </Button>
-        </div>
+        {title && <AlertTitle>{title}</AlertTitle>}
+        <AlertDescription>
+          {description ? (
+            <p className="text-sm mb-4">{description}</p>
+          ) : (
+            <div className="mb-4">{children}</div>
+          )}
+          <div className="flex justify-end gap-2 mt-2">
+            <Button
+              variant="outline"
+              onClick={onCancel}
+              disabled={isCancelDisabled || isConfirmLoading}
+              size="sm"
+            >
+              {cancelText}
+            </Button>
+            <Button
+              variant={color === "danger" ? "destructive" : "default"}
+              onClick={onConfirm}
+              disabled={isConfirmLoading}
+              size="sm"
+            >
+              {isConfirmLoading && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              {confirmText}
+            </Button>
+          </div>
+        </AlertDescription>
       </Alert>
     );
   }

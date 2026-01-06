@@ -2,13 +2,12 @@
 import React, { useState } from "react";
 import {
   Table,
-  TableHeader,
-  TableColumn,
   TableBody,
-  TableRow,
   TableCell,
-  getKeyValue,
-} from "@heroui/react";
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { X, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 
@@ -135,68 +134,76 @@ function CustomTable({
 
       {/* Table */}
       <div className="overflow-auto rounded-lg border border-slate-200/70 dark:border-neutral-800 mt-4">
-        <Table
-          aria-label="Data table with dynamic content"
-          className="bg-transparent"
-        >
-          <TableHeader columns={columns}>
-            {(column) => (
-              <TableColumn
-                key={column.key}
-                className="bg-slate-100 dark:bg-neutral-900/80 p-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider"
-              >
-                {column.label}
-              </TableColumn>
-            )}
+        <Table className="bg-transparent">
+          <TableHeader>
+            <TableRow className="bg-slate-100 dark:bg-neutral-900/80 hover:bg-slate-100 dark:hover:bg-neutral-900/80">
+              {columns.map((column) => (
+                <TableHead
+                  key={column.key}
+                  className="p-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider"
+                >
+                  {column.label}
+                </TableHead>
+              ))}
+            </TableRow>
           </TableHeader>
-          <TableBody
-            items={rows}
-            emptyContent={
-              !isLoading && rows.length === 0 ? "No data to display." : " "
-            }
-          >
-            {(item) => (
-              <TableRow
-                key={item.key || item.id}
-                className="border-b last:border-b-0 border-slate-200/70 dark:border-neutral-800 hover:bg-slate-50 dark:hover:bg-neutral-800/60 transition-colors"
-              >
-                {(columnKey) => {
-                  const column = columns.find((col) => col.key === columnKey);
-                  const cellValue = getKeyValue(item, columnKey);
+          <TableBody>
+            {!isLoading && rows.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center text-slate-500"
+                >
+                  No data to display.
+                </TableCell>
+              </TableRow>
+            ) : (
+              rows.map((item) => (
+                <TableRow
+                  key={item.key || item.id}
+                  className="border-b last:border-b-0 border-slate-200/70 dark:border-neutral-800 hover:bg-slate-50 dark:hover:bg-neutral-800/60 transition-colors"
+                >
+                  {columns.map((column) => {
+                    const cellValue = item[column.key];
 
-                  // Preview for arrays of images/photos
-                  if (
-                    (columnKey === "images" || columnKey === "photos") &&
-                    Array.isArray(cellValue) &&
-                    cellValue.length > 0
-                  ) {
+                    if (
+                      (column.key === "images" || column.key === "photos") &&
+                      Array.isArray(cellValue) &&
+                      cellValue.length > 0
+                    ) {
+                      return (
+                        <TableCell
+                          key={column.key}
+                          className="p-3 text-sm text-slate-700 dark:text-slate-300 whitespace-nowrap"
+                        >
+                          <Image
+                            src={formatImageUrl(cellValue[0])}
+                            alt={`Preview for ${item.id || item.key}`}
+                            width={100}
+                            height={60}
+                            className="object-contain rounded-md cursor-pointer h-16 w-24 ring-1 ring-slate-200 dark:ring-neutral-800"
+                            onClick={() => handleImageClick(cellValue, 0)}
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = "none";
+                            }}
+                          />
+                        </TableCell>
+                      );
+                    }
                     return (
-                      <TableCell className="p-3 text-sm text-slate-700 dark:text-slate-300 whitespace-nowrap">
-                        <Image
-                          src={formatImageUrl(cellValue[0])}
-                          alt={`Preview for ${item.id || item.key}`}
-                          width={100}
-                          height={60}
-                          className="object-contain rounded-md cursor-pointer h-16 w-24 ring-1 ring-slate-200 dark:ring-neutral-800"
-                          onClick={() => handleImageClick(cellValue, 0)}
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.style.display = "none";
-                          }}
-                        />
+                      <TableCell
+                        key={column.key}
+                        className="p-3 text-sm text-slate-700 dark:text-slate-300 whitespace-nowrap"
+                      >
+                        {column.renderCell
+                          ? column.renderCell(item)
+                          : cellValue}
                       </TableCell>
                     );
-                  }
-
-                  return (
-                    <TableCell className="p-3 text-sm text-slate-700 dark:text-slate-300 whitespace-nowrap">
-                      {column && column.renderCell
-                        ? column.renderCell(item)
-                        : cellValue}
-                    </TableCell>
-                  );
-                }}
-              </TableRow>
+                  })}
+                </TableRow>
+              ))
             )}
           </TableBody>
         </Table>

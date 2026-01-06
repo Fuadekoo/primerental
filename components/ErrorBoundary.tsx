@@ -1,7 +1,8 @@
 "use client";
 
 import React, { Component, ErrorInfo, ReactNode } from "react";
-import { Button, Card, CardBody } from "@heroui/react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 
 interface Props {
@@ -41,7 +42,7 @@ class ErrorBoundary extends Component<Props, State> {
       return (
         <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-900">
           <Card className="max-w-md w-full">
-            <CardBody className="text-center p-8">
+            <CardContent className="text-center p-8">
               <div className="flex justify-center mb-4">
                 <AlertTriangle className="h-16 w-16 text-red-500" />
               </div>
@@ -53,24 +54,19 @@ class ErrorBoundary extends Component<Props, State> {
                 refreshing the page.
               </p>
               <div className="space-y-3">
-                <Button
-                  color="primary"
-                  variant="solid"
-                  onClick={this.handleRetry}
-                  className="w-full"
-                  startContent={<RefreshCw className="h-4 w-4" />}
-                >
+                <Button onClick={this.handleRetry} className="w-full">
+                  <RefreshCw className="mr-2 h-4 w-4" />
                   Try Again
                 </Button>
                 <Button
-                  variant="light"
+                  variant="ghost"
                   onClick={() => window.location.reload()}
                   className="w-full"
                 >
                   Refresh Page
                 </Button>
               </div>
-            </CardBody>
+            </CardContent>
           </Card>
         </div>
       );

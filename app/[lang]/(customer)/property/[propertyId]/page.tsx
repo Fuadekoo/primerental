@@ -6,7 +6,7 @@ import { getProperty } from "@/actions/customer/property";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { addToast } from "@heroui/toast";
+import { toast } from "sonner";
 import wa from "@/public/wa.png";
 import insta from "@/public/insta.png";
 import tg from "@/public/tg.png";
@@ -391,17 +391,17 @@ function Page() {
     if (!isFav) {
       addToast({ description: t.addedToFavorites });
     } else {
-      addToast({ description: t.removedFromFavorites });
+      toast.info(t.removedFromFavorites);
     }
   };
 
   const handleShare = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
-      addToast({ description: t.linkCopied });
+      toast.success(t.linkCopied);
     } catch (err) {
       console.error("Failed to copy link: ", err);
-      addToast({ description: t.copyFailed });
+      toast.error(t.copyFailed);
     }
   };
 

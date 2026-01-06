@@ -8,8 +8,8 @@ import {
   Send,
   Building2,
 } from "lucide-react";
-import { Input } from "@heroui/react";
-import { Button } from "@heroui/button";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export default function Footer() {
   return (
@@ -80,12 +80,7 @@ export default function Footer() {
                   <Input
                     type="email"
                     placeholder="Enter your email..."
-                    classNames={{
-                      input:
-                        "text-slate-900 dark:text-white placeholder:text-slate-500",
-                      inputWrapper:
-                        "bg-white dark:bg-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/70 focus-within:bg-slate-50 dark:focus-within:bg-slate-700/70 border-slate-200 dark:border-slate-600 data-[hover=true]:bg-slate-50 dark:data-[hover=true]:bg-slate-700/70 group-data-[focus=true]:bg-slate-50 dark:group-data-[focus=true]:bg-slate-700/70 h-12 w-full",
-                    }}
+                    className="h-12 w-full bg-white dark:bg-slate-700/50 border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white placeholder:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700/70 focus-within:bg-slate-50 dark:focus-within:bg-slate-700/70"
                   />
                 </div>
                 <Button className="bg-green-600 text-white font-semibold h-12 px-6 rounded-xl hover:bg-green-500 shadow-lg shadow-green-900/20">
