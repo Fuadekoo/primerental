@@ -13,6 +13,10 @@ import {
   Car,
   Building2,
   X,
+  Home,
+  Key,
+  Clock,
+  Calendar,
 } from "lucide-react";
 // import { addToast } from "@heroui/toast";
 import {
@@ -450,49 +454,128 @@ function Page() {
           </div>
 
           {/* --- Categories Section --- */}
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-2 px-1">
+          <div className="mb-8">
+            <div className="flex justify-between items-center mb-4 px-1">
               <h2 className="text-xl font-bold">{t.exploreByType}</h2>
-              {/* <Link
-              href={`/${currentLang}/categories`}
-              className="text-sm font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
-            >
-              {t.viewAll}
-            </Link> */}
             </div>
-            <div className="flex gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {isLoadingCategory
-                ? Array.from({ length: 5 }).map((_, i) => (
-                    <div
+                ? Array.from({ length: 6 }).map((_, i) => (
+                    <SkeletonLoader
                       key={i}
-                      className="flex-shrink-0 flex flex-col items-center w-24 gap-2"
-                    >
-                      <SkeletonLoader className="w-20 h-20 rounded-full" />
-                      <SkeletonLoader className="w-16 h-4" />
-                    </div>
+                      className="h-64 w-full rounded-2xl"
+                    />
                   ))
-                : categoryData?.map((cat) => (
-                    <div
-                      key={cat.id}
-                      onClick={() => setSelectedCategoryId(cat.id)}
-                      className="flex-shrink-0 flex flex-col items-center w-24 gap-2 text-center cursor-pointer"
-                    >
-                      <Image
-                        src={
-                          cat.photo
-                            ? `/api/filedata/${cat.photo}`
-                            : "/default.png"
-                        }
-                        alt={cat.name}
-                        width={80}
-                        height={80}
-                        className="w-20 h-20 object-cover rounded-full shadow-md ring-1 ring-slate-200 dark:ring-neutral-800"
+                : categoryData?.map((cat) => {
+                    // Helper for details
+                    const n = cat.name.toLowerCase();
+                    let icon = (
+                      <Home
+                        className="text-green-600 dark:text-green-500"
+                        size={24}
                       />
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {cat.name}
-                      </span>
-                    </div>
-                  ))}
+                    );
+                    let sub = "";
+                    let count = "10+ listings";
+
+                    if (n.includes("sale") || n.includes("buy")) {
+                      icon = (
+                        <Home
+                          className="text-green-600 dark:text-green-500"
+                          size={24}
+                        />
+                      );
+                      sub = "የንብረት ሽያጭ";
+                      count = "450+ listings";
+                    } else if (n.includes("rent") && !n.includes("car")) {
+                      icon = (
+                        <Key
+                          className="text-green-600 dark:text-green-500"
+                          size={24}
+                        />
+                      );
+                      sub = "ኪራይ";
+                      count = "280+ available";
+                    } else if (n.includes("short") || n.includes("stay")) {
+                      icon = (
+                        <Clock
+                          className="text-green-600 dark:text-green-500"
+                          size={24}
+                        />
+                      );
+                      sub = "አጭር ጊዜ";
+                      count = "120+ options";
+                    } else if (n.includes("car")) {
+                      icon = (
+                        <Car
+                          className="text-green-600 dark:text-green-500"
+                          size={24}
+                        />
+                      );
+                      sub = "መኪና ኪራይ";
+                      count = "85+ vehicles";
+                    } else if (n.includes("hotel") || n.includes("guest")) {
+                      icon = (
+                        <Building2
+                          className="text-green-600 dark:text-green-500"
+                          size={24}
+                        />
+                      );
+                      sub = "ሆቴሎች";
+                      count = "50+ partners";
+                    } else if (n.includes("event") || n.includes("venue")) {
+                      icon = (
+                        <Calendar
+                          className="text-green-600 dark:text-green-500"
+                          size={24}
+                        />
+                      );
+                      sub = "የዝግጅት ቦታ";
+                      count = "40+ venues";
+                    }
+
+                    return (
+                      <div
+                        key={cat.id}
+                        onClick={() => setSelectedCategoryId(cat.id)}
+                        className="group relative h-64 w-full cursor-pointer overflow-hidden rounded-3xl shadow-lg transition-transform hover:scale-[1.02]"
+                      >
+                        <Image
+                          src={
+                            cat.photo
+                              ? `/api/filedata/${cat.photo}`
+                              : "/default.png"
+                          }
+                          alt={cat.name}
+                          fill
+                          className="object-cover transition-transform duration-700 group-hover:scale-110"
+                        />
+                        {/* Gradient Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+                        {/* Top Left Icon */}
+                        <div className="absolute top-4 left-4 flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm dark:bg-neutral-900">
+                          {icon}
+                        </div>
+
+                        {/* Top Right Badge */}
+                        <div className="absolute top-4 right-4 rounded-lg bg-white px-3 py-1 text-xs font-bold text-slate-900 shadow-sm dark:bg-neutral-900 dark:text-slate-100">
+                          {count}
+                        </div>
+
+                        {/* Bottom Text */}
+                        <div className="absolute bottom-4 left-4 text-white">
+                          <h3 className="text-2xl font-bold leading-tight mb-1">
+                            {cat.name}
+                          </h3>
+                          <p className="text-sm font-medium opacity-90">
+                            {sub}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
             </div>
           </div>
 
